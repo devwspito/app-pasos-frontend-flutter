@@ -1,0 +1,191 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "25044f1f7f2c32e9d29cf33f",
+    "timestamp": "2026-01-22T16:54:03.952Z",
+    "phase": "techlead",
+    "epicId": "epic-goals-groups-ui",
+    "savedAt": "2026-01-22T16:54:03.952Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-goals-groups-ui",
+    "storiesCount": 5,
+    "architecture": "## Goals Feature Architecture\n\n### Overview\nThe Goals feature follows Clean Architecture with 3 layers: Domain, Data, and Presentation.\n\n### Layer Structure\n```\nlib/features/goals/\n├── domain/           # Business logic (entities, repository interface, use cases)\n│   ├── entities/     # Immutable data classes with Equatable\n│   ├── repositories/ # Abstract interface for data operations\n│   └── usecases/     # Single-responsibility business operations\n├── data/             # Data handling (models, datasources, repository impl)\n│   ├── models/       # JSON-serializable classes extending entities\n│   ├── datasources/  # Remote API communication\n│   └── repositories/ # Repository implementation\n└── presentation/     # UI layer (providers, screens, widgets)\n    ├── providers/    # Riverpod StateNotifier + State\n    ├── screens/      # Full-page widgets\n    └── widgets/      # Reusable UI components\n```\n\n### Key Patterns\n1. **Riverpod StateNotifier**: Immutable state management with status enum\n2. **Repository Pattern**: Abstract interface in domain, implementation in data\n3. **UseCase Pattern**: Single call() method delegating to repository\n4. **Dependency Injection**: GetIt service locator for data layer\n5. **Model-Entity Separation**: Models for JSON, entities for business logic\n\n### Data Flow\n```\nUI (Screen) → Provider (StateNotifier) → UseCase → Repository → DataSource → API\n                    ↓                                              ↓\n              State Updates                                   JSON Models\n```\n\n### SOLID Compliance\n- **SRP**: Each use case has single responsibility\n- **OCP**: Repository interface allows swapping implementations\n- **LSP**: Models extend entities without breaking contracts\n- **ISP**: Repository interface has focused methods\n- **DIP**: Providers depend on repository interface, not implementation",
+    "stories": [
+      {
+        "id": "epic-goals-groups-ui-story-1",
+        "title": "Create Goals domain layer entities, repository interface and use cases in lib/features/goals/domain/",
+        "description": "Create the complete domain layer for Goals feature following the exact patterns from steps feature.\n\n🔧 **PATTERNS TO USE:**\n- Use Equatable-based entity pattern from `lib/features/steps/domain/entities/step_stats.dart`\n- Use abstract interface class pattern from `lib/features/steps/domain/repositories/steps_repository.dart`\n- Use UseCase with call() method pattern from `lib/features/steps/domain/usecases/get_today_steps_usecase.dart`\n\n📦 **REQUIRED STRUCTURE:**\n\n1. **lib/features/goals/domain/entities/goal.dart:**\n   - `final class Goal extends Equatable`\n   - Fields: `String id`, `String name`, `String description`, `int targetSteps`, `DateTime startDate`, `DateTime endDate`, `String ownerId`, `bool isPublic`, `List<String> memberIds`\n   - copyWith method, props getter\n\n2. **lib/features/goals/domain/entities/goal_membership.dart:**\n   - `final class GoalMembership extends Equatable`\n   - Fields: `String id`, `String goalId`, `String oderId`, `String role`, `DateTime joinedAt`, `int contributedSteps`\n\n3. **lib/features/goals/domain/entities/goal_progress.dart:**\n   - `final class GoalProgress extends Equatable`\n   - Fields: `String goalId`, `int totalSteps`, `int targetSteps`, `double percentComplete`, `List<MemberProgress> memberProgress`\n   - Include inner class `MemberProgress` with userId, displayName, steps, rank\n\n4. **lib/features/goals/domain/repositories/goals_repository.dart:**\n   - `abstract interface class GoalsRepository`\n   - Methods: `getUserGoals()`, `getGoalById(String id)`, `createGoal(...)`, `getGoalProgress(String goalId)`, `inviteUser(String goalId, String email)`, `joinGoal(String inviteCode)`\n\n5. **Use cases** (one file each in lib/features/goals/domain/usecases/):\n   - `get_user_goals_usecase.dart` - calls repository.getUserGoals()\n   - `create_goal_usecase.dart` - calls repository.createGoal(...)\n   - `get_goal_progress_usecase.dart` - calls repository.getGoalProgress(goalId)\n   - `invite_user_usecase.dart` - calls repository.inviteUser(goalId, email)\n   - `join_goal_usecase.dart` - calls repository.joinGoal(inviteCode)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use freezed annotations (project uses manual Equatable)\n- Do NOT add JSON serialization in entities (that's for models in data layer)\n- Do NOT instantiate repositories directly (use dependency injection)\n\n🧪 **VERIFICATION:**\n- `flutter analyze lib/features/goals/domain/` returns no errors\n- All files import equatable package\n- Repository is abstract interface class",
+        "epicId": "epic-goals-groups-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/entities/step_stats.dart",
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/features/steps/domain/usecases/get_today_steps_usecase.dart",
+          "lib/features/steps/domain/usecases/record_steps_usecase.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/domain/entities/goal.dart",
+          "lib/features/goals/domain/entities/goal_membership.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart",
+          "lib/features/goals/domain/repositories/goals_repository.dart",
+          "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
+          "lib/features/goals/domain/usecases/create_goal_usecase.dart",
+          "lib/features/goals/domain/usecases/get_goal_progress_usecase.dart",
+          "lib/features/goals/domain/usecases/invite_user_usecase.dart",
+          "lib/features/goals/domain/usecases/join_goal_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the Goal entity exists, When I create a new Goal instance, Then it should be immutable and have all required fields",
+          "Given the GoalsRepository interface exists, When I call getUserGoals(), Then it should return Future<List<Goal>>",
+          "Given all use cases exist, When I instantiate them with a repository, Then they should have a call() method that delegates to repository"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-story-2",
+        "title": "Create Goals data layer models, remote datasource and repository implementation in lib/features/goals/data/",
+        "description": "Create the complete data layer for Goals feature including models with JSON serialization, remote datasource, and repository implementation.\n\n🔧 **PATTERNS TO USE:**\n- Use Model extends Entity pattern from `lib/features/steps/data/models/step_stats_model.dart`\n- Use fromJson/toJson factory pattern from existing models\n- Use ApiClient for network calls from `lib/core/network/api_client.dart`\n\n📦 **REQUIRED STRUCTURE:**\n\n1. **lib/features/goals/data/models/goal_model.dart:**\n   - `final class GoalModel extends Goal`\n   - Constructor using `super.` syntax\n   - `factory GoalModel.fromJson(Map<String, dynamic> json)`\n   - `factory GoalModel.fromEntity(Goal entity)`\n   - `Map<String, dynamic> toJson()` method\n   - Override copyWith to return GoalModel\n\n2. **lib/features/goals/data/models/goal_membership_model.dart:**\n   - Same pattern as goal_model.dart\n   - Extends GoalMembership entity\n\n3. **lib/features/goals/data/models/goal_progress_model.dart:**\n   - Same pattern\n   - Include MemberProgressModel inner class\n\n4. **lib/features/goals/data/datasources/goals_remote_datasource.dart:**\n   - `abstract interface class GoalsRemoteDataSource`\n   - `class GoalsRemoteDataSourceImpl implements GoalsRemoteDataSource`\n   - Constructor takes `ApiClient` as dependency\n   - Methods: `getUserGoals()`, `getGoalById(String id)`, `createGoal(...)`, `getGoalProgress(String goalId)`, `inviteUser(...)`, `joinGoal(...)`\n   - Use ApiEndpoints constants for URL paths\n\n5. **lib/features/goals/data/repositories/goals_repository_impl.dart:**\n   - `class GoalsRepositoryImpl implements GoalsRepository`\n   - Constructor takes `GoalsRemoteDataSource` as dependency\n   - Implements all repository methods by delegating to datasource\n   - Convert models to entities in return values\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT hardcode API URLs (use ApiEndpoints constants)\n- Do NOT use dio directly (use ApiClient wrapper)\n- Do NOT skip error handling in repository implementation\n\n🧪 **VERIFICATION:**\n- `flutter analyze lib/features/goals/data/` returns no errors\n- Models have both fromJson and toJson methods\n- Repository impl properly converts models to entities",
+        "epicId": "epic-goals-groups-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-groups-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/models/step_stats_model.dart",
+          "lib/features/steps/data/models/step_model.dart",
+          "lib/core/network/api_client.dart",
+          "lib/core/constants/api_endpoints.dart",
+          "lib/features/goals/domain/entities/goal.dart",
+          "lib/features/goals/domain/repositories/goals_repository.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/data/models/goal_model.dart",
+          "lib/features/goals/data/models/goal_membership_model.dart",
+          "lib/features/goals/data/models/goal_progress_model.dart",
+          "lib/features/goals/data/datasources/goals_remote_datasource.dart",
+          "lib/features/goals/data/repositories/goals_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given a JSON response from API, When I call GoalModel.fromJson(), Then it should create a valid GoalModel instance",
+          "Given a GoalModel instance, When I call toJson(), Then it should return a valid Map for API requests",
+          "Given GoalsRemoteDataSourceImpl, When I call getUserGoals(), Then it should use ApiClient to make GET request to correct endpoint",
+          "Given GoalsRepositoryImpl, When methods are called, Then they should delegate to datasource and convert models to entities"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-story-3",
+        "title": "Create Goals state management with Riverpod provider and state in lib/features/goals/presentation/providers/",
+        "description": "Create Riverpod StateNotifier-based state management for Goals feature and register dependencies in DI container.\n\n🔧 **PATTERNS TO USE:**\n- Use StepsState pattern from `lib/features/steps/presentation/providers/steps_state.dart`\n- Use StepsNotifier pattern from `lib/features/steps/presentation/providers/steps_provider.dart`\n- Use DI registration pattern from `lib/core/di/injection_container.dart`\n\n📦 **REQUIRED STRUCTURE:**\n\n1. **lib/features/goals/presentation/providers/goals_state.dart:**\n   - `enum GoalsStatus { initial, loading, loaded, error }`\n   - `final class GoalsState extends Equatable`\n   - Fields: status, isLoading, goals (List<Goal>), selectedGoal (Goal?), goalProgress (GoalProgress?), errorMessage, lastUpdated\n   - Factory constructors: `GoalsState.initial()`, `GoalsState.loading()`\n   - copyWith method with clearError, clearGoals flags\n   - Computed getters: hasData, hasError, isInitialLoading, isRefreshing\n\n2. **lib/features/goals/presentation/providers/goals_provider.dart:**\n   - `class GoalsNotifier extends StateNotifier<GoalsState>`\n   - Constructor takes use cases as dependencies (GetUserGoalsUseCase, CreateGoalUseCase, etc.)\n   - Methods:\n     - `loadUserGoals()` - fetches all user goals\n     - `loadGoalDetails(String goalId)` - fetches single goal with progress\n     - `createGoal(...)` - creates new goal and refreshes list\n     - `inviteUser(String goalId, String email)` - invites user\n     - `joinGoal(String inviteCode)` - joins goal via code\n     - `refresh()` - refreshes all data\n     - `clearError()`, `reset()`\n   - Provider definitions at bottom:\n     - `goalsRepositoryProvider` (throws UnimplementedError)\n     - `goalsProvider` (StateNotifierProvider)\n\n3. **Modify lib/core/di/injection_container.dart:**\n   - Add `_registerGoalsFeature()` function\n   - Register `GoalsRemoteDataSourceImpl`\n   - Register `GoalsRepositoryImpl`\n   - Call `_registerGoalsFeature()` from `configureDependencies()`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT instantiate use cases outside provider (inject via constructor)\n- Do NOT mutate state directly (always use copyWith)\n- Do NOT forget to register dependencies in injection_container.dart\n\n🧪 **VERIFICATION:**\n- `flutter analyze lib/features/goals/presentation/providers/` returns no errors\n- `flutter analyze lib/core/di/injection_container.dart` returns no errors\n- GoalsState is immutable with Equatable\n- GoalsNotifier properly updates state on each operation",
+        "epicId": "epic-goals-groups-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-groups-ui-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/core/di/injection_container.dart",
+          "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
+          "lib/features/goals/data/repositories/goals_repository_impl.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/providers/goals_state.dart",
+          "lib/features/goals/presentation/providers/goals_provider.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalsState.initial(), When checked, Then status should be initial and goals should be empty list",
+          "Given GoalsNotifier, When loadUserGoals() is called, Then state should transition from loading to loaded with goals",
+          "Given injection_container.dart is modified, When configureDependencies() is called, Then GoalsRemoteDataSourceImpl and GoalsRepositoryImpl should be registered"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-story-4",
+        "title": "Create Goals UI screens in lib/features/goals/presentation/screens/ and update routing",
+        "description": "Create all Goals feature screens following existing screen patterns and integrate with app routing.\n\n🔧 **PATTERNS TO USE:**\n- Use screen structure from `lib/features/auth/presentation/screens/login_screen.dart`\n- Use ConsumerWidget/ConsumerStatefulWidget for Riverpod integration\n- Use shared widgets from `lib/shared/widgets/`\n- Use theme from `lib/core/theme/`\n\n📦 **REQUIRED STRUCTURE:**\n\n1. **lib/features/goals/presentation/screens/goals_screen.dart:**\n   - `class GoalsScreen extends ConsumerWidget`\n   - AppBar with title 'My Goals'\n   - FloatingActionButton to navigate to create goal\n   - ListView.builder displaying goal cards\n   - Pull-to-refresh with RefreshIndicator\n   - Handle loading/error/empty states using shared widgets\n   - Use `ref.watch(goalsProvider)` for state\n   - Use `ref.read(goalsProvider.notifier).loadUserGoals()` in initState\n\n2. **lib/features/goals/presentation/screens/goal_detail_screen.dart:**\n   - `class GoalDetailScreen extends ConsumerStatefulWidget`\n   - Receives goalId as parameter\n   - Shows goal info, progress indicator, member list, leaderboard\n   - TabBar for Progress/Members/Leaderboard sections\n   - Action buttons: Invite Members, Leave Goal\n\n3. **lib/features/goals/presentation/screens/create_goal_screen.dart:**\n   - `class CreateGoalScreen extends ConsumerStatefulWidget`\n   - Form with fields: name, description, targetSteps, startDate, endDate, isPublic\n   - Form validation using `lib/core/utils/validators.dart`\n   - Submit button calls `goalsProvider.notifier.createGoal(...)`\n   - Navigate back on success\n\n4. **lib/features/goals/presentation/screens/invite_members_screen.dart:**\n   - `class InviteMembersScreen extends ConsumerWidget`\n   - Text field for email input\n   - Button to send invite\n   - Display invite code/link that can be shared\n   - List of pending invites\n\n5. **Update lib/app.dart** (add routes to _router):\n   - `/goals` -> GoalsScreen (name: 'goals')\n   - `/goals/:goalId` -> GoalDetailScreen (name: 'goalDetail')\n   - `/goals/create` -> CreateGoalScreen (name: 'createGoal')\n   - `/goals/:goalId/invite` -> InviteMembersScreen (name: 'inviteMembers')\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use StatelessWidget for screens with Riverpod (use ConsumerWidget)\n- Do NOT hardcode colors (use Theme.of(context).colorScheme)\n- Do NOT skip loading/error states\n- Do NOT forget to add routes to app.dart\n\n🧪 **VERIFICATION:**\n- `flutter analyze lib/features/goals/presentation/screens/` returns no errors\n- `flutter analyze lib/app.dart` returns no errors\n- All screens extend Consumer widgets\n- Routes are properly defined with parameters",
+        "epicId": "epic-goals-groups-ui",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-groups-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/screens/login_screen.dart",
+          "lib/features/auth/presentation/screens/register_screen.dart",
+          "lib/app.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/error_widget.dart",
+          "lib/shared/widgets/empty_state_widget.dart",
+          "lib/core/utils/validators.dart",
+          "lib/features/goals/presentation/providers/goals_provider.dart"
+        ],
+        "filesToModify": [
+          "lib/app.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/screens/goals_screen.dart",
+          "lib/features/goals/presentation/screens/goal_detail_screen.dart",
+          "lib/features/goals/presentation/screens/create_goal_screen.dart",
+          "lib/features/goals/presentation/screens/invite_members_screen.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalsScreen is rendered, When goals are loading, Then LoadingIndicator should be displayed",
+          "Given GoalsScreen with goals, When a goal card is tapped, Then navigate to GoalDetailScreen with goalId",
+          "Given CreateGoalScreen, When form is submitted with valid data, Then createGoal is called and navigates back",
+          "Given app.dart is updated, When navigating to /goals, Then GoalsScreen is displayed"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-story-5",
+        "title": "Create Goals UI widgets in lib/features/goals/presentation/widgets/ and add API endpoints",
+        "description": "Create reusable widgets for Goals feature and add Goals API endpoints to constants.\n\n🔧 **PATTERNS TO USE:**\n- Use AppCard widget pattern from `lib/shared/widgets/app_card.dart`\n- Use AppButton pattern from `lib/shared/widgets/app_button.dart`\n- Use ApiEndpoints pattern from `lib/core/constants/api_endpoints.dart`\n- Use AppSpacing for consistent spacing from `lib/core/theme/app_spacing.dart`\n\n📦 **REQUIRED STRUCTURE:**\n\n1. **lib/features/goals/presentation/widgets/goal_card.dart:**\n   - `class GoalCard extends StatelessWidget`\n   - Takes Goal entity as parameter\n   - Displays: goal name, description (truncated), progress bar, member count, date range\n   - Uses AppCard as base\n   - onTap callback for navigation\n   - Shows badge for public/private\n\n2. **lib/features/goals/presentation/widgets/goal_progress_indicator.dart:**\n   - `class GoalProgressIndicator extends StatelessWidget`\n   - Circular or linear progress indicator\n   - Shows: currentSteps/targetSteps, percentage\n   - Animated progress changes\n   - Color changes based on completion (red -> yellow -> green)\n\n3. **lib/features/goals/presentation/widgets/member_list_item.dart:**\n   - `class MemberListItem extends StatelessWidget`\n   - Takes GoalMembership or MemberProgress as parameter\n   - Shows: avatar placeholder, display name, role badge, contributed steps\n   - Different styling for owner vs member\n\n4. **lib/features/goals/presentation/widgets/leaderboard_widget.dart:**\n   - `class LeaderboardWidget extends StatelessWidget`\n   - Takes List<MemberProgress> as parameter\n   - Displays ranked list of members by steps\n   - Highlights top 3 with medals/colors\n   - Shows current user's position\n\n5. **Modify lib/core/constants/api_endpoints.dart:**\n   - Add Goals section comments\n   - Add: `static const String userGoals = '/goals/user'`\n   - Add: `static String goalById(String goalId) => '/goals/$goalId'`\n   - Add: `static const String createGoal = '/goals'`\n   - Add: `static String goalProgress(String goalId) => '/goals/$goalId/progress'`\n   - Add: `static String inviteToGoal(String goalId) => '/goals/$goalId/invite'`\n   - Add: `static const String joinGoal = '/goals/join'`\n   - Add: `static String goalMembers(String goalId) => '/goals/$goalId/members'`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT hardcode colors (use Theme.of(context).colorScheme)\n- Do NOT hardcode strings (prepare for localization)\n- Do NOT create duplicate widgets that exist in shared/widgets/\n- Do NOT add API endpoints that duplicate existing ones\n\n🧪 **VERIFICATION:**\n- `flutter analyze lib/features/goals/presentation/widgets/` returns no errors\n- `flutter analyze lib/core/constants/api_endpoints.dart` returns no errors\n- All widgets are stateless and take required parameters\n- API endpoints follow existing naming pattern (static const + static methods)",
+        "epicId": "epic-goals-groups-ui",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-groups-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/core/constants/api_endpoints.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/core/theme/app_colors.dart",
+          "lib/features/goals/domain/entities/goal.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart"
+        ],
+        "filesToModify": [
+          "lib/core/constants/api_endpoints.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/widgets/goal_card.dart",
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/member_list_item.dart",
+          "lib/features/goals/presentation/widgets/leaderboard_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalCard widget, When rendered with a Goal, Then it displays name, description, progress and member count",
+          "Given GoalProgressIndicator, When progress is 75%, Then it shows green color and animated fill to 75%",
+          "Given LeaderboardWidget with members, When rendered, Then members are sorted by steps descending with rank numbers",
+          "Given api_endpoints.dart is modified, When ApiEndpoints.userGoals is accessed, Then it returns '/goals/user'"
+        ]
+      }
+    ]
+  }
+}
