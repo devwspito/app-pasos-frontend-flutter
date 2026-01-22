@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Application name -->
+    <string name="app_name">App Pasos</string>
+
+    <!-- Health Connect permission rationale -->
+    <string name="health_permission_rationale">App Pasos needs access to Health Connect to track your steps, distance, calories, and other health metrics. This data helps us provide personalized insights and track your fitness progress. Your health data is stored securely and never shared without your explicit consent.</string>
+
+    <!-- Health Connect permission descriptions -->
+    <string name="health_steps_rationale">Track your daily steps and walking activity</string>
+    <string name="health_distance_rationale">Measure the distance you cover during activities</string>
+    <string name="health_calories_rationale">Monitor calories burned throughout the day</string>
+    <string name="health_heart_rate_rationale">Track your heart rate during activities</string>
+    <string name="health_sleep_rationale">Analyze your sleep patterns and quality</string>
+    <string name="health_exercise_rationale">Record and view your workout sessions</string>
+    <string name="health_weight_rationale">Track weight changes over time</string>
+    <string name="health_height_rationale">Store your height for accurate calculations</string>
+
+    <!-- Activity recognition permission -->
+    <string name="activity_recognition_rationale">App Pasos uses activity recognition to automatically detect when you are walking, running, or cycling to accurately track your fitness activities.</string>
+
+    <!-- Background sync notification -->
+    <string name="sync_notification_title">Syncing health data</string>
+    <string name="sync_notification_content">App Pasos is syncing your health data in the background</string>
+    <string name="sync_notification_channel">Health Data Sync</string>
+    <string name="sync_notification_channel_description">Notifications for health data synchronization</string>
+
+    <!-- Error messages -->
+    <string name="health_connect_not_available">Health Connect is not available on this device. Please install Health Connect from the Play Store.</string>
+    <string name="health_connect_permission_denied">Health Connect permissions were denied. Some features may not work correctly.</string>
+    <string name="health_connect_error">An error occurred while accessing Health Connect. Please try again.</string>
+</resources>
