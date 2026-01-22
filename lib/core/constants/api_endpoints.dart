@@ -80,6 +80,18 @@ abstract final class ApiEndpoints {
   /// Get goal progress.
   static String goalProgress(String goalId) => '/goals/$goalId/progress';
 
+  /// Get goal members.
+  static String goalMembers(String goalId) => '/goals/$goalId/members';
+
+  /// Invite user to a goal.
+  static String inviteToGoal(String goalId) => '/goals/$goalId/invite';
+
+  /// Join a goal using invite code.
+  static const String joinGoal = '/goals/join';
+
+  /// Leave a goal.
+  static String leaveGoal(String goalId) => '/goals/$goalId/leave';
+
   // ============================================
   // Steps Endpoints
   // ============================================
