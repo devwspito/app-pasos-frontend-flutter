@@ -28,6 +28,9 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
 
+  # Health & Step Counting
+  health: ^9.0.0
+
   # Dependency Injection
   get_it: ^7.6.4
 
@@ -50,10 +53,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Assets configuration (uncomment when adding assets)
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
+  # Assets configuration
+  assets:
+    - assets/images/
+    - assets/icons/
 
   # Fonts configuration (uncomment when adding fonts)
   # fonts:
