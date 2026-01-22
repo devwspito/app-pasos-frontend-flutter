@@ -1,0 +1,92 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "25044f1f7f2c32e9d29cf33f",
+    "timestamp": "2026-01-22T15:28:52.329Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-platform-setup",
+    "savedAt": "2026-01-22T15:28:52.329Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-platform-setup",
+    "storiesCount": 3,
+    "architecture": "## Flutter Platform Setup Architecture\n\n### Overview\nThis epic establishes the native platform configurations required for building the Flutter app on iOS and Android devices. The architecture follows Flutter's standard platform channel conventions.\n\n### iOS Platform (Story 1)\n- **Info.plist**: Core app configuration including bundle ID, version, supported orientations, and launch screen settings\n- **AppDelegate.swift**: Swift-based application delegate using FlutterAppDelegate for plugin registration\n- Portrait-only orientation to match the app's step tracking UX\n\n### Android Platform (Stories 2 & 3)\n- **AndroidManifest.xml**: App manifest with package name, launcher activity, and INTERNET permission\n- **MainActivity.kt**: Kotlin entry point extending FlutterActivity (v2 embedding)\n- **Gradle Configuration**: Modern AGP 8.x setup with Kotlin 1.9, targeting Android 14 (SDK 34) with minimum SDK 21 for broad device support\n\n### Dependencies\n- Health package (^9.0.0) added to pubspec.yaml for native step counting integration\n- This enables HealthKit (iOS) and Google Fit (Android) access\n\n### Verification Commands\n- Typecheck: `flutter analyze`\n- Build: `flutter build apk --debug` (Android), `flutter build ios --no-codesign` (iOS)\n- Lint: `flutter analyze --fatal-infos`\n\n### File Structure\n```\napp-pasos-frontend-flutter/\n├── ios/\n│   └── Runner/\n│       ├── Info.plist\n│       └── AppDelegate.swift\n├── android/\n│   ├── build.gradle\n│   ├── settings.gradle\n│   └── app/\n│       ├── build.gradle\n│       └── src/main/\n│           ├── AndroidManifest.xml\n│           └── kotlin/com/example/app_pasos_frontend/\n│               └── MainActivity.kt\n└── pubspec.yaml (modified)\n```",
+    "stories": [
+      {
+        "id": "epic-flutter-platform-setup-story-1",
+        "title": "Create iOS platform configuration with Info.plist and AppDelegate.swift",
+        "description": "Create the iOS platform configuration files for the Flutter app.\n\n🔧 **PATTERNS TO USE:**\n- Standard Flutter iOS project structure under ios/Runner/\n- Use SwiftUI-compatible AppDelegate pattern\n- Configure bundle identifier as 'com.apppasos.frontend'\n- Use UILaunchStoryboardName for launch screen\n\n📦 **REQUIRED FILES TO CREATE:**\n1. `ios/Runner/Info.plist` - iOS app configuration with:\n   - CFBundleDisplayName: 'App Pasos'\n   - CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)\n   - CFBundleVersion: $(FLUTTER_BUILD_NUMBER)\n   - UILaunchStoryboardName: LaunchScreen\n   - UISupportedInterfaceOrientations: Portrait only\n   - LSRequiresIPhoneOS: true\n   - UIStatusBarHidden: false\n\n2. `ios/Runner/AppDelegate.swift` - App delegate with:\n   - Import UIKit and Flutter\n   - @UIApplicationMain annotation\n   - FlutterAppDelegate subclass\n   - Override application(_:didFinishLaunchingWithOptions:)\n   - GeneratedPluginRegistrant.register(with: self)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Objective-C (use Swift)\n- Do NOT hardcode bundle version (use build variables)\n- Do NOT include unnecessary permissions\n\n🧪 **VERIFICATION:**\n- Files exist at correct paths\n- Info.plist is valid XML plist format\n- AppDelegate.swift compiles (syntax check)",
+        "epicId": "epic-flutter-platform-setup",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          "lib/main.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "ios/Runner/Info.plist",
+          "ios/Runner/AppDelegate.swift"
+        ],
+        "acceptanceCriteria": [
+          "Given the Flutter project, When iOS platform files are created, Then ios/Runner/Info.plist exists with proper app configuration",
+          "Given the Flutter project, When iOS platform files are created, Then ios/Runner/AppDelegate.swift exists with FlutterAppDelegate implementation",
+          "Given Info.plist, When validated, Then it contains CFBundleDisplayName='App Pasos' and portrait orientation"
+        ]
+      },
+      {
+        "id": "epic-flutter-platform-setup-story-2",
+        "title": "Create Android platform configuration with AndroidManifest.xml and MainActivity.kt",
+        "description": "Create the Android platform configuration files for the Flutter app.\n\n🔧 **PATTERNS TO USE:**\n- Standard Flutter Android project structure\n- Use Kotlin for MainActivity (not Java)\n- Package name: com.example.app_pasos_frontend\n- FlutterActivity as base class\n\n📦 **REQUIRED FILES TO CREATE:**\n1. `android/app/src/main/AndroidManifest.xml` - Android manifest with:\n   - package='com.example.app_pasos_frontend'\n   - android:label='App Pasos'\n   - android:icon='@mipmap/ic_launcher'\n   - INTERNET permission\n   - MainActivity as launcher activity\n   - intent-filter with MAIN action and LAUNCHER category\n   - android:screenOrientation='portrait'\n\n2. `android/app/src/main/kotlin/com/example/app_pasos_frontend/MainActivity.kt` - Main activity with:\n   - Package declaration matching manifest\n   - Import io.flutter.embedding.android.FlutterActivity\n   - Class MainActivity extending FlutterActivity\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Java (use Kotlin)\n- Do NOT use deprecated FlutterActivity from old embedding\n- Do NOT add unnecessary permissions\n\n🧪 **VERIFICATION:**\n- Files exist at correct paths\n- AndroidManifest.xml is valid XML\n- MainActivity.kt has correct package structure",
+        "epicId": "epic-flutter-platform-setup",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "android/app/src/main/AndroidManifest.xml",
+          "android/app/src/main/kotlin/com/example/app_pasos_frontend/MainActivity.kt"
+        ],
+        "acceptanceCriteria": [
+          "Given the Flutter project, When Android platform files are created, Then AndroidManifest.xml exists with proper app configuration",
+          "Given the Flutter project, When Android platform files are created, Then MainActivity.kt exists extending FlutterActivity",
+          "Given AndroidManifest.xml, When validated, Then it contains package='com.example.app_pasos_frontend' and INTERNET permission"
+        ]
+      },
+      {
+        "id": "epic-flutter-platform-setup-story-3",
+        "title": "Create Android Gradle configuration files and update pubspec.yaml",
+        "description": "Create the Android Gradle build configuration and update pubspec.yaml with platform-specific settings.\n\n🔧 **PATTERNS TO USE:**\n- Android Gradle Plugin 8.x with Kotlin DSL support\n- Use flutter.sdk from local.properties\n- compileSdk 34, minSdk 21, targetSdk 34\n- Kotlin version 1.9.0\n\n📦 **REQUIRED FILES TO CREATE:**\n1. `android/build.gradle` - Root build file with:\n   - buildscript with kotlin_version ext property\n   - google() and mavenCentral() repositories\n   - com.android.tools.build:gradle:8.1.0\n   - org.jetbrains.kotlin:kotlin-gradle-plugin\n   - allprojects with same repositories\n   - clean task\n\n2. `android/settings.gradle` - Settings with:\n   - pluginManagement block with flutter sdk resolution\n   - plugins block with flutter-plugin-loader\n   - include ':app'\n\n3. `android/app/build.gradle` - App build file with:\n   - apply plugin: 'com.android.application'\n   - apply plugin: 'kotlin-android'\n   - apply from: flutter.gradle\n   - android block with compileSdk 34, namespace\n   - defaultConfig with applicationId, minSdk 21, targetSdk 34, versionCode, versionName\n   - flutter block\n   - dependencies with kotlin-stdlib implementation\n\n📦 **FILE TO MODIFY:**\n4. `pubspec.yaml` - Add assets configuration:\n   - Uncomment and configure assets section for future use\n   - Add health package for step counting (health: ^9.0.0)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use deprecated gradle versions\n- Do NOT hardcode flutter.sdk path\n- Do NOT use compileSdkVersion (use compileSdk)\n\n🧪 **VERIFICATION:**\n- All Gradle files exist with valid Groovy syntax\n- pubspec.yaml validates with `flutter pub get`",
+        "epicId": "epic-flutter-platform-setup",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "android/build.gradle",
+          "android/settings.gradle",
+          "android/app/build.gradle"
+        ],
+        "acceptanceCriteria": [
+          "Given the Flutter project, When Gradle files are created, Then android/build.gradle exists with proper plugin configuration",
+          "Given the Flutter project, When Gradle files are created, Then android/settings.gradle exists with flutter plugin loader",
+          "Given the Flutter project, When Gradle files are created, Then android/app/build.gradle exists with compileSdk 34 and minSdk 21",
+          "Given pubspec.yaml, When updated, Then health package dependency is added for step counting functionality"
+        ]
+      }
+    ]
+  }
+}
