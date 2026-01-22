@@ -1,0 +1,45 @@
+name: app_pasos_frontend
+description: App Pasos - Health and fitness tracking application with step counting and wellness features.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI/Design
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+  # Navigation
+  go_router: ^13.2.0
+
+  # State Management
+  flutter_riverpod: ^2.4.10
+
+  # Utilities
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+
+  # Assets configuration (uncomment when assets are added)
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+
+  # Fonts configuration (uncomment when fonts are added)
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: assets/fonts/CustomFont-Regular.ttf
+  #       - asset: assets/fonts/CustomFont-Bold.ttf
+  #         weight: 700
