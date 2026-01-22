@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/sharing/data/datasources/sharing_remote_datasource.dart';
+import '../../features/sharing/data/repositories/sharing_repository_impl.dart';
+import '../../features/sharing/domain/repositories/sharing_repository.dart';
 import '../network/api_client.dart';
 import '../network/api_interceptors.dart';
 import '../storage/local_storage.dart';
@@ -28,9 +31,9 @@ Future<void> configureDependencies() async {
   await _registerCoreDependencies();
 
   // ============================================
-  // Feature Dependencies (to be added as features are implemented)
+  // Feature Dependencies
   // ============================================
-  // await _registerFeatureDependencies();
+  _registerSharingDependencies();
 }
 
 /// Registers external package dependencies.
@@ -95,3 +98,25 @@ Future<void> resetDependencies() async {
 
 /// Checks if dependencies have been configured.
 bool get isDependenciesConfigured => sl.isRegistered<ApiClient>();
+
+// ============================================
+// Feature: Sharing/Friends
+// ============================================
+
+/// Registers sharing feature dependencies.
+///
+/// Registers in order: DataSources → Repositories
+/// This follows the clean architecture pattern where:
+/// - DataSources handle raw data operations (API calls)
+/// - Repositories provide a clean interface to the domain layer
+void _registerSharingDependencies() {
+  // Data Sources - depend on ApiClient
+  sl.registerLazySingleton<SharingRemoteDataSource>(
+    () => SharingRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
+  );
+
+  // Repositories - depend on DataSources
+  sl.registerLazySingleton<SharingRepository>(
+    () => SharingRepositoryImpl(remoteDataSource: sl<SharingRemoteDataSource>()),
+  );
+}
