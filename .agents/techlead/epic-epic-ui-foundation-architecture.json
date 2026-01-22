@@ -1,0 +1,135 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "69715d9525b29e96e72895b3",
+    "timestamp": "2026-01-22T01:45:12.760Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-22T01:45:12.761Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 4,
+    "architecture": "## UI Foundation Architecture\n\n### Directory Structure\n```\nlib/\n├── core/\n│   ├── theme/           # NEW: Theme system\n│   │   ├── app_theme.dart\n│   │   ├── app_colors.dart\n│   │   ├── app_text_styles.dart\n│   │   └── app_spacing.dart\n│   ├── router/          # NEW: Navigation\n│   │   ├── app_router.dart\n│   │   └── routes.dart\n│   └── ... (existing: constants, di, errors, network, storage, utils)\n├── shared/\n│   └── widgets/         # NEW: Reusable widgets\n│       ├── app_button.dart\n│       ├── app_text_field.dart\n│       ├── app_card.dart\n│       ├── loading_indicator.dart\n│       ├── error_widget.dart\n│       ├── empty_state_widget.dart\n│       ├── app_scaffold.dart\n│       └── bottom_nav_bar.dart\n├── app.dart             # MODIFY: Integrate theme/router\n└── main.dart            # EXISTS: No changes needed\n```\n\n### SOLID Compliance\n- **SRP**: Each theme file handles one concern (colors, typography, spacing)\n- **OCP**: Widget library extensible via composition\n- **LSP**: All widgets follow Flutter widget contract\n- **ISP**: Small, focused widget APIs\n- **DIP**: Theme accessed via Theme.of(context), router via Riverpod provider\n\n### Technology Stack\n- Flutter 3.16+ with Dart 3.2+\n- Material Design 3 (uses-material-design: true)\n- go_router for navigation\n- flutter_riverpod for state management\n- google_fonts for typography\n\n### Verification Commands\n- Install: `flutter pub get`\n- Analyze: `flutter analyze --no-fatal-infos`\n- Test: `flutter test`",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Create Material Design 3 theme system in lib/core/theme/",
+        "description": "Create a comprehensive Material Design 3 theme system with extracted colors, typography, and spacing.\n\n🔧 **PATTERNS TO USE**:\n- Follow existing core module pattern from `lib/core/constants/` directory structure\n- Use `ColorScheme.fromSeed()` pattern already in app.dart\n- Use `google_fonts` package for custom typography (add to pubspec.yaml)\n\n📦 **REQUIRED STRUCTURE**:\n- `app_colors.dart`: Define AppColors class with static color constants for both light/dark\n- `app_text_styles.dart`: Define AppTextStyles using Google Fonts with TextStyle getters\n- `app_spacing.dart`: Define AppSpacing class with static spacing constants (4, 8, 12, 16, 24, 32, 48)\n- `app_theme.dart`: Export AppTheme class with `static ThemeData light()` and `static ThemeData dark()` methods\n\n⚠️ **ANTI-PATTERNS TO AVOID**:\n- Don't hardcode colors in widgets - use AppColors.primaryColor\n- Don't use magic numbers for spacing - use AppSpacing.md\n- Don't create instance-based theme classes - use static methods\n\n🧪 **VERIFICATION**:\n1. flutter pub get\n2. flutter analyze --no-fatal-infos\n3. Verify imports work: `import 'package:app_pasos_frontend/core/theme/app_theme.dart';`",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/app.dart",
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_text_styles.dart",
+          "lib/core/theme/app_spacing.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the theme files are created, When importing AppTheme, Then light() and dark() return valid ThemeData",
+          "Given AppColors is imported, When accessing AppColors.primary, Then returns the correct Color value",
+          "Given AppTextStyles is imported, When accessing AppTextStyles.headlineLarge, Then returns TextStyle with Google Font",
+          "Given AppSpacing is imported, When accessing AppSpacing.md, Then returns 16.0",
+          "Given pubspec.yaml is updated, When running flutter pub get, Then google_fonts package is installed"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Configure go_router navigation system in lib/core/router/",
+        "description": "Create a dedicated router module with route definitions, nested navigation support for bottom nav, and auth guard placeholder.\n\n🔧 **PATTERNS TO USE**:\n- Follow existing GoRouter pattern from app.dart `_router` variable\n- Use `riverpod` Provider pattern for router (matches app's state management)\n- Use `StatefulShellRoute.indexedStack` for bottom navigation nested routes\n\n📦 **REQUIRED STRUCTURE**:\n- `routes.dart`: Define route path constants (e.g., `class Routes { static const home = '/'; }`)\n- `app_router.dart`: Create GoRouter configuration with:\n  - `routerProvider` for Riverpod integration\n  - ShellRoute for bottom nav with 4 branches: home, friends, goals, profile\n  - Auth redirect placeholder\n  - Error page builder\n\n⚠️ **ANTI-PATTERNS TO AVOID**:\n- Don't use hardcoded path strings - use Routes.home constant\n- Don't create global GoRouter variable - use Riverpod provider\n- Don't forget to export from routes.dart\n\n🧪 **VERIFICATION**:\n1. flutter analyze --no-fatal-infos\n2. Verify StatefulShellRoute has 4 branches\n3. Verify Routes class has: home, friends, goals, profile constants",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/app.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/router/app_router.dart",
+          "lib/core/router/routes.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given routes.dart exists, When importing Routes, Then Routes.home equals '/'",
+          "Given app_router.dart exists, When accessing routerProvider, Then returns valid GoRouter",
+          "Given router is configured, When navigating to Routes.profile, Then StatefulShellRoute handles nested navigation",
+          "Given auth redirect is configured, When user not authenticated, Then placeholder redirect logic exists"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create reusable widget library in lib/shared/widgets/",
+        "description": "Implement 6 reusable widgets with consistent styling following the app's theme system.\n\n🔧 **PATTERNS TO USE**:\n- Use Theme.of(context) to access theme colors and text styles\n- Follow Flutter's composition pattern (prefer StatelessWidget)\n- Use const constructors where possible for performance\n\n📦 **REQUIRED WIDGETS**:\n1. `app_button.dart`: AppButton with variants (primary, secondary, outline), loading state, disabled state\n2. `app_text_field.dart`: AppTextField with label, hint, error text, prefix/suffix icons, obscure text support\n3. `app_card.dart`: AppCard with optional header, content padding, elevation, onTap callback\n4. `loading_indicator.dart`: LoadingIndicator with size variants (small, medium, large), optional message\n5. `error_widget.dart`: AppErrorWidget with icon, message, retry button callback\n6. `empty_state_widget.dart`: EmptyStateWidget with icon, title, description, optional action button\n\n⚠️ **ANTI-PATTERNS TO AVOID**:\n- Don't hardcode colors - use Theme.of(context).colorScheme\n- Don't use magic numbers - define as class constants or use theme spacing\n- Don't forget to add const to constructors where possible\n\n🧪 **VERIFICATION**:\n1. flutter analyze --no-fatal-infos\n2. All widgets should be importable from lib/shared/widgets/\n3. Each widget should have required parameters documented",
+        "epicId": "epic-ui-foundation",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/app.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/error_widget.dart",
+          "lib/shared/widgets/empty_state_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppButton is created, When variant is primary, Then uses colorScheme.primary background",
+          "Given AppTextField is created, When error text is provided, Then displays error styling",
+          "Given AppCard is created, When onTap is provided, Then card is tappable with ink effect",
+          "Given LoadingIndicator is created, When size is LoadingSize.small, Then renders smaller indicator",
+          "Given AppErrorWidget is created, When onRetry is provided, Then shows retry button",
+          "Given EmptyStateWidget is created, When action is provided, Then shows action button"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Implement bottom navigation scaffold and integrate theme/router in lib/app.dart",
+        "description": "Create bottom navigation bar, app scaffold wrapper, and integrate all UI foundation components into app.dart.\n\n🔧 **PATTERNS TO USE**:\n- Use `NavigationBar` (Material 3) instead of `BottomNavigationBar`\n- Follow existing App widget pattern in lib/app.dart\n- Use `ref.watch(routerProvider)` for router in App widget\n- Import AppTheme.light() and AppTheme.dark() for theme configuration\n\n📦 **REQUIRED STRUCTURE**:\n1. `bottom_nav_bar.dart`: BottomNavBar widget with 4 destinations:\n   - Home (Icons.home_outlined / Icons.home)\n   - Friends (Icons.people_outlined / Icons.people)\n   - Goals (Icons.flag_outlined / Icons.flag)\n   - Profile (Icons.person_outlined / Icons.person)\n2. `app_scaffold.dart`: AppScaffold wrapper with:\n   - Optional appBar parameter\n   - body parameter\n   - Optional floatingActionButton\n   - bottomNavigationBar slot\n3. Update `lib/app.dart`:\n   - Import and use AppTheme.light() for theme\n   - Import and use AppTheme.dark() for darkTheme\n   - Replace inline _router with ref.watch(routerProvider)\n   - Remove inline _buildLightTheme and _buildDarkTheme methods\n   - Remove _PlaceholderScreen class (will be in router)\n\n⚠️ **ANTI-PATTERNS TO AVOID**:\n- Don't use BottomNavigationBar - use NavigationBar (Material 3)\n- Don't hardcode navigation indices - use currentIndex from router state\n- Don't duplicate theme code - import from AppTheme\n\n🧪 **VERIFICATION**:\n1. flutter analyze --no-fatal-infos\n2. App.dart should have no inline theme methods\n3. App.dart should import from core/theme and core/router\n4. BottomNavBar should have exactly 4 NavigationDestination items",
+        "epicId": "epic-ui-foundation",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1",
+          "epic-ui-foundation-story-2",
+          "epic-ui-foundation-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/main.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/app.dart"
+        ],
+        "filesToCreate": [
+          "lib/shared/widgets/app_scaffold.dart",
+          "lib/shared/widgets/bottom_nav_bar.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given BottomNavBar is created, When rendered, Then shows 4 navigation destinations with correct icons",
+          "Given AppScaffold is created, When body is provided, Then renders content with proper structure",
+          "Given app.dart is updated, When theme is accessed, Then uses imported AppTheme.light()/dark()",
+          "Given app.dart is updated, When router is accessed, Then uses ref.watch(routerProvider)",
+          "Given app.dart is updated, Then _buildLightTheme, _buildDarkTheme, and _PlaceholderScreen are removed"
+        ]
+      }
+    ]
+  }
+}
