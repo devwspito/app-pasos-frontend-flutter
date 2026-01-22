@@ -1,0 +1,93 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "69715d9525b29e96e72895b3",
+    "timestamp": "2026-01-22T00:37:50.792Z",
+    "phase": "techlead",
+    "epicId": "epic-platform-config",
+    "savedAt": "2026-01-22T00:37:50.793Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-platform-config",
+    "storiesCount": 3,
+    "architecture": "## Platform Configuration Architecture\n\n### Overview\nThis epic establishes the native platform configurations required for the App Pasos Flutter application to access health APIs on both iOS and Android devices.\n\n### iOS Architecture (Story 1)\n- **Info.plist**: Central configuration for app metadata and permissions\n  - HealthKit usage descriptions for user consent\n  - Background modes for sync functionality\n  - Bundle configuration and iOS version targeting\n- **Podfile**: CocoaPods dependency management\n  - Platform minimum version (iOS 12.0)\n  - Framework configuration for Swift interop\n- **project.pbxproj**: Xcode project configuration\n  - HealthKit capability enablement\n  - Build settings and signing configuration\n\n### Android Architecture (Story 2)\n- **AndroidManifest.xml**: App configuration and permissions\n  - Health Connect integration permissions\n  - Activity recognition for step counting\n  - Foreground service for background sync\n- **build.gradle (app)**: Module-level build configuration\n  - SDK versions (min 26 for Health Connect)\n  - Application ID and versioning\n- **build.gradle (project)**: Project-level build configuration\n  - Repository sources\n  - Kotlin version management\n- **gradle.properties**: Build environment settings\n  - AndroidX migration flags\n  - JVM optimization settings\n\n### Assets Architecture (Story 3)\n- **assets/images/**: Future home for app images, icons, splash screens\n- **assets/fonts/**: Future home for custom typography\n- **pubspec.yaml**: Asset registration for Flutter build system\n\n### SOLID Principles Compliance\n- **SRP**: Each platform file has a single responsibility (permissions, build config, assets)\n- **OCP**: Configuration is extensible without modifying core structure\n- **DIP**: Platform configurations are abstracted from business logic\n\n### Security Considerations\n- Health data permissions require explicit user consent strings\n- Background modes are limited to essential functionality\n- No sensitive data stored in configuration files\n\n### Setup Commands\n```bash\n# From project root (after merging foundation epic)\nflutter pub get\n```\n\n### Verification Commands\n```bash\n# Validate pubspec.yaml\nflutter pub get\n\n# Check Flutter doctor (platform configuration)\nflutter doctor -v\n```",
+    "stories": [
+      {
+        "id": "epic-platform-config-story-1",
+        "title": "Configure iOS platform with Info.plist, Podfile and HealthKit capability",
+        "description": "Create the iOS platform configuration files for the Flutter app with proper HealthKit permissions.\n\n🔧 **PATTERNS TO USE:**\n- Follow standard Flutter iOS project structure under ios/ directory\n- Use Info.plist for permission strings (NSHealthShareUsageDescription, NSHealthUpdateUsageDescription)\n- Configure Podfile with platform :ios, '12.0' minimum for health package compatibility\n- Set proper bundle identifiers matching app_pasos_frontend\n\n📦 **REQUIRED CONFIGURATION:**\n- ios/Runner/Info.plist must include:\n  - CFBundleName: App Pasos\n  - CFBundleIdentifier: com.appasos.frontend\n  - NSHealthShareUsageDescription: \"App Pasos needs access to read your step data to track your daily activity\"\n  - NSHealthUpdateUsageDescription: \"App Pasos needs access to write step data for activity tracking\"\n  - UIBackgroundModes: fetch, processing (for background sync)\n  - MinimumOSVersion: 12.0\n- ios/Podfile must:\n  - Set platform :ios, '12.0'\n  - Include use_frameworks! for Swift compatibility\n  - Configure HealthKit pod dependencies\n- ios/Runner.xcodeproj/project.pbxproj must:\n  - Enable HealthKit capability\n  - Configure signing and provisioning\n  - Set deployment target to iOS 12.0\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Don't set iOS version below 12.0 (health package requires it)\n- Don't forget UIBackgroundModes for background sync\n- Don't use hardcoded team IDs (use placeholders like DEVELOPMENT_TEAM)\n\n🧪 **VERIFICATION:**\n- All XML/plist files must be valid and well-formed\n- Check that permission strings are user-friendly and explain why access is needed",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "ios/Runner/Info.plist",
+          "ios/Runner.xcodeproj/project.pbxproj",
+          "ios/Podfile"
+        ],
+        "acceptanceCriteria": [
+          "Given the iOS directory doesn't exist, When the story is complete, Then ios/Runner/Info.plist exists with HealthKit permission strings",
+          "Given HealthKit is required for step tracking, When the story is complete, Then ios/Podfile has platform :ios '12.0' minimum",
+          "Given the app needs background sync, When the story is complete, Then Info.plist includes UIBackgroundModes with fetch and processing",
+          "Given the project needs Xcode configuration, When the story is complete, Then project.pbxproj enables HealthKit capability"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-2",
+        "title": "Configure Android platform with AndroidManifest.xml, build.gradle and Health Connect permissions",
+        "description": "Create the Android platform configuration files for the Flutter app with proper Health Connect and activity recognition permissions.\n\n🔧 **PATTERNS TO USE:**\n- Follow standard Flutter Android project structure under android/ directory\n- Use AndroidManifest.xml for permissions (ACTIVITY_RECOGNITION, BODY_SENSORS, etc.)\n- Configure build.gradle with minSdkVersion 26 for Health Connect compatibility\n- Use gradle.properties for project-wide settings\n\n📦 **REQUIRED CONFIGURATION:**\n- android/app/src/main/AndroidManifest.xml must include:\n  - package=\"com.appasos.frontend\"\n  - uses-permission: ACTIVITY_RECOGNITION\n  - uses-permission: BODY_SENSORS\n  - uses-permission: FOREGROUND_SERVICE\n  - uses-permission: INTERNET, ACCESS_NETWORK_STATE\n  - Health Connect permissions (health queries/writes)\n  - Intent filters for Health Connect\n- android/app/build.gradle must:\n  - Set minSdkVersion 26 (Health Connect requirement)\n  - Set targetSdkVersion 34\n  - Set compileSdkVersion 34\n  - Configure applicationId \"com.appasos.frontend\"\n- android/build.gradle must:\n  - Configure Kotlin version (1.9.0+)\n  - Set up repositories (google, mavenCentral)\n- android/gradle.properties must:\n  - Enable AndroidX: android.useAndroidX=true\n  - Enable Jetifier: android.enableJetifier=true\n  - Configure JVM args for build performance\n- android/app/src/main/res/values/strings.xml must:\n  - Define app_name as \"App Pasos\"\n  - Define health_permission_rationale string\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Don't set minSdkVersion below 26 (Health Connect requires API 26+)\n- Don't forget FOREGROUND_SERVICE permission for background sync\n- Don't hardcode version codes (use placeholder that can be updated)\n\n🧪 **VERIFICATION:**\n- All XML files must be valid and well-formed\n- Gradle files must have correct syntax (no compilation errors)",
+        "epicId": "epic-platform-config",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "android/app/src/main/AndroidManifest.xml",
+          "android/app/build.gradle",
+          "android/build.gradle",
+          "android/gradle.properties",
+          "android/app/src/main/res/values/strings.xml"
+        ],
+        "acceptanceCriteria": [
+          "Given the Android directory doesn't exist, When the story is complete, Then android/app/src/main/AndroidManifest.xml exists with Health Connect permissions",
+          "Given Health Connect requires API 26+, When the story is complete, Then android/app/build.gradle has minSdkVersion 26",
+          "Given the app needs Kotlin, When the story is complete, Then android/build.gradle configures Kotlin 1.9.0+",
+          "Given AndroidX is required, When the story is complete, Then gradle.properties enables AndroidX and Jetifier",
+          "Given the app needs strings, When the story is complete, Then strings.xml defines app_name as 'App Pasos'"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-3",
+        "title": "Set up assets directory structure and update pubspec.yaml assets configuration",
+        "description": "Create the assets directory structure for images and fonts, and update pubspec.yaml to register the assets.\n\n🔧 **PATTERNS TO USE:**\n- Follow Flutter conventions for assets directory at project root\n- Use .gitkeep files to preserve empty directories in git\n- Update pubspec.yaml flutter section to register asset paths\n- Keep asset paths consistent with existing pubspec.yaml comments\n\n📦 **REQUIRED CONFIGURATION:**\n- assets/images/.gitkeep:\n  - Create empty file to preserve directory for future image assets\n  - This will hold app icons, splash screens, placeholder images\n- assets/fonts/.gitkeep:\n  - Create empty file to preserve directory for future font files\n  - This will hold custom typography files\n- pubspec.yaml modifications:\n  - Uncomment and configure assets section\n  - Register assets/images/ directory\n  - Add assets/icons/ directory for icon assets\n  - Keep fonts section commented (will be configured when fonts are added)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Don't create deeply nested asset directories unnecessarily\n- Don't modify other sections of pubspec.yaml (dependencies, dev_dependencies)\n- Don't remove the commented font configuration (it's a template for future use)\n\n🧪 **VERIFICATION:**\n- Run: flutter pub get (should complete without errors after pubspec.yaml change)\n- Directory structure assets/images/ and assets/fonts/ must exist\n- pubspec.yaml must remain valid YAML",
+        "epicId": "epic-platform-config",
+        "priority": 3,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "assets/images/.gitkeep",
+          "assets/fonts/.gitkeep"
+        ],
+        "acceptanceCriteria": [
+          "Given assets directories don't exist, When the story is complete, Then assets/images/.gitkeep exists",
+          "Given assets directories don't exist, When the story is complete, Then assets/fonts/.gitkeep exists",
+          "Given pubspec.yaml has commented asset config, When the story is complete, Then flutter section has uncommented assets: with assets/images/ registered",
+          "Given the pubspec must remain valid, When the story is complete, Then flutter pub get completes successfully"
+        ]
+      }
+    ]
+  }
+}
