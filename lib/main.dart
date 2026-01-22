@@ -1,31 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/theme/theme.dart';
+import 'app.dart';
+import 'core/di/injection_container.dart';
 
-void main() {
-  runApp(const AppPasosApp());
-}
-
-/// Root application widget.
+/// Application entry point.
 ///
-/// Configures Material Design 3 theming with light and dark mode support.
-class AppPasosApp extends StatelessWidget {
-  /// Creates the root application widget.
-  const AppPasosApp({super.key});
+/// Initializes Flutter bindings, configures dependencies,
+/// and starts the application with Riverpod state management.
+void main() async {
+  // Ensure Flutter bindings are initialized before any async operations
+  WidgetsFlutterBinding.ensureInitialized();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'App Pasos',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const Scaffold(
-        body: Center(
-          child: Text('App Pasos'),
-        ),
-      ),
-    );
-  }
+  // Configure system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+
+  // Set preferred orientations (portrait only for now)
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Configure dependency injection
+  await configureDependencies();
+
+  // Run the app wrapped with ProviderScope for Riverpod
+  runApp(
+    const ProviderScope(
+      child: App(),
+    ),
+  );
 }
