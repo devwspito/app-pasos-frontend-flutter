@@ -1,21 +1,21 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "39ef8662c0b7227b3413c3a8",
-    "timestamp": "2026-01-22T22:51:29.092Z",
+    "taskId": "19767cb565ca6124e8ef47b9",
+    "timestamp": "2026-01-22T23:33:30.899Z",
     "phase": "Planning",
-    "savedAt": "2026-01-22T22:51:29.092Z",
+    "savedAt": "2026-01-22T23:33:30.899Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "Flutter Test Final con entorno",
-    "taskDescription": "Completar App Pasos Flutter - Merge PRs pendientes y Epics faltantes\n\n## Contexto\nLa task anterior (25044f1f7f2c32e9d29cf33f) fue interrumpida dejando trabajo parcial.\nHay 3 PRs APROBADOS por el Judge pendientes de merge y 2 epics sin empezar.\n\nRepositorio: https://github.com/devwspito/app-pasos-frontend-flutter\n\n## Estado Actual en Main\n- ✅ Flutter Foundation (DI, API client, storage, error handling)\n- ✅ UI Foundation (Material 3 theme, go_router, widgets base)\n- ✅ Authentication UI (login, register, forgot password, providers)\n- ✅ Dashboard parcial (models, entities básicos)\n\n## PRs Pendientes de Merge (YA APROBADOS)\n1. PR #6: Flutter Platform Setup (iOS/Android config, pubspec.yaml)\n2. PR #7: Dashboard & Step Tracking Completion (datasources, repository, widgets, charts)\n3. PR #8: Sharing & Friends UI (friend list, share requests, comparisons)\n\n## Trabajo Pendiente\n\n### 1. Merge PRs Aprobados (Prioridad Máxima)\n- Mergear PR #6, #7, #8 a main en orden\n\n### 2. Goals & Groups UI (Epic en progreso)\nLa rama epic/d29cf33f-epic-goals-groups-ui-1mx8rc tiene trabajo parcial.\nCompletar:\n- Goals domain layer (entities, repositories, use cases)\n- Goals data layer (models, datasources, repository impl)\n- Goals presentation (screens, widgets, Riverpod providers)\n- Groups functionality (crear/unirse grupos, rankings)\n- Crear PR y mergear\n\n### 3. Native Health API Integration (Epic nuevo)\n- Configurar permisos HealthKit (iOS Info.plist)\n- Configurar permisos Health Connect (Android manifest)\n- Crear HealthService con abstracción multiplataforma\n- Implementar sincronización automática de pasos\n- Background fetch para actualizaciones periódicas\n\n### 4. Real-Time WebSocket Client (Epic nuevo)\n- Cliente Socket.io para conexión con backend\n- Handlers para eventos de pasos en tiempo real\n- Sincronización bidireccional de datos\n- Reconexión automática y manejo de offline\n- Notificaciones push de actividad de amigos\n\n## Stack\n- Flutter 3.x con Clean Architecture\n- Riverpod para state management\n- go_router para navegación\n- fl_chart para gráficos\n- health package para HealthKit/Health Connect\n- socket_io_client para WebSockets\n\n## Notas\n- El backend ya tiene Socket.io implementado (repo: project-app-pasos-backend)\n- Coordinar endpoints con backend para health sync",
-    "startedAt": "2026-01-22T22:47:30.296Z",
+    "taskTitle": "Final frontend Flutter",
+    "taskDescription": "Completar App Pasos Flutter - Merge PRs pendientes y Epics faltantes ## Contexto La task anterior (25044f1f7f2c32e9d29cf33f) fue interrumpida dejando trabajo parcial. Hay 3 PRs APROBADOS por el Judge pendientes de merge y 2 epics sin empezar. Repositorio: https://github.com/devwspito/app-pasos-frontend-flutter ## Estado Actual en Main - ✅ Flutter Foundation (DI, API client, storage, error handling) - ✅ UI Foundation (Material 3 theme, go_router, widgets base) - ✅ Authentication UI (login, register, forgot password, providers) - ✅ Dashboard parcial (models, entities básicos) ## PRs Pendientes de Merge (YA APROBADOS) 1. PR #6: Flutter Platform Setup (iOS/Android config, pubspec.yaml) 2. PR #7: Dashboard & Step Tracking Completion (datasources, repository, widgets, charts) 3. PR #8: Sharing & Friends UI (friend list, share requests, comparisons) ## Trabajo Pendiente ### 1. Merge PRs Aprobados (Prioridad Máxima) - Mergear PR #6, #7, #8 a main en orden ### 2. Goals & Groups UI (Epic en progreso) La rama epic/d29cf33f-epic-goals-groups-ui-1mx8rc tiene trabajo parcial. Completar: - Goals domain layer (entities, repositories, use cases) - Goals data layer (models, datasources, repository impl) - Goals presentation (screens, widgets, Riverpod providers) - Groups functionality (crear/unirse grupos, rankings) - Crear PR y mergear ### 3. Native Health API Integration (Epic nuevo) - Configurar permisos HealthKit (iOS Info.plist) - Configurar permisos Health Connect (Android manifest) - Crear HealthService con abstracción multiplataforma - Implementar sincronización automática de pasos - Background fetch para actualizaciones periódicas ### 4. Real-Time WebSocket Client (Epic nuevo) - Cliente Socket.io para conexión con backend - Handlers para eventos de pasos en tiempo real - Sincronización bidireccional de datos - Reconexión automática y manejo de offline - Notificaciones push de actividad de amigos ## Stack - Flutter 3.x con Clean Architecture - Riverpod para state management - go_router para navegación - fl_chart para gráficos - health package para HealthKit/Health Connect - socket_io_client para WebSockets ## Notas - El backend ya tiene Socket.io implementado (repo: project-app-pasos-backend) - Coordinar endpoints con backend para health sync",
+    "startedAt": "2026-01-22T23:28:37.014Z",
     "currentPhase": "Planning",
     "phasesCompleted": [],
     "epics": [],
     "totalCost": 0,
     "totalTokens": 0,
-    "lastUpdated": "2026-01-22T22:51:29.092Z"
+    "lastUpdated": "2026-01-22T23:33:30.899Z"
   }
 }
