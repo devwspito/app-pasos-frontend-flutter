@@ -1,149 +1,121 @@
 import 'package:flutter/material.dart';
 
-/// Button variant types.
+import '../../core/theme/app_spacing.dart';
+
+/// Button variant types for styling
 enum AppButtonVariant {
-  /// Primary button with filled background.
+  /// Filled primary button (default)
   primary,
 
-  /// Secondary button with outlined border.
+  /// Outlined secondary button
   secondary,
 
-  /// Text button with no background or border.
+  /// Text-only button
   text,
 }
 
-/// Button size options.
+/// Button size variants
 enum AppButtonSize {
-  /// Small button size.
+  /// Small button with reduced padding
   small,
 
-  /// Medium button size (default).
+  /// Default button size
   medium,
 
-  /// Large button size.
+  /// Large button with increased padding
   large,
 }
 
-/// A customizable button widget that follows app design patterns.
+/// A reusable button widget following Material Design 3 guidelines.
 ///
-/// Supports multiple variants, sizes, loading state, and icons.
+/// Supports multiple variants (primary, secondary, text), loading states,
+/// disabled states, and optional icons.
 ///
-/// Usage:
+/// Example usage:
 /// ```dart
 /// AppButton(
-///   label: 'Sign In',
-///   onPressed: _handleSignIn,
-///   isLoading: _isLoading,
-///   fullWidth: true,
+///   label: 'Submit',
+///   onPressed: () => handleSubmit(),
+///   variant: AppButtonVariant.primary,
+///   isLoading: isSubmitting,
 /// )
 /// ```
 class AppButton extends StatelessWidget {
-  /// Creates an [AppButton].
+  /// Creates an AppButton.
+  ///
+  /// The [label] parameter is required and specifies the button text.
+  /// The [onPressed] callback is triggered when the button is tapped.
   const AppButton({
-    super.key,
     required this.label,
     this.onPressed,
     this.variant = AppButtonVariant.primary,
     this.size = AppButtonSize.medium,
+    this.isLoading = false,
+    this.isDisabled = false,
     this.icon,
     this.iconPosition = IconPosition.leading,
-    this.isLoading = false,
     this.fullWidth = false,
-    this.enabled = true,
+    super.key,
   });
 
-  /// Button label text.
+  /// The text label displayed on the button
   final String label;
 
-  /// Callback when button is pressed.
+  /// Callback function when button is pressed
+  /// If null, button will be disabled
   final VoidCallback? onPressed;
 
-  /// Button variant style.
+  /// The visual variant of the button
   final AppButtonVariant variant;
 
-  /// Button size.
+  /// The size variant of the button
   final AppButtonSize size;
 
-  /// Optional icon to display.
-  final IconData? icon;
-
-  /// Position of the icon.
-  final IconPosition iconPosition;
-
-  /// Whether to show loading indicator.
+  /// Whether to show a loading indicator
   final bool isLoading;
 
-  /// Whether the button should take full width.
-  final bool fullWidth;
+  /// Whether the button is disabled
+  final bool isDisabled;
 
-  /// Whether the button is enabled.
-  final bool enabled;
+  /// Optional icon to display alongside the label
+  final IconData? icon;
+
+  /// Position of the icon relative to the label
+  final IconPosition iconPosition;
+
+  /// Whether the button should expand to fill available width
+  final bool fullWidth;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDisabled = !enabled || onPressed == null || isLoading;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isEnabled = !isDisabled && !isLoading && onPressed != null;
 
-    // Get size-specific values
-    final padding = _getPadding();
-    final textStyle = _getTextStyle(theme);
+    final buttonChild = _buildButtonChild(context);
 
-    // Build button content
-    final content = _buildContent(theme, textStyle);
+    final buttonStyle = _getButtonStyle(context);
 
-    // Build the appropriate button variant
     Widget button;
+
     switch (variant) {
       case AppButtonVariant.primary:
-        button = ElevatedButton(
-          onPressed: isDisabled ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            padding: padding,
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: theme.colorScheme.onPrimary,
-            disabledBackgroundColor: theme.colorScheme.primary.withOpacity(0.5),
-            disabledForegroundColor: theme.colorScheme.onPrimary.withOpacity(0.7),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
-          ),
-          child: content,
+        button = FilledButton(
+          onPressed: isEnabled ? onPressed : null,
+          style: buttonStyle,
+          child: buttonChild,
         );
-        break;
-
       case AppButtonVariant.secondary:
         button = OutlinedButton(
-          onPressed: isDisabled ? null : onPressed,
-          style: OutlinedButton.styleFrom(
-            padding: padding,
-            foregroundColor: theme.colorScheme.primary,
-            side: BorderSide(
-              color: isDisabled
-                  ? theme.colorScheme.outline.withOpacity(0.5)
-                  : theme.colorScheme.primary,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: content,
+          onPressed: isEnabled ? onPressed : null,
+          style: buttonStyle,
+          child: buttonChild,
         );
-        break;
-
       case AppButtonVariant.text:
         button = TextButton(
-          onPressed: isDisabled ? null : onPressed,
-          style: TextButton.styleFrom(
-            padding: padding,
-            foregroundColor: theme.colorScheme.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: content,
+          onPressed: isEnabled ? onPressed : null,
+          style: buttonStyle,
+          child: buttonChild,
         );
-        break;
     }
 
     if (fullWidth) {
@@ -156,103 +128,98 @@ class AppButton extends StatelessWidget {
     return button;
   }
 
-  EdgeInsets _getPadding() {
-    switch (size) {
-      case AppButtonSize.small:
-        return const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-      case AppButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 24, vertical: 14);
-      case AppButtonSize.large:
-        return const EdgeInsets.symmetric(horizontal: 32, vertical: 18);
-    }
-  }
+  Widget _buildButtonChild(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
 
-  TextStyle? _getTextStyle(ThemeData theme) {
-    switch (size) {
-      case AppButtonSize.small:
-        return theme.textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        );
-      case AppButtonSize.medium:
-        return theme.textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        );
-      case AppButtonSize.large:
-        return theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        );
-    }
-  }
-
-  double _getIconSize() {
-    switch (size) {
-      case AppButtonSize.small:
-        return 16;
-      case AppButtonSize.medium:
-        return 20;
-      case AppButtonSize.large:
-        return 24;
-    }
-  }
-
-  double _getLoadingSize() {
-    switch (size) {
-      case AppButtonSize.small:
-        return 14;
-      case AppButtonSize.medium:
-        return 18;
-      case AppButtonSize.large:
-        return 22;
-    }
-  }
-
-  Widget _buildContent(ThemeData theme, TextStyle? textStyle) {
     if (isLoading) {
       return SizedBox(
-        height: _getLoadingSize(),
-        width: _getLoadingSize(),
+        height: _getIconSize(),
+        width: _getIconSize(),
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(
             variant == AppButtonVariant.primary
-                ? theme.colorScheme.onPrimary
-                : theme.colorScheme.primary,
+                ? colorScheme.onPrimary
+                : colorScheme.primary,
           ),
         ),
       );
     }
 
-    final labelWidget = Text(
-      label,
-      style: textStyle,
-    );
+    if (icon != null) {
+      final iconWidget = Icon(icon, size: _getIconSize());
+      final labelWidget = Text(label);
+      final gap = SizedBox(width: AppSpacing.sm);
 
-    if (icon == null) {
-      return labelWidget;
+      if (iconPosition == IconPosition.trailing) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [labelWidget, gap, iconWidget],
+        );
+      }
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [iconWidget, gap, labelWidget],
+      );
     }
 
-    final iconWidget = Icon(
-      icon,
-      size: _getIconSize(),
-    );
+    return Text(label);
+  }
 
-    final spacing = SizedBox(width: size == AppButtonSize.small ? 4 : 8);
+  ButtonStyle _getButtonStyle(BuildContext context) {
+    final EdgeInsetsGeometry padding;
+    final Size minimumSize;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: iconPosition == IconPosition.leading
-          ? [iconWidget, spacing, labelWidget]
-          : [labelWidget, spacing, iconWidget],
+    switch (size) {
+      case AppButtonSize.small:
+        padding = const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        );
+        minimumSize = const Size(48, AppSpacing.buttonHeightSm);
+      case AppButtonSize.medium:
+        padding = const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        );
+        minimumSize = const Size(64, AppSpacing.buttonHeight);
+      case AppButtonSize.large:
+        padding = const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.md,
+        );
+        minimumSize = const Size(80, 56);
+    }
+
+    return ButtonStyle(
+      padding: WidgetStateProperty.all(padding),
+      minimumSize: WidgetStateProperty.all(minimumSize),
+      shape: WidgetStateProperty.all(
+        const RoundedRectangleBorder(
+          borderRadius: AppSpacing.borderRadiusLg,
+        ),
+      ),
     );
+  }
+
+  double _getIconSize() {
+    switch (size) {
+      case AppButtonSize.small:
+        return AppSpacing.iconSm;
+      case AppButtonSize.medium:
+        return AppSpacing.iconMd;
+      case AppButtonSize.large:
+        return AppSpacing.iconLg;
+    }
   }
 }
 
-/// Icon position relative to label.
+/// Position of icon relative to button label
 enum IconPosition {
-  /// Icon before label.
+  /// Icon appears before the label
   leading,
 
-  /// Icon after label.
+  /// Icon appears after the label
   trailing,
 }
