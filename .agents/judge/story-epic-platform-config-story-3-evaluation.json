@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "69715d9525b29e96e72895b3",
+    "timestamp": "2026-01-22T01:27:40.233Z",
+    "phase": "judge",
+    "storyId": "epic-platform-config-story-3",
+    "savedAt": "2026-01-22T01:27:40.233Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-platform-config-story-3",
+    "verdict": "rejected",
+    "feedback": "🚨 AUTOMATIC REJECTION: Developer did not create required files.\n\nMissing files:\n- assets/images/.gitkeep (empty file)\n- assets/fonts/.gitkeep (empty file)\n\nThe developer must create these files before the code can be reviewed.",
+    "issues": [
+      "Failed after 3 attempts - human intervention required"
+    ]
+  }
+}
