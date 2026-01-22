@@ -121,6 +121,34 @@ abstract final class ApiEndpoints {
   static const String markAllNotificationsRead = '/notifications/read-all';
 
   // ============================================
+  // Sharing Endpoints
+  // ============================================
+
+  /// Get all sharing relationships.
+  static const String sharingRelationships = '/sharing/relationships';
+
+  /// Send a sharing request.
+  static const String sharingRequest = '/sharing/request';
+
+  /// Accept a sharing request by relationship ID.
+  static String acceptSharingRequest(String id) =>
+      '/sharing/relationships/$id/accept';
+
+  /// Reject a sharing request by relationship ID.
+  static String rejectSharingRequest(String id) =>
+      '/sharing/relationships/$id/reject';
+
+  /// Remove a sharing relationship by ID.
+  static String removeSharingRelationship(String id) =>
+      '/sharing/relationships/$id';
+
+  /// Get shared stats for a specific friend.
+  static String sharedStats(String friendId) => '/sharing/stats/$friendId';
+
+  /// Get all shared stats for all friends.
+  static const String allSharedStats = '/sharing/stats';
+
+  // ============================================
   // Utility Methods
   // ============================================
 
