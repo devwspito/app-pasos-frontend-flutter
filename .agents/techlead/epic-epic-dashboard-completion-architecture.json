@@ -1,0 +1,168 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "25044f1f7f2c32e9d29cf33f",
+    "timestamp": "2026-01-22T15:46:42.564Z",
+    "phase": "techlead",
+    "epicId": "epic-dashboard-completion",
+    "savedAt": "2026-01-22T15:46:42.565Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-dashboard-completion",
+    "storiesCount": 5,
+    "architecture": "## Architecture: Flutter Clean Architecture with Riverpod\n\n### Layer Structure\n```\nlib/\n├── core/\n│   ├── di/injection_container.dart (GetIt service locator)\n│   ├── network/api_client.dart (Dio wrapper)\n│   ├── storage/local_storage.dart (SharedPreferences)\n│   ├── router/app_router.dart (GoRouter config) [NEW]\n│   └── constants/api_endpoints.dart (API paths)\n├── features/steps/\n│   ├── data/\n│   │   ├── datasources/ [NEW]\n│   │   │   ├── steps_remote_datasource.dart\n│   │   │   └── steps_local_datasource.dart\n│   │   ├── repositories/steps_repository_impl.dart [NEW]\n│   │   └── models/ (existing: StepStatsModel, StepModel, WeeklyTrendModel)\n│   ├── domain/\n│   │   ├── repositories/steps_repository.dart (interface)\n│   │   ├── entities/ (StepStats, StepRecord)\n│   │   └── usecases/ (existing use cases)\n│   └── presentation/\n│       ├── screens/ [NEW]\n│       │   ├── dashboard_screen.dart\n│       │   └── step_history_screen.dart\n│       ├── widgets/ [NEW]\n│       │   ├── step_counter_card.dart\n│       │   ├── stats_summary_card.dart\n│       │   ├── weekly_chart.dart\n│       │   ├── hourly_chart.dart\n│       │   └── activity_list_item.dart\n│       └── providers/ (existing: steps_provider.dart, steps_state.dart)\n└── shared/widgets/ (existing reusable widgets)\n```\n\n### Data Flow\n1. UI watches `stepsProvider` → StateNotifier methods → UseCases → Repository → DataSources\n2. Offline-first: Remote fetch → Cache on success → Fallback to cache on network error\n3. DI: GetIt for core services, Riverpod for feature state management\n\n### Key Dependencies\n- flutter_riverpod: State management\n- go_router: Navigation\n- dio: HTTP client\n- fl_chart: Data visualization (to be added)\n- get_it: Service locator\n\n### SOLID Compliance\n- SRP: Each datasource handles single responsibility (remote OR local)\n- OCP: Repository interface allows swapping implementations\n- LSP: StepsRepositoryImpl fully implements StepsRepository contract\n- ISP: Separate interfaces for remote/local datasources\n- DIP: Repository depends on datasource interfaces, not concrete classes",
+    "stories": [
+      {
+        "id": "epic-dashboard-completion-story-1",
+        "title": "Create steps API endpoints and datasource layer in lib/features/steps/data/datasources/",
+        "description": "Implement the data source layer for step tracking with remote and local datasources.\n\n🔧 **PATTERNS TO USE:**\n- Use `ApiClient` from `lib/core/network/api_client.dart` for HTTP requests\n- Use `LocalStorage` from `lib/core/storage/local_storage.dart` for caching\n- Follow JSON serialization pattern from `StepStatsModel.fromJson()` in `lib/features/steps/data/models/step_stats_model.dart`\n- Throw `ServerException`, `CacheException`, `NetworkException` from `lib/core/errors/exceptions.dart`\n\n📦 **REQUIRED STRUCTURE:**\n- `StepsRemoteDataSource` interface + impl: getTodayStats(), getWeeklyTrend(), getHourlyBreakdown(date), recordSteps(count, source), syncSteps()\n- `StepsLocalDataSource` interface + impl: cacheTodayStats(), getCachedTodayStats(), cacheWeeklyTrend(), getCachedWeeklyTrend(), clearCache()\n- Add endpoints to `ApiEndpoints`: `/steps/today`, `/steps/weekly`, `/steps/hourly`, `/steps/record`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Dio directly - use `ApiClient.get()`, `ApiClient.post()` methods\n- Do NOT create new exception types - use existing `ServerException`, `CacheException`\n- Do NOT use `SharedPreferences` directly - use `LocalStorage` interface\n\n🧪 **VERIFICATION:**\n- flutter analyze\n- flutter test (if tests exist)",
+        "epicId": "epic-dashboard-completion",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/api_client.dart",
+          "lib/core/storage/local_storage.dart",
+          "lib/core/errors/exceptions.dart",
+          "lib/features/steps/data/models/step_stats_model.dart",
+          "lib/features/steps/data/models/weekly_trend_model.dart"
+        ],
+        "filesToModify": [
+          "lib/core/constants/api_endpoints.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/data/datasources/steps_remote_datasource.dart",
+          "lib/features/steps/data/datasources/steps_local_datasource.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given ApiClient is available, When StepsRemoteDataSourceImpl is instantiated, Then it can make GET/POST requests to steps endpoints",
+          "Given LocalStorage is available, When caching step stats, Then data is stored as JSON string with proper keys",
+          "Given API returns valid JSON, When parsing response, Then StepStatsModel.fromJson() correctly deserializes",
+          "Given network error occurs, When calling remote datasource, Then ServerException or NetworkException is thrown"
+        ]
+      },
+      {
+        "id": "epic-dashboard-completion-story-2",
+        "title": "Create StepsRepositoryImpl and register in DI container lib/core/di/injection_container.dart",
+        "description": "Implement the repository that orchestrates remote/local datasources with offline-first strategy and register all steps dependencies.\n\n🔧 **PATTERNS TO USE:**\n- Implement `StepsRepository` interface from `lib/features/steps/domain/repositories/steps_repository.dart`\n- Follow DI registration pattern from `_registerNetworkServices()` in `lib/core/di/injection_container.dart`\n- Override `stepsRepositoryProvider` in Riverpod as shown in `lib/features/steps/presentation/providers/steps_provider.dart` comments\n\n📦 **REQUIRED STRUCTURE:**\n- `StepsRepositoryImpl` with constructor injection: `StepsRemoteDataSource`, `StepsLocalDataSource`\n- Offline-first pattern: try remote → cache on success → fallback to cache on failure\n- Register in DI: `_registerStepsFeature()` function with datasources and repository\n- Update `stepsProvider` to use GetIt-registered repository\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT instantiate datasources directly in repository - use DI injection\n- Do NOT register as `registerFactory` - use `registerLazySingleton` for repository\n- Do NOT modify `StepsNotifier` class - only update provider registration\n\n🧪 **VERIFICATION:**\n- flutter analyze\n- flutter test",
+        "epicId": "epic-dashboard-completion",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-completion-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/core/di/injection_container.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/data/repositories/steps_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given dependencies are configured, When calling sl<StepsRepository>(), Then StepsRepositoryImpl is returned",
+          "Given network available, When getTodayStats() called, Then remote data is fetched and cached",
+          "Given network unavailable, When getTodayStats() called, Then cached data is returned",
+          "Given stepsProvider is watched, When repository is registered, Then StepsNotifier uses real repository"
+        ]
+      },
+      {
+        "id": "epic-dashboard-completion-story-3",
+        "title": "Create AppRouter in lib/core/router/app_router.dart and integrate in App widget",
+        "description": "Extract routing configuration to dedicated file and add dashboard/history routes.\n\n🔧 **PATTERNS TO USE:**\n- Follow existing `GoRouter` configuration pattern from `lib/app.dart` line 165-198\n- Use `GoRoute` with `name` and `path` for each route\n- Use `context.go()` or `context.goNamed()` for navigation\n\n📦 **REQUIRED STRUCTURE:**\n- `AppRouter` class with static `GoRouter router` getter\n- Routes: '/' → DashboardScreen, '/history' → StepHistoryScreen, '/login', '/register' (existing placeholders)\n- `AppRoutes` abstract class with static route name constants\n- Update `App` widget to use `AppRouter.router` instead of inline `_router`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Navigator.push - use GoRouter methods\n- Do NOT hardcode route strings in screens - use AppRoutes constants\n- Do NOT remove existing placeholder routes (/login, /register) - keep them\n\n🧪 **VERIFICATION:**\n- flutter analyze\n- flutter test",
+        "epicId": "epic-dashboard-completion",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/app.dart"
+        ],
+        "filesToModify": [
+          "lib/app.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/router/app_router.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given app starts, When initial route is '/', Then DashboardScreen is displayed",
+          "Given user navigates to '/history', When route is resolved, Then StepHistoryScreen is displayed",
+          "Given AppRoutes.dashboard constant exists, When used for navigation, Then correct route is matched",
+          "Given App widget builds, When routerConfig is accessed, Then AppRouter.router is used"
+        ]
+      },
+      {
+        "id": "epic-dashboard-completion-story-4",
+        "title": "Create DashboardScreen with StepCounterCard and StatsSummaryCard widgets",
+        "description": "Build the main dashboard screen with step counter circular progress and statistics summary cards.\n\n🔧 **PATTERNS TO USE:**\n- Use `ref.watch(stepsProvider)` to access `StepsState` from `lib/features/steps/presentation/providers/steps_provider.dart`\n- Use `ref.read(stepsProvider.notifier).loadTodayStats()` to trigger data loading\n- Use `AppCard` from `lib/shared/widgets/app_card.dart` as base for custom cards\n- Use `LoadingIndicator` and `ErrorWidget` from `lib/shared/widgets/`\n- Use theme colors from `Theme.of(context).colorScheme`\n\n📦 **REQUIRED STRUCTURE:**\n- `DashboardScreen`: ConsumerStatefulWidget with pull-to-refresh, auto-load on init\n- `StepCounterCard`: Circular progress indicator showing todaySteps/goalSteps with percentage\n- `StatsSummaryCard`: Shows weeklyAverage, stepsRemaining, isGoalAchieved status\n- All widgets must handle loading, error, and loaded states\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use StatefulWidget - use ConsumerStatefulWidget for Riverpod\n- Do NOT call `loadTodayStats()` in build method - call in initState or onRefresh\n- Do NOT hardcode colors - use Theme.of(context).colorScheme\n- Do NOT create new state classes - use existing StepsState\n\n🧪 **VERIFICATION:**\n- flutter analyze\n- flutter test",
+        "epicId": "epic-dashboard-completion",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-completion-story-2",
+          "epic-dashboard-completion-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/loading_indicator.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/presentation/screens/dashboard_screen.dart",
+          "lib/features/steps/presentation/widgets/step_counter_card.dart",
+          "lib/features/steps/presentation/widgets/stats_summary_card.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given DashboardScreen mounts, When initState runs, Then loadTodayStats() and loadWeeklyTrend() are called",
+          "Given StepsState.isLoading is true, When building UI, Then LoadingIndicator is shown",
+          "Given StepsState.todayStats has data, When StepCounterCard builds, Then circular progress shows correct percentage",
+          "Given user pulls to refresh, When onRefresh completes, Then fresh data is displayed"
+        ]
+      },
+      {
+        "id": "epic-dashboard-completion-story-5",
+        "title": "Create WeeklyChart, HourlyChart, ActivityListItem widgets and StepHistoryScreen",
+        "description": "Build chart visualizations using fl_chart and step history screen with activity list.\n\n🔧 **PATTERNS TO USE:**\n- Add `fl_chart: ^0.66.0` to pubspec.yaml dependencies\n- Use `BarChart` from fl_chart for weekly trend visualization\n- Use `LineChart` from fl_chart for hourly breakdown\n- Use `ref.watch(stepsProvider).weeklyTrend` for chart data (List<WeeklyTrendModel>)\n- Use `ref.watch(stepsProvider).hourlyData` for hourly chart (List<StepRecord>)\n- Use `AppCard` as container for charts\n\n📦 **REQUIRED STRUCTURE:**\n- `WeeklyChart`: BarChart showing 7 days, highlight today, use WeeklyTrendModel.dayOfWeek for labels\n- `HourlyChart`: LineChart showing 24 hours, spots from StepRecord.stepCount by hour\n- `ActivityListItem`: ListTile showing StepRecord with icon, stepCount, recordedAt, source\n- `StepHistoryScreen`: ConsumerStatefulWidget with WeeklyChart, date picker, HourlyChart for selected date, activity list\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use hardcoded chart dimensions - use LayoutBuilder for responsive sizing\n- Do NOT parse dates manually - use DateTime methods and intl for formatting\n- Do NOT create separate state for chart data - use existing StepsState.weeklyTrend and hourlyData\n\n🧪 **VERIFICATION:**\n- flutter pub get (to fetch fl_chart)\n- flutter analyze\n- flutter test",
+        "epicId": "epic-dashboard-completion",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-dashboard-completion-story-2",
+          "epic-dashboard-completion-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/models/weekly_trend_model.dart",
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/presentation/widgets/weekly_chart.dart",
+          "lib/features/steps/presentation/widgets/hourly_chart.dart",
+          "lib/features/steps/presentation/widgets/activity_list_item.dart",
+          "lib/features/steps/presentation/screens/step_history_screen.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given fl_chart is added to pubspec.yaml, When flutter pub get runs, Then package is available",
+          "Given weeklyTrend has 7 days data, When WeeklyChart builds, Then 7 bars are displayed with correct heights",
+          "Given hourlyData has records, When HourlyChart builds, Then line chart shows step counts by hour",
+          "Given StepHistoryScreen loads, When date is selected, Then loadHourlyData(date) is called"
+        ]
+      }
+    ]
+  }
+}
