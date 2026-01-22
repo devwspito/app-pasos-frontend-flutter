@@ -50,10 +50,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Assets configuration (uncomment when adding assets)
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
+  # Assets configuration
+  assets:
+    - assets/images/
+    - assets/icons/
 
   # Fonts configuration (uncomment when adding fonts)
   # fonts:
