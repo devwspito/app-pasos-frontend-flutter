@@ -5,6 +5,10 @@ import '../network/api_client.dart';
 import '../network/api_interceptors.dart';
 import '../storage/local_storage.dart';
 import '../storage/secure_storage.dart';
+import '../../features/goals/data/datasources/goals_remote_data_source.dart';
+import '../../features/goals/data/datasources/goals_remote_data_source_impl.dart';
+import '../../features/goals/data/repositories/goals_repository_impl.dart';
+import '../../features/goals/domain/repositories/goals_repository.dart';
 
 /// Global service locator instance.
 ///
@@ -28,9 +32,9 @@ Future<void> configureDependencies() async {
   await _registerCoreDependencies();
 
   // ============================================
-  // Feature Dependencies (to be added as features are implemented)
+  // Feature Dependencies
   // ============================================
-  // await _registerFeatureDependencies();
+  _registerGoalsFeature();
 }
 
 /// Registers external package dependencies.
@@ -95,3 +99,20 @@ Future<void> resetDependencies() async {
 
 /// Checks if dependencies have been configured.
 bool get isDependenciesConfigured => sl.isRegistered<ApiClient>();
+
+/// Registers goals feature dependencies.
+///
+/// Registers:
+/// - [GoalsRemoteDataSource] for API communication
+/// - [GoalsRepository] for data access
+void _registerGoalsFeature() {
+  // Data Sources
+  sl.registerLazySingleton<GoalsRemoteDataSource>(
+    () => GoalsRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<GoalsRepository>(
+    () => GoalsRepositoryImpl(remoteDataSource: sl<GoalsRemoteDataSource>()),
+  );
+}
