@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection_container.dart';
 import '../../data/models/weekly_trend_model.dart';
 import '../../domain/entities/step_record.dart';
 import '../../domain/entities/step_stats.dart';
@@ -254,9 +255,8 @@ class StepsNotifier extends StateNotifier<StepsState> {
 /// )
 /// ```
 final stepsRepositoryProvider = Provider<StepsRepository>((ref) {
-  throw UnimplementedError(
-    'stepsRepositoryProvider must be overridden with actual implementation',
-  );
+  // Use GetIt service locator to get the registered repository
+  return sl<StepsRepository>();
 });
 
 final stepsProvider = StateNotifierProvider<StepsNotifier, StepsState>((ref) {

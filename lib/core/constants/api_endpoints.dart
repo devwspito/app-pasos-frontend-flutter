@@ -107,6 +107,25 @@ abstract final class ApiEndpoints {
       '/goals/$goalId/steps/$stepId/complete';
 
   // ============================================
+  // Step Tracking Endpoints (Activity/Fitness)
+  // ============================================
+
+  /// Get today's step statistics.
+  static const String stepsTodayStats = '/steps/today';
+
+  /// Get weekly step trend data.
+  static const String stepsWeeklyTrend = '/steps/weekly';
+
+  /// Get hourly step breakdown.
+  static const String stepsHourlyBreakdown = '/steps/hourly';
+
+  /// Record new steps.
+  static const String stepsRecord = '/steps/record';
+
+  /// Sync local step data with server.
+  static const String stepsSync = '/steps/sync';
+
+  // ============================================
   // Notifications Endpoints
   // ============================================
 

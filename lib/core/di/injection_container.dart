@@ -6,6 +6,12 @@ import '../network/api_interceptors.dart';
 import '../storage/local_storage.dart';
 import '../storage/secure_storage.dart';
 
+// Steps feature imports
+import '../../features/steps/data/datasources/steps_local_datasource.dart';
+import '../../features/steps/data/datasources/steps_remote_datasource.dart';
+import '../../features/steps/data/repositories/steps_repository_impl.dart';
+import '../../features/steps/domain/repositories/steps_repository.dart';
+
 /// Global service locator instance.
 ///
 /// Use this to access registered services throughout the app.
@@ -28,9 +34,9 @@ Future<void> configureDependencies() async {
   await _registerCoreDependencies();
 
   // ============================================
-  // Feature Dependencies (to be added as features are implemented)
+  // Feature Dependencies
   // ============================================
-  // await _registerFeatureDependencies();
+  _registerStepsFeature();
 }
 
 /// Registers external package dependencies.
@@ -95,3 +101,34 @@ Future<void> resetDependencies() async {
 
 /// Checks if dependencies have been configured.
 bool get isDependenciesConfigured => sl.isRegistered<ApiClient>();
+
+// ============================================
+// Feature Registrations
+// ============================================
+
+/// Registers steps feature dependencies.
+///
+/// Includes datasources and repository following offline-first pattern.
+void _registerStepsFeature() {
+  // Remote data source - depends on ApiClient
+  sl.registerLazySingleton<StepsRemoteDataSource>(
+    () => StepsRemoteDataSourceImpl(
+      apiClient: sl<ApiClient>(),
+    ),
+  );
+
+  // Local data source - depends on LocalStorage
+  sl.registerLazySingleton<StepsLocalDataSource>(
+    () => StepsLocalDataSourceImpl(
+      localStorage: sl<LocalStorage>(),
+    ),
+  );
+
+  // Repository - depends on both datasources
+  sl.registerLazySingleton<StepsRepository>(
+    () => StepsRepositoryImpl(
+      remoteDataSource: sl<StepsRemoteDataSource>(),
+      localDataSource: sl<StepsLocalDataSource>(),
+    ),
+  );
+}
