@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "2ff781736c9f12b7376700e2",
+    "timestamp": "2026-01-23T14:54:54.957Z",
+    "phase": "judge",
+    "storyId": "epic-flutter-foundation-story-1",
+    "savedAt": "2026-01-23T14:54:54.957Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-flutter-foundation-story-1",
+    "verdict": "rejected",
+    "feedback": "Reason: Missing\nRequired Changes: 1.\n",
+    "issues": [
+      "Failed after 3 attempts - human intervention required"
+    ]
+  }
+}
