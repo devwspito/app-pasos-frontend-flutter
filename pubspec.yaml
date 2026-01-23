@@ -35,6 +35,9 @@ dependencies:
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
 
+  # Health Data Integration
+  health: ^10.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
