@@ -1,0 +1,85 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1afec52ab9de7df94dd31a59",
+    "timestamp": "2026-01-23T01:09:34.115Z",
+    "phase": "techlead",
+    "epicId": "epic-merge-pending-prs",
+    "savedAt": "2026-01-23T01:09:34.115Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-merge-pending-prs",
+    "storiesCount": 3,
+    "architecture": "This epic performs Git merge operations using GitHub CLI (gh). Each story merges one PR sequentially to avoid conflicts. The merge order is PR #6 → PR #7 → PR #8, following chronological creation order. Each PR adds non-overlapping architecture and evaluation JSON files to the .agents/ directory. Dependencies ensure sequential execution: Story 2 depends on Story 1, Story 3 depends on Story 2. This prevents race conditions and ensures clean merge history.",
+    "stories": [
+      {
+        "id": "epic-merge-pending-prs-story-1",
+        "title": "Merge PR #6 Flutter Platform Setup to main",
+        "description": "Merge Pull Request #6 that contains Flutter platform configuration architecture definitions.\n\n🔧 **COMMAND TO EXECUTE:**\n```bash\ngh pr merge 6 --merge --delete-branch\n```\n\n📦 **FILES BEING MERGED:**\n- .agents/judge/techlead-epic-flutter-platform-setup-evaluation.json\n- .agents/techlead/epic-epic-flutter-platform-setup-architecture.json\n\n⚠️ **VERIFICATION:**\n1. Run: `gh pr view 6 --json state` - should show 'MERGED'\n2. Run: `git pull origin main` - should succeed without conflicts\n3. Verify files exist: `ls .agents/techlead/epic-epic-flutter-platform-setup-architecture.json`\n\n🚨 **IF MERGE FAILS:**\n- Check for conflicts: `gh pr view 6 --json mergeable`\n- If conflicts exist, checkout the PR branch, rebase on main, resolve conflicts, push\n- Then retry merge",
+        "epicId": "epic-merge-pending-prs",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [
+          ".agents/judge/techlead-epic-flutter-platform-setup-evaluation.json",
+          ".agents/techlead/epic-epic-flutter-platform-setup-architecture.json"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given PR #6 is open, When developer executes gh pr merge 6 --merge, Then PR state changes to MERGED",
+          "Given PR #6 is merged, When checking main branch, Then files .agents/judge/techlead-epic-flutter-platform-setup-evaluation.json and .agents/techlead/epic-epic-flutter-platform-setup-architecture.json exist",
+          "Given merge is complete, When running git status on main, Then no merge conflicts are present"
+        ]
+      },
+      {
+        "id": "epic-merge-pending-prs-story-2",
+        "title": "Merge PR #7 Dashboard Completion to main",
+        "description": "Merge Pull Request #7 that contains Dashboard and Step Tracking completion architecture.\n\n🔧 **COMMAND TO EXECUTE:**\n```bash\ngh pr merge 7 --merge --delete-branch\n```\n\n📦 **FILES BEING MERGED:**\n- .agents/judge/techlead-epic-dashboard-completion-evaluation.json\n- .agents/techlead/epic-epic-dashboard-completion-architecture.json\n\n⚠️ **VERIFICATION:**\n1. Run: `gh pr view 7 --json state` - should show 'MERGED'\n2. Run: `git pull origin main` - should succeed without conflicts\n3. Verify files exist: `ls .agents/techlead/epic-epic-dashboard-completion-architecture.json`\n\n🚨 **IF MERGE FAILS:**\n- Check for conflicts: `gh pr view 7 --json mergeable`\n- If conflicts exist, checkout the PR branch, rebase on main, resolve conflicts, push\n- Then retry merge",
+        "epicId": "epic-merge-pending-prs",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-merge-pending-prs-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [
+          ".agents/judge/techlead-epic-dashboard-completion-evaluation.json",
+          ".agents/techlead/epic-epic-dashboard-completion-architecture.json"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given PR #7 is open, When developer executes gh pr merge 7 --merge, Then PR state changes to MERGED",
+          "Given PR #7 is merged, When checking main branch, Then files .agents/judge/techlead-epic-dashboard-completion-evaluation.json and .agents/techlead/epic-epic-dashboard-completion-architecture.json exist",
+          "Given merge is complete, When running git status on main, Then no merge conflicts are present"
+        ]
+      },
+      {
+        "id": "epic-merge-pending-prs-story-3",
+        "title": "Merge PR #8 Sharing Friends UI to main",
+        "description": "Merge Pull Request #8 that contains Sharing and Friends UI architecture definitions.\n\n🔧 **COMMAND TO EXECUTE:**\n```bash\ngh pr merge 8 --merge --delete-branch\n```\n\n📦 **FILES BEING MERGED:**\n- .agents/judge/techlead-epic-sharing-friends-ui-evaluation.json\n- .agents/techlead/epic-epic-sharing-friends-ui-architecture.json\n\n⚠️ **VERIFICATION:**\n1. Run: `gh pr view 8 --json state` - should show 'MERGED'\n2. Run: `git pull origin main` - should succeed without conflicts\n3. Verify files exist: `ls .agents/techlead/epic-epic-sharing-friends-ui-architecture.json`\n\n🚨 **IF MERGE FAILS:**\n- Check for conflicts: `gh pr view 8 --json mergeable`\n- If conflicts exist, checkout the PR branch, rebase on main, resolve conflicts, push\n- Then retry merge",
+        "epicId": "epic-merge-pending-prs",
+        "priority": 3,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-merge-pending-prs-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [
+          ".agents/judge/techlead-epic-sharing-friends-ui-evaluation.json",
+          ".agents/techlead/epic-epic-sharing-friends-ui-architecture.json"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given PR #8 is open, When developer executes gh pr merge 8 --merge, Then PR state changes to MERGED",
+          "Given PR #8 is merged, When checking main branch, Then files .agents/judge/techlead-epic-sharing-friends-ui-evaluation.json and .agents/techlead/epic-epic-sharing-friends-ui-architecture.json exist",
+          "Given merge is complete, When running git status on main, Then no merge conflicts are present"
+        ]
+      }
+    ]
+  }
+}
