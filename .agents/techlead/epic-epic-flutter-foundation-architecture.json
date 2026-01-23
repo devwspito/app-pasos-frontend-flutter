@@ -1,0 +1,125 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "6c006dedb0f6e4171b542793",
+    "timestamp": "2026-01-23T11:43:42.589Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-23T11:43:42.590Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-foundation",
+    "storiesCount": 4,
+    "architecture": "## Flutter Clean Architecture for App Pasos\n\n### Architecture Overview\nThis epic establishes the foundation for a Flutter mobile app following Clean Architecture with feature-based modules.\n\n### Layer Structure\n```\nlib/\n├── main.dart                    # Entry point with ProviderScope\n├── core/                        # Shared infrastructure\n│   ├── di/                      # Dependency injection (get_it)\n│   │   └── injection_container.dart\n│   ├── network/                 # HTTP client & interceptors\n│   │   ├── dio_client.dart\n│   │   ├── api_endpoints.dart\n│   │   └── interceptors/\n│   ├── errors/                  # Exception & Failure classes\n│   ├── utils/                   # Constants, validators, extensions\n│   └── config/                  # Environment configuration\n└── features/                    # Feature modules (future epics)\n    ├── auth/\n    ├── steps/\n    ├── goals/\n    └── sharing/\n```\n\n### SOLID Principles Applied\n1. **SRP**: Each interceptor handles one concern (auth, errors, logging)\n2. **OCP**: New interceptors can be added without modifying DioClient\n3. **LSP**: All Failures extend base Failure class\n4. **ISP**: Small, focused interfaces (Validators, Extensions)\n5. **DIP**: DioClient depends on AppConfig abstraction, not concrete values\n\n### Backend API Integration Contract\n- Base URL: http://localhost:55090/api (from .env)\n- Auth endpoints: /api/auth/*\n- Steps endpoints: /api/steps/*\n- Goals endpoints: /api/goals/*\n- Sharing endpoints: /api/sharing/*\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Typecheck: `dart analyze`\n- Test: `flutter test`\n- Lint: `dart analyze --fatal-infos`",
+    "stories": [
+      {
+        "id": "epic-flutter-foundation-story-1",
+        "title": "Create pubspec.yaml with Flutter dependencies and analysis_options.yaml",
+        "description": "Initialize Flutter project configuration with all required dependencies.\n\n🔧 PATTERNS TO USE:\n- Use standard Flutter pubspec.yaml structure\n- Group dependencies by purpose (networking, state, storage, etc.)\n- Pin major versions for stability\n\n📦 REQUIRED DEPENDENCIES:\n- dio: ^5.4.0 (HTTP client)\n- flutter_riverpod: ^2.4.9 (state management)\n- go_router: ^13.0.0 (navigation)\n- flutter_secure_storage: ^9.0.0 (secure storage)\n- health: ^10.0.0 (health data)\n- web_socket_channel: ^2.4.0 (WebSocket)\n- fl_chart: ^0.66.0 (charts)\n- get_it: ^7.6.4 (DI)\n- injectable: ^2.3.2 (DI code gen)\n- flutter_dotenv: ^5.1.0 (env config)\n- freezed_annotation: ^2.4.1 (immutable models)\n- json_annotation: ^4.8.1 (JSON serialization)\n\nDEV DEPENDENCIES:\n- build_runner, freezed, json_serializable, injectable_generator\n- flutter_lints for code quality\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Using caret (^) for all versions without checking compatibility\n- Missing dev_dependencies for code generation\n- Forgetting to add .env to assets\n\nVERIFICATION:\n1. flutter pub get (verify dependencies resolve)\n2. dart analyze (verify analysis_options work)",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "pubspec.yaml",
+          "analysis_options.yaml"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml exists, When running flutter pub get, Then all dependencies resolve without errors",
+          "Given analysis_options.yaml exists, When running dart analyze, Then linter rules are applied",
+          "Given .env is listed in assets, When app runs, Then flutter_dotenv can load environment variables"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-2",
+        "title": "Create core error handling, utilities, and configuration files",
+        "description": "Set up the foundational core utilities, error handling classes, and environment configuration.\n\n🔧 PATTERNS TO USE:\n- Use sealed classes for Failure types (Either pattern)\n- Use abstract Exception classes with concrete implementations\n- Use static constants classes for app-wide values\n- Use extension methods for common type operations\n\n📦 FILES TO CREATE:\n1. lib/core/errors/exceptions.dart - Custom exceptions (ServerException, CacheException, NetworkException)\n2. lib/core/errors/failures.dart - Failure classes for Either pattern (ServerFailure, CacheFailure, NetworkFailure)\n3. lib/core/utils/constants.dart - App constants (timeouts, pagination, storage keys)\n4. lib/core/utils/validators.dart - Input validators (email, password, step count)\n5. lib/core/utils/extensions.dart - Dart extensions (String, DateTime, int)\n6. lib/core/config/app_config.dart - AppConfig singleton with getters for API_BASE_URL, WS_URL\n7. lib/core/config/environment.dart - Environment enum (development, staging, production)\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Throwing generic Exception instead of custom types\n- Hardcoding values instead of using constants\n- Mutable configuration classes\n\nVERIFICATION:\n1. dart analyze lib/core/\n2. Verify no import errors",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          ".env"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/errors/exceptions.dart",
+          "lib/core/errors/failures.dart",
+          "lib/core/utils/constants.dart",
+          "lib/core/utils/validators.dart",
+          "lib/core/utils/extensions.dart",
+          "lib/core/config/app_config.dart",
+          "lib/core/config/environment.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given exceptions.dart exists, When a ServerException is thrown, Then it contains statusCode and message",
+          "Given failures.dart exists, When a ServerFailure is created, Then it implements Failure base class",
+          "Given app_config.dart exists, When AppConfig.apiBaseUrl is called, Then it returns value from .env",
+          "Given validators.dart exists, When Validators.isValidEmail is called with invalid input, Then it returns false"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-3",
+        "title": "Configure Dio HTTP client with auth, error, and logging interceptors",
+        "description": "Create the Dio HTTP client singleton with interceptors for authentication, error handling, and logging.\n\n🔧 PATTERNS TO USE:\n- Singleton pattern for DioClient\n- Interceptor chain: LoggingInterceptor → AuthInterceptor → ErrorInterceptor\n- Use AppConfig for base URL (from story-2)\n- Use custom exceptions from errors/exceptions.dart\n\n📦 API ENDPOINTS (matching backend routes):\n- Auth: /api/auth/register, /api/auth/login, /api/auth/refresh, /api/auth/logout\n- Steps: /api/steps, /api/steps/:id, /api/steps/sync\n- Sharing: /api/sharing/permissions, /api/sharing/shared-with-me\n- Goals: /api/goals, /api/goals/:id, /api/goals/progress\n\n📦 FILES TO CREATE:\n1. lib/core/network/api_endpoints.dart - Static class with all API routes as constants\n2. lib/core/network/dio_client.dart - DioClient singleton with configured Dio instance\n3. lib/core/network/interceptors/auth_interceptor.dart - Adds Authorization header, handles 401\n4. lib/core/network/interceptors/error_interceptor.dart - Converts DioException to custom exceptions\n5. lib/core/network/interceptors/logging_interceptor.dart - Logs request/response in debug mode\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Creating new Dio instances per request\n- Hardcoding API URLs instead of using ApiEndpoints constants\n- Not handling token refresh on 401\n- Logging sensitive data in production\n\nVERIFICATION:\n1. dart analyze lib/core/network/\n2. Verify DioClient.instance returns same instance",
+        "epicId": "epic-flutter-foundation",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          ".env"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/network/dio_client.dart",
+          "lib/core/network/interceptors/auth_interceptor.dart",
+          "lib/core/network/interceptors/error_interceptor.dart",
+          "lib/core/network/interceptors/logging_interceptor.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given DioClient exists, When DioClient.instance is called twice, Then same instance is returned",
+          "Given ApiEndpoints exists, When ApiEndpoints.login is accessed, Then it returns '/api/auth/login'",
+          "Given AuthInterceptor exists, When request is made with stored token, Then Authorization header is added",
+          "Given ErrorInterceptor exists, When 500 response received, Then ServerException is thrown"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-4",
+        "title": "Create main.dart with ProviderScope and dependency injection setup",
+        "description": "Create the app entry point with Riverpod provider scope and get_it dependency injection initialization.\n\n🔧 PATTERNS TO USE:\n- Use ProviderScope at root for Riverpod\n- Use get_it for service locator pattern\n- Initialize dependencies before runApp\n- Load .env using flutter_dotenv before initialization\n\n📦 FILES TO CREATE:\n1. lib/main.dart - Entry point with async initialization\n2. lib/core/di/injection_container.dart - get_it setup with registerSingleton/registerLazySingleton\n\n📦 DEPENDENCY REGISTRATION ORDER:\n1. AppConfig (singleton)\n2. DioClient (lazy singleton, depends on AppConfig)\n3. Future: Repositories, Use Cases, etc.\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Not awaiting dotenv.load() before accessing env vars\n- Registering dependencies in wrong order (DioClient before AppConfig)\n- Missing ProviderScope wrapper\n- Not using GetIt.I or sl shorthand consistently\n\nVERIFICATION:\n1. flutter analyze\n2. flutter run (should start without DI errors)\n3. Verify app launches with 'App Pasos' title",
+        "epicId": "epic-flutter-foundation",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-flutter-foundation-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          ".env"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/main.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given main.dart exists, When app starts, Then dotenv is loaded before MaterialApp",
+          "Given injection_container.dart exists, When init() is called, Then DioClient is registered",
+          "Given ProviderScope wraps app, When app runs, Then Riverpod providers are accessible",
+          "Given all initialization completes, When app launches, Then no dependency injection errors occur"
+        ]
+      }
+    ]
+  }
+}
