@@ -1,0 +1,143 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "09fb1502f00abc4638c73758",
+    "timestamp": "2026-01-23T17:07:13.877Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-23T17:07:13.877Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 5,
+    "architecture": "## UI Foundation Architecture\n\n### Design System Structure\n```\nlib/\n├── core/\n│   ├── theme/\n│   │   ├── app_colors.dart      # Color palette (light/dark)\n│   │   ├── app_typography.dart  # Text styles\n│   │   ├── app_spacing.dart     # Spacing constants\n│   │   └── app_theme.dart       # ThemeData configuration\n│   └── di/modules/\n│       └── theme_module.dart    # Theme DI registration\n├── shared/widgets/\n│   ├── app_scaffold.dart        # Base scaffold\n│   ├── app_button.dart          # Button variants\n│   ├── app_text_field.dart      # Text input\n│   ├── app_card.dart            # Card container\n│   ├── app_loading.dart         # Loading indicator\n│   ├── app_error.dart           # Error display\n│   ├── app_empty_state.dart     # Empty state\n│   ├── step_counter_display.dart # Step count display\n│   ├── progress_ring.dart       # Circular progress\n│   └── stat_card.dart           # Statistics card\n└── app.dart                     # Root App widget\n```\n\n### SOLID Principles Applied\n- **SRP**: Each widget has single responsibility (button only handles button UI)\n- **OCP**: Widgets extensible via parameters without modification\n- **LSP**: All AppButton variants can replace each other\n- **ISP**: Small widget interfaces, only required parameters\n- **DIP**: Widgets depend on Theme abstraction, not concrete colors\n\n### Material Design 3 Integration\n- Uses ColorScheme.fromSeed() for consistent palette generation\n- ThemeData.useMaterial3: true for all Material 3 components\n- Light/dark mode support via ThemeMode.system\n\n### Dependency Injection\n- ThemeModule follows existing pattern (abstract final class)\n- Registered in configureDependencies() chain\n- Accessible via sl<ThemeData>() when needed\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Analyze: `flutter analyze`\n- Test: `flutter test`\n- Build: `flutter build apk --debug`",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Create Theme Core Files in lib/core/theme/ (colors, typography, spacing, theme)",
+        "description": "Create the core theming infrastructure with Material Design 3 support and light/dark mode.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class` pattern (like Routes in routes.dart)\n- Use ColorScheme.fromSeed() for Material 3 color generation\n- Export all from app_theme.dart for easy imports\n\n📦 **REQUIRED STRUCTURE:**\n- app_colors.dart: Define AppColors with static Color constants for primary, secondary, error, surface colors for both light and dark\n- app_typography.dart: Define AppTypography with static TextStyle methods using Material 3 type scale\n- app_spacing.dart: Define AppSpacing with static double constants (xs=4, sm=8, md=16, lg=24, xl=32)\n- app_theme.dart: Define AppTheme with static ThemeData lightTheme() and darkTheme() methods using ColorScheme.fromSeed()\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use hardcoded colors in widgets - use AppColors\n- DO NOT create mutable theme classes - use abstract final class pattern\n- DO NOT skip Material 3 (useMaterial3: true)\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/core/theme/\n- All files should have no warnings\n- Theme files should export cleanly",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/router/routes.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_typography.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/core/theme/app_theme.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppColors class exists, When importing app_colors.dart, Then all color constants are accessible as AppColors.primaryLight, AppColors.primaryDark, etc.",
+          "Given AppTypography class exists, When calling AppTypography.headlineLarge(context), Then returns TextStyle with Material 3 typography",
+          "Given AppSpacing class exists, When using AppSpacing.md, Then returns 16.0",
+          "Given AppTheme class exists, When calling AppTheme.lightTheme(), Then returns complete ThemeData with Material 3 enabled"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Create Base UI Widgets in lib/shared/widgets/ (scaffold, button, text_field)",
+        "description": "Create foundational reusable widgets following Flutter's composition pattern.\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget for pure UI components\n- Accept all required parameters through constructor\n- Use Theme.of(context) to access theme colors/typography\n- Follow naming convention: AppXxx for all shared widgets\n\n📦 **REQUIRED STRUCTURE:**\n- app_scaffold.dart: AppScaffold widget wrapping Scaffold with SafeArea, optional AppBar, FAB support\n- app_button.dart: AppButton with variants (primary, secondary, outlined, text) using ElevatedButton/OutlinedButton/TextButton\n- app_text_field.dart: AppTextField wrapping TextField with consistent decoration, validation support, prefix/suffix icons\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode colors - use Theme.of(context).colorScheme\n- DO NOT use const Colors.xxx - use theme colors\n- DO NOT skip required parameters (onPressed for buttons, controller for text fields)\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/widgets/\n- Widgets should accept all necessary callbacks and parameters",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_scaffold.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_text_field.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppScaffold widget exists, When wrapping content, Then provides consistent scaffold with SafeArea",
+          "Given AppButton widget exists, When setting variant to AppButtonVariant.primary, Then renders ElevatedButton with primary color",
+          "Given AppTextField widget exists, When providing validator function, Then displays error text on validation failure"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create Feedback & State Widgets in lib/shared/widgets/ (card, loading, error, empty_state)",
+        "description": "Create widgets for displaying card layouts and various UI states.\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget for pure UI components\n- Use Card widget from Material 3 for app_card.dart\n- Use CircularProgressIndicator for loading states\n- Accept customizable messages and icons\n\n📦 **REQUIRED STRUCTURE:**\n- app_card.dart: AppCard wrapping Card with consistent elevation, border radius, padding, optional header/footer\n- app_loading.dart: AppLoading with centered CircularProgressIndicator, optional message text\n- app_error.dart: AppError displaying error icon, message, and optional retry button with onRetry callback\n- app_empty_state.dart: AppEmptyState displaying icon, title, description, and optional action button\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode elevation values - use theme defaults or accept as parameter\n- DO NOT skip null safety - all optional parameters should be nullable\n- DO NOT forget to handle loading/error states in parent widgets\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/widgets/\n- All widgets should render without errors",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/app_loading.dart",
+          "lib/shared/widgets/app_error.dart",
+          "lib/shared/widgets/app_empty_state.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppCard widget exists, When wrapping content with header, Then displays card with header section",
+          "Given AppLoading widget exists, When message is provided, Then displays message below spinner",
+          "Given AppError widget exists, When onRetry callback is provided, Then displays retry button",
+          "Given AppEmptyState widget exists, When action button text and callback provided, Then displays actionable empty state"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Create Step Counter Widgets in lib/shared/widgets/ (step_counter_display, progress_ring, stat_card)",
+        "description": "Create step tracking specific widgets for the Pasos app dashboard.\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget for display components\n- Use CustomPainter for progress_ring circular progress\n- Use AnimatedBuilder or TweenAnimationBuilder for animated transitions\n- Accept int stepCount, int goal parameters for step widgets\n\n📦 **REQUIRED STRUCTURE:**\n- step_counter_display.dart: StepCounterDisplay showing large step count number with goal comparison, animated number changes\n- progress_ring.dart: ProgressRing using CustomPainter to draw circular progress, accepts progress (0.0-1.0), color, strokeWidth\n- stat_card.dart: StatCard displaying a statistic with icon, label, value, optional trend indicator (up/down arrow)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use setState for animations - use AnimatedBuilder/TweenAnimationBuilder\n- DO NOT hardcode step goals - accept as parameters\n- DO NOT skip accessibility - add Semantics widgets\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/widgets/\n- Widgets render correctly with sample data",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/step_counter_display.dart",
+          "lib/shared/widgets/progress_ring.dart",
+          "lib/shared/widgets/stat_card.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepCounterDisplay widget exists, When stepCount=5000 and goal=10000, Then displays '5,000' with '50% of goal'",
+          "Given ProgressRing widget exists, When progress=0.75, Then draws 75% filled circular arc",
+          "Given StatCard widget exists, When trend is positive, Then displays up arrow indicator"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-5",
+        "title": "Create Theme Module and App Integration (theme_module.dart, app.dart, modify main.dart)",
+        "description": "Integrate the theme system with DI container and create the main App widget with theme support.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class ThemeModule` pattern from network_module.dart\n- Use `static void register(GetIt sl)` method pattern\n- Register ThemeData as lazy singleton\n- Create App widget in app.dart using MaterialApp.router with theme\n\n📦 **REQUIRED STRUCTURE:**\n- theme_module.dart: ThemeModule with register() method that registers light and dark ThemeData\n- app.dart: App widget (StatelessWidget) that builds MaterialApp.router with:\n  - routerConfig from createAppRouter()\n  - theme: AppTheme.lightTheme()\n  - darkTheme: AppTheme.darkTheme()\n  - themeMode: ThemeMode.system\n- main.dart modifications: Import app.dart, call configureDependencies(), runApp(const App())\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create new GetIt instance - use `sl` from injection_container.dart\n- DO NOT hardcode theme in MaterialApp - use AppTheme methods\n- DO NOT skip ThemeModule.register() call in configureDependencies()\n\n🧪 **VERIFICATION:**\n- flutter analyze\n- flutter build apk --debug (should complete without errors)\n- App should start with Material 3 theme applied",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/di/modules/network_module.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/di/modules/theme_module.dart",
+          "lib/app.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given ThemeModule.register() is called, When accessing sl<ThemeData>(), Then returns configured ThemeData",
+          "Given App widget exists, When running the app, Then MaterialApp.router renders with Material 3 theme",
+          "Given themeMode is ThemeMode.system, When device is in dark mode, Then app uses dark theme",
+          "Given main.dart is modified, When app starts, Then configureDependencies() is called before runApp()"
+        ]
+      }
+    ]
+  }
+}
