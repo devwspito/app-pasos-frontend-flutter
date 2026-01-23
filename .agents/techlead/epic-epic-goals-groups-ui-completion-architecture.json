@@ -1,0 +1,161 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1afec52ab9de7df94dd31a59",
+    "timestamp": "2026-01-23T01:41:32.580Z",
+    "phase": "techlead",
+    "epicId": "epic-goals-groups-ui-completion",
+    "savedAt": "2026-01-23T01:41:32.580Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-goals-groups-ui-completion",
+    "storiesCount": 5,
+    "architecture": "## Flutter Goals & Groups UI Architecture\n\n### Pattern: Riverpod StateNotifier + Clean Architecture Presentation Layer\n\n**State Management:**\n- `GoalsNotifier extends StateNotifier<GoalsState>` - follows existing StepsNotifier pattern\n- `GoalsState` - immutable state class with Equatable, copyWith(), status enum\n- Screens use `ConsumerStatefulWidget` for local form state + provider access\n\n**Widget Composition:**\n- Screens import from `lib/shared/widgets/widgets.dart` barrel file\n- Reusable widgets: AppCard, AppButton, LoadingIndicator, EmptyStateWidget\n- Feature-specific widgets: GoalCard, GoalProgressIndicator, MemberListWidget, GroupRankingWidget\n\n**File Structure:**\n```\nlib/features/goals/\n├── presentation/\n│   ├── screens/\n│   │   ├── goals_list_screen.dart\n│   │   ├── goal_detail_screen.dart\n│   │   └── create_goal_screen.dart\n│   └── widgets/\n│       ├── goal_card.dart\n│       ├── goal_progress_indicator.dart\n│       ├── member_list_widget.dart\n│       └── invite_user_dialog.dart\n\nlib/features/groups/\n├── presentation/\n│   ├── screens/\n│   │   └── groups_screen.dart\n│   └── widgets/\n│       └── group_ranking_widget.dart\n```\n\n**Theme Integration:**\n- All colors via `Theme.of(context).colorScheme`\n- Spacing via `AppSpacing` constants\n- Typography via `Theme.of(context).textTheme`\n\n**Navigation:**\n- GoRouter for declarative routing\n- `context.go()` for replacement, `context.push()` for stack\n\n**Mock Data Strategy:**\n- UI components use hardcoded mock data arrays\n- Integration task will replace with real provider calls later",
+    "stories": [
+      {
+        "id": "epic-goals-groups-ui-completion-story-1",
+        "title": "Create GoalsListScreen with goal_card.dart widget in lib/features/goals/presentation/",
+        "description": "Implement the Goals List screen showing user's goals with cards, loading states, empty state, and pull-to-refresh.\n\n🔧 PATTERNS TO USE:\n- Extend `ConsumerStatefulWidget` for screen (see lib/features/auth/presentation/screens/login_screen.dart)\n- Use `ref.watch(goalsProvider)` for reactive state (pattern from steps_provider.dart)\n- Use `LoadingIndicator` from lib/shared/widgets/loading_indicator.dart for loading state\n- Use `EmptyStateWidget` from lib/shared/widgets/empty_state_widget.dart for empty state\n- Use `AppCard` from lib/shared/widgets/app_card.dart for GoalCard base\n- Use `RefreshIndicator` for pull-to-refresh\n\n📦 REQUIRED STRUCTURE:\n- GoalsListScreen: Main screen with Scaffold, AppBar, RefreshIndicator wrapping ListView\n- GoalCard: Reusable widget showing goal title, description, progress indicator, member count\n- Use mock data for now (integration will connect to real API later)\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- `StatefulWidget` without Consumer ← WRONG (use ConsumerStatefulWidget)\n- Direct API calls in screen ← WRONG (use provider pattern)\n- Custom loading spinners ← WRONG (use LoadingIndicator widget)\n\nVERIFICATION:\n1. flutter analyze lib/features/goals/\n2. flutter test\n3. dart format --set-exit-if-changed lib/features/goals/",
+        "epicId": "epic-goals-groups-ui-completion",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/empty_state_widget.dart",
+          "lib/features/auth/presentation/screens/login_screen.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/screens/goals_list_screen.dart",
+          "lib/features/goals/presentation/widgets/goal_card.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the user opens Goals tab, When goals exist, Then display list of GoalCard widgets with title, description, and progress",
+          "Given the user opens Goals tab, When goals are loading, Then display LoadingIndicator centered on screen",
+          "Given the user opens Goals tab, When no goals exist, Then display EmptyStateWidget with 'No goals yet' message and 'Create Goal' action",
+          "Given the user is viewing goals list, When they pull down, Then RefreshIndicator triggers and reloads goals"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-completion-story-2",
+        "title": "Create GoalDetailScreen with goal_progress_indicator.dart and member_list_widget.dart",
+        "description": "Implement the Goal Detail screen showing goal progress, member list with avatars, and action buttons.\n\n🔧 PATTERNS TO USE:\n- Extend `ConsumerStatefulWidget` for screen (see lib/features/auth/presentation/screens/login_screen.dart)\n- Use `ProgressLoadingIndicator` pattern from lib/shared/widgets/loading_indicator.dart for GoalProgressIndicator\n- Use `AppButton` from lib/shared/widgets/app_button.dart for action buttons\n- Use `AppCard` for member list container\n- Use CircleAvatar for member avatars\n\n📦 REQUIRED STRUCTURE:\n- GoalDetailScreen: Scaffold with goal info header, progress section, members section, action buttons\n- GoalProgressIndicator: Custom widget showing circular progress with percentage and step count\n- MemberListWidget: Horizontal scrollable list of member avatars with names\n- Show 'Invite' button for goal creators, 'Leave' button for non-creators\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Hardcoding colors ← WRONG (use Theme.of(context).colorScheme)\n- Custom progress indicator without following ProgressLoadingIndicator pattern ← WRONG\n- Inline styles ← WRONG (use AppSpacing constants)\n\nVERIFICATION:\n1. flutter analyze lib/features/goals/\n2. flutter test\n3. dart format --set-exit-if-changed lib/features/goals/",
+        "epicId": "epic-goals-groups-ui-completion",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/features/auth/presentation/screens/login_screen.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/screens/goal_detail_screen.dart",
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/member_list_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the user opens a goal detail, Then display goal title, description, start date, and end date",
+          "Given the user views goal detail, Then GoalProgressIndicator shows circular progress with percentage and current/target steps",
+          "Given the user views goal detail, Then MemberListWidget shows horizontal list of member avatars with names",
+          "Given the user is the goal creator, Then show 'Invite Members' button",
+          "Given the user is not the goal creator, Then show 'Leave Goal' button"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-completion-story-3",
+        "title": "Create CreateGoalScreen with form validation in lib/features/goals/presentation/screens/",
+        "description": "Implement the Create Goal screen with form for creating new group goals including validation.\n\n🔧 PATTERNS TO USE:\n- Extend `ConsumerStatefulWidget` with Form and GlobalKey<FormState> (see lib/features/auth/presentation/screens/login_screen.dart)\n- Use `AppTextField` from lib/shared/widgets/app_text_field.dart for form fields\n- Use `AppButton` from lib/shared/widgets/app_button.dart for submit button\n- Use `Validators` from lib/core/utils/validators.dart for validation\n- Use DatePicker for start/end dates\n\n📦 REQUIRED STRUCTURE:\n- CreateGoalScreen: Scaffold with Form containing title, description, target steps, start/end date fields\n- Form validation: title required, target steps > 0, end date > start date\n- Submit button with loading state\n- Success navigates to goal detail screen\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Custom text fields ← WRONG (use AppTextField or AuthFormField pattern)\n- Validation without Validators class ← WRONG\n- Direct navigation without GoRouter ← WRONG (use context.go() or context.push())\n\nVERIFICATION:\n1. flutter analyze lib/features/goals/\n2. flutter test\n3. dart format --set-exit-if-changed lib/features/goals/",
+        "epicId": "epic-goals-groups-ui-completion",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/screens/login_screen.dart",
+          "lib/features/auth/presentation/widgets/auth_form_field.dart",
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/core/utils/validators.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/screens/create_goal_screen.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the user opens Create Goal screen, Then display form with title, description, target steps, start date, and end date fields",
+          "Given the user submits form with empty title, Then show validation error 'Title is required'",
+          "Given the user enters target steps <= 0, Then show validation error 'Target steps must be greater than 0'",
+          "Given the user selects end date before start date, Then show validation error 'End date must be after start date'",
+          "Given the user submits valid form, Then show loading state on button and navigate to goal detail on success"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-completion-story-4",
+        "title": "Create InviteUserDialog with search functionality in lib/features/goals/presentation/widgets/",
+        "description": "Implement the Invite User dialog with user search and selection functionality.\n\n🔧 PATTERNS TO USE:\n- Use `showDialog` with `AlertDialog` or `Dialog` for modal\n- Use `AppTextField` from lib/shared/widgets/app_text_field.dart for search input\n- Use `LoadingIndicator` from lib/shared/widgets/loading_indicator.dart for search loading\n- Use `NoSearchResultsWidget` from lib/shared/widgets/empty_state_widget.dart for no results\n- Use `ListTile` with `CircleAvatar` for user search results\n- Use `AppButton` for send invitation action\n\n📦 REQUIRED STRUCTURE:\n- InviteUserDialog: StatefulWidget dialog with search TextField, results ListView, and action buttons\n- Search input with debounce (300ms delay before search)\n- User result tiles showing avatar, username, and select action\n- Success/error SnackBar feedback after invitation\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Immediate search on every keystroke ← WRONG (use debounce)\n- Custom dialog without Material dialog pattern ← WRONG\n- Alert without SnackBar for feedback ← WRONG (use ScaffoldMessenger.showSnackBar)\n\nVERIFICATION:\n1. flutter analyze lib/features/goals/\n2. flutter test\n3. dart format --set-exit-if-changed lib/features/goals/",
+        "epicId": "epic-goals-groups-ui-completion",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/empty_state_widget.dart",
+          "lib/shared/widgets/app_button.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/widgets/invite_user_dialog.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the user opens invite dialog, Then display search text field with placeholder 'Search by username'",
+          "Given the user types in search field, Then debounce 300ms and show LoadingIndicator while searching",
+          "Given search returns users, Then display list of user tiles with avatar, username, and invite button",
+          "Given search returns no users, Then display NoSearchResultsWidget",
+          "Given the user taps invite on a user, Then show success SnackBar 'Invitation sent' and close dialog"
+        ]
+      },
+      {
+        "id": "epic-goals-groups-ui-completion-story-5",
+        "title": "Create GroupsScreen with group_ranking_widget.dart in lib/features/groups/presentation/",
+        "description": "Implement the Groups screen and ranking widget showing member contributions within goals.\n\n🔧 PATTERNS TO USE:\n- Extend `ConsumerStatefulWidget` for GroupsScreen (see lib/features/auth/presentation/screens/login_screen.dart)\n- Use `AppCard` from lib/shared/widgets/app_card.dart for ranking card container\n- Use `LoadingIndicator` and `EmptyStateWidget` from lib/shared/widgets/\n- Use `ListTile` with leading position badge, avatar, name, and trailing step count\n\n📦 REQUIRED STRUCTURE:\n- GroupsScreen: Scaffold showing list of groups user belongs to\n- GroupRankingWidget: Card showing members sorted by step contribution\n- Position badges: Gold (1st), Silver (2nd), Bronze (3rd), numbered for others\n- Step count formatted with commas (e.g., 12,345 steps)\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- Custom card without AppCard ← WRONG\n- Hardcoded position colors ← WRONG (use Theme colors or defined constants)\n- Number formatting without intl or manual comma insertion ← Consider using NumberFormat\n\nVERIFICATION:\n1. flutter analyze lib/features/groups/\n2. flutter test\n3. dart format --set-exit-if-changed lib/features/groups/",
+        "epicId": "epic-goals-groups-ui-completion",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/empty_state_widget.dart",
+          "lib/features/auth/presentation/screens/login_screen.dart",
+          "lib/core/theme/app_colors.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/groups/presentation/screens/groups_screen.dart",
+          "lib/features/groups/presentation/widgets/group_ranking_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the user opens Groups tab, Then display list of groups they belong to",
+          "Given the user views a group, Then GroupRankingWidget shows members sorted by step contribution (highest first)",
+          "Given ranking display, Then 1st place shows gold medal/badge, 2nd shows silver, 3rd shows bronze",
+          "Given ranking display, Then each member row shows position, avatar, name, and formatted step count",
+          "Given no groups exist, Then display EmptyStateWidget with 'No groups yet' message"
+        ]
+      }
+    ]
+  }
+}
