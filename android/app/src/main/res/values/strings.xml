@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App Pasos</string>
+    <string name="health_permission_rationale">This app needs access to your step count and physical activity data to track your daily progress.</string>
+    <string name="activity_recognition_rationale">Step counting requires activity recognition permission to detect when you are walking or running.</string>
+    <string-array name="health_permissions">
+        <item>androidx.health.permission.Steps.READ</item>
+        <item>androidx.health.permission.Steps.WRITE</item>
+        <item>androidx.health.permission.Distance.READ</item>
+        <item>androidx.health.permission.ActiveCaloriesBurned.READ</item>
+    </string-array>
+</resources>
