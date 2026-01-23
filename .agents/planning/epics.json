@@ -1,57 +1,21 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "19767cb565ca6124e8ef47b9",
-    "timestamp": "2026-01-22T23:33:28.637Z",
+    "taskId": "28b6c823428d826b814affbe",
+    "timestamp": "2026-01-23T00:12:18.497Z",
     "phase": "planning",
-    "savedAt": "2026-01-22T23:33:28.637Z",
+    "savedAt": "2026-01-23T00:12:18.497Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "Final frontend Flutter",
+    "taskTitle": "fn",
     "taskDescription": "Completar App Pasos Flutter - Merge PRs pendientes y Epics faltantes ## Contexto La task anterior (25044f1f7f2c32e9d29cf33f) fue interrumpida dejando trabajo parcial. Hay 3 PRs APROBADOS por el Judge pendientes de merge y 2 epics sin empezar. Repositorio: https://github.com/devwspito/app-pasos-frontend-flutter ## Estado Actual en Main - ✅ Flutter Foundation (DI, API client, storage, error handling) - ✅ UI Foundation (Material 3 theme, go_router, widgets base) - ✅ Authentication UI (login, register, forgot password, providers) - ✅ Dashboard parcial (models, entities básicos) ## PRs Pendientes de Merge (YA APROBADOS) 1. PR #6: Flutter Platform Setup (iOS/Android config, pubspec.yaml) 2. PR #7: Dashboard & Step Tracking Completion (datasources, repository, widgets, charts) 3. PR #8: Sharing & Friends UI (friend list, share requests, comparisons) ## Trabajo Pendiente ### 1. Merge PRs Aprobados (Prioridad Máxima) - Mergear PR #6, #7, #8 a main en orden ### 2. Goals & Groups UI (Epic en progreso) La rama epic/d29cf33f-epic-goals-groups-ui-1mx8rc tiene trabajo parcial. Completar: - Goals domain layer (entities, repositories, use cases) - Goals data layer (models, datasources, repository impl) - Goals presentation (screens, widgets, Riverpod providers) - Groups functionality (crear/unirse grupos, rankings) - Crear PR y mergear ### 3. Native Health API Integration (Epic nuevo) - Configurar permisos HealthKit (iOS Info.plist) - Configurar permisos Health Connect (Android manifest) - Crear HealthService con abstracción multiplataforma - Implementar sincronización automática de pasos - Background fetch para actualizaciones periódicas ### 4. Real-Time WebSocket Client (Epic nuevo) - Cliente Socket.io para conexión con backend - Handlers para eventos de pasos en tiempo real - Sincronización bidireccional de datos - Reconexión automática y manejo de offline - Notificaciones push de actividad de amigos ## Stack - Flutter 3.x con Clean Architecture - Riverpod para state management - go_router para navegación - fl_chart para gráficos - health package para HealthKit/Health Connect - socket_io_client para WebSockets ## Notas - El backend ya tiene Socket.io implementado (repo: project-app-pasos-backend) - Coordinar endpoints con backend para health sync",
-    "epicsCount": 6,
+    "epicsCount": 5,
     "epics": [
       {
-        "id": "epic-platform-setup",
-        "title": "Flutter Platform Setup - iOS/Android Configuration",
-        "description": "Configure iOS and Android platform projects for the Flutter app. This includes creating the platform folders, setting up permissions for health APIs, and configuring the build files. PR #6 branch exists with planning but needs actual platform file implementation.",
-        "targetRepository": "app-pasos-frontend-flutter",
-        "affectedRepositories": [
-          "app-pasos-frontend-flutter"
-        ],
-        "filesToModify": [
-          "pubspec.yaml"
-        ],
-        "filesToCreate": [
-          "android/app/build.gradle",
-          "android/app/src/main/AndroidManifest.xml",
-          "android/app/src/main/kotlin/com/apppasos/MainActivity.kt",
-          "android/build.gradle",
-          "android/settings.gradle",
-          "android/gradle.properties",
-          "ios/Runner/Info.plist",
-          "ios/Runner/AppDelegate.swift",
-          "ios/Runner.xcodeproj/project.pbxproj",
-          "ios/Podfile"
-        ],
-        "filesToRead": [
-          "pubspec.yaml",
-          "lib/main.dart"
-        ],
-        "estimatedComplexity": "moderate",
-        "dependencies": [],
-        "executionOrder": 1,
-        "followsPatterns": [
-          "Standard Flutter platform setup",
-          "Health permissions in manifests"
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-dashboard-completion",
-        "title": "Dashboard & Step Tracking Completion",
-        "description": "Complete the Dashboard feature with data layer implementation (datasources, repository impl), presentation widgets (charts, progress indicators), and screens. PR #7 branch has planning but needs actual implementation. Steps domain entities exist but need datasource and repository impl.",
+        "id": "epic-goals-groups-ui",
+        "title": "Goals & Groups UI - Complete Feature",
+        "description": "Complete the Goals & Groups feature by merging partial work from epic branch and adding presentation layer screens and widgets. Domain and data layers exist in branch.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -62,38 +26,33 @@
           "lib/app.dart"
         ],
         "filesToCreate": [
-          "lib/features/steps/data/datasources/steps_remote_data_source.dart",
-          "lib/features/steps/data/datasources/steps_remote_data_source_impl.dart",
-          "lib/features/steps/data/repositories/steps_repository_impl.dart",
-          "lib/features/steps/presentation/screens/dashboard_screen.dart",
-          "lib/features/steps/presentation/widgets/step_counter_widget.dart",
-          "lib/features/steps/presentation/widgets/weekly_chart_widget.dart",
-          "lib/features/steps/presentation/widgets/hourly_chart_widget.dart",
-          "lib/features/steps/presentation/widgets/stats_card_widget.dart",
-          "lib/core/router/app_router.dart"
+          "lib/features/goals/presentation/screens/goals_list_screen.dart",
+          "lib/features/goals/presentation/screens/goal_details_screen.dart",
+          "lib/features/goals/presentation/screens/create_goal_screen.dart",
+          "lib/features/goals/presentation/widgets/goal_card.dart",
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/member_list_tile.dart",
+          "lib/features/goals/presentation/widgets/invite_member_dialog.dart"
         ],
         "filesToRead": [
-          "lib/features/steps/domain/repositories/steps_repository.dart",
-          "lib/features/steps/domain/entities/step_stats.dart",
           "lib/features/steps/presentation/providers/steps_provider.dart",
-          "lib/core/network/api_client.dart"
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/features/auth/presentation/screens/login_screen.dart"
         ],
         "estimatedComplexity": "moderate",
-        "dependencies": [
-          "epic-platform-setup"
-        ],
-        "executionOrder": 2,
+        "dependencies": [],
+        "executionOrder": 1,
         "followsPatterns": [
-          "Clean Architecture data layer",
-          "Riverpod state management",
-          "fl_chart for visualizations"
+          "Uses existing Riverpod StateNotifier pattern from steps_provider",
+          "Follows screen/widget separation from auth feature",
+          "Uses AppCard, AppButton from shared widgets"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-sharing-friends-ui",
-        "title": "Sharing & Friends UI Feature",
-        "description": "Implement the complete Sharing & Friends feature following Clean Architecture. PR #8 branch has planning but needs full implementation. Backend has sharing routes at /sharing with sendRequest, acceptRequest, rejectRequest, getRelationships, getSharedUserStats endpoints.",
+        "title": "Sharing & Friends UI - Full Implementation",
+        "description": "Implement complete Sharing & Friends feature following Clean Architecture. Includes domain entities, data layer with API integration, and presentation layer with screens and widgets.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -101,141 +60,51 @@
         "filesToModify": [
           "lib/core/di/injection_container.dart",
           "lib/core/constants/api_endpoints.dart",
-          "lib/core/router/app_router.dart"
+          "lib/app.dart"
         ],
         "filesToCreate": [
           "lib/features/sharing/domain/entities/sharing_relationship.dart",
-          "lib/features/sharing/domain/entities/friend.dart",
+          "lib/features/sharing/domain/entities/friend_stats.dart",
           "lib/features/sharing/domain/repositories/sharing_repository.dart",
           "lib/features/sharing/domain/usecases/send_friend_request_usecase.dart",
           "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
+          "lib/features/sharing/domain/usecases/get_friends_usecase.dart",
           "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart",
           "lib/features/sharing/data/models/sharing_relationship_model.dart",
-          "lib/features/sharing/data/models/friend_model.dart",
+          "lib/features/sharing/data/models/friend_stats_model.dart",
           "lib/features/sharing/data/datasources/sharing_remote_data_source.dart",
-          "lib/features/sharing/data/datasources/sharing_remote_data_source_impl.dart",
           "lib/features/sharing/data/repositories/sharing_repository_impl.dart",
           "lib/features/sharing/presentation/providers/sharing_provider.dart",
           "lib/features/sharing/presentation/providers/sharing_state.dart",
           "lib/features/sharing/presentation/screens/friends_list_screen.dart",
-          "lib/features/sharing/presentation/screens/friend_detail_screen.dart",
-          "lib/features/sharing/presentation/screens/add_friend_screen.dart",
-          "lib/features/sharing/presentation/widgets/friend_card_widget.dart",
-          "lib/features/sharing/presentation/widgets/friend_stats_widget.dart",
-          "lib/features/sharing/presentation/widgets/pending_requests_widget.dart"
+          "lib/features/sharing/presentation/screens/friend_requests_screen.dart",
+          "lib/features/sharing/presentation/screens/friend_comparison_screen.dart",
+          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/sharing/presentation/widgets/friend_request_tile.dart",
+          "lib/features/sharing/presentation/widgets/comparison_chart.dart"
         ],
         "filesToRead": [
+          "lib/features/steps/domain/entities/step_stats.dart",
           "lib/features/steps/data/datasources/steps_remote_data_source.dart",
           "lib/features/steps/presentation/providers/steps_provider.dart",
-          "lib/core/network/api_client.dart"
-        ],
-        "estimatedComplexity": "high",
-        "dependencies": [
-          "epic-dashboard-completion",
-          "epic-dashboard-completion"
-        ],
-        "executionOrder": 3,
-        "followsPatterns": [
-          "Clean Architecture full stack",
-          "Riverpod StateNotifier pattern",
-          "Repository interface pattern"
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-goals-groups-ui",
-        "title": "Goals & Groups UI Completion",
-        "description": "Complete the Goals & Groups UI feature. The branch epic/d29cf33f-epic-goals-groups-ui-1mx8rc has domain layer (entities, repositories, usecases), data layer (models, datasources, repository impl), and Riverpod providers already implemented. Missing: presentation screens and widgets for goal creation, listing, detail view, and group management.",
-        "targetRepository": "app-pasos-frontend-flutter",
-        "affectedRepositories": [
-          "app-pasos-frontend-flutter"
-        ],
-        "filesToModify": [
-          "lib/core/router/app_router.dart",
-          "lib/core/di/injection_container.dart"
-        ],
-        "filesToCreate": [
-          "lib/features/goals/presentation/screens/goals_list_screen.dart",
-          "lib/features/goals/presentation/screens/goal_detail_screen.dart",
-          "lib/features/goals/presentation/screens/create_goal_screen.dart",
-          "lib/features/goals/presentation/screens/join_goal_screen.dart",
-          "lib/features/goals/presentation/widgets/goal_card_widget.dart",
-          "lib/features/goals/presentation/widgets/goal_progress_widget.dart",
-          "lib/features/goals/presentation/widgets/goal_members_widget.dart",
-          "lib/features/goals/presentation/widgets/invite_member_dialog.dart",
-          "lib/features/groups/presentation/screens/group_rankings_screen.dart",
-          "lib/features/groups/presentation/widgets/group_leaderboard_widget.dart"
-        ],
-        "filesToRead": [
-          "lib/features/goals/domain/entities/goal.dart",
-          "lib/features/goals/domain/entities/goal_progress.dart",
-          "lib/features/goals/presentation/providers/goals_provider.dart",
-          "lib/features/goals/presentation/providers/goals_state.dart",
-          "lib/features/goals/data/repositories/goals_repository_impl.dart"
+          "project-app-pasos-backend/src/routes/sharing.routes.ts"
         ],
         "estimatedComplexity": "moderate",
         "dependencies": [
-          "epic-sharing-friends-ui",
-          "epic-dashboard-completion"
+          "epic-goals-groups-ui"
         ],
-        "executionOrder": 3,
+        "executionOrder": 2,
         "followsPatterns": [
-          "Existing Goals domain/data layer patterns",
-          "Riverpod StateNotifier for goals_provider",
-          "go_router navigation"
+          "Clean Architecture: domain -> data -> presentation",
+          "Riverpod StateNotifier pattern",
+          "API endpoints from sharing.routes.ts"
         ],
         "repoType": "frontend"
       },
       {
-        "id": "epic-native-health-api",
+        "id": "epic-health-api-integration",
         "title": "Native Health API Integration",
-        "description": "Implement HealthKit (iOS) and Health Connect (Android) integration for automatic step synchronization. Requires health package, platform-specific permission configuration, and a HealthService abstraction layer. Backend sync endpoint at POST /steps for recording steps with source field.",
-        "targetRepository": "app-pasos-frontend-flutter",
-        "affectedRepositories": [
-          "app-pasos-frontend-flutter"
-        ],
-        "filesToModify": [
-          "pubspec.yaml",
-          "android/app/src/main/AndroidManifest.xml",
-          "ios/Runner/Info.plist",
-          "lib/core/di/injection_container.dart"
-        ],
-        "filesToCreate": [
-          "lib/core/health/health_service.dart",
-          "lib/core/health/health_service_impl.dart",
-          "lib/core/health/health_permissions.dart",
-          "lib/features/steps/data/datasources/health_local_data_source.dart",
-          "lib/features/steps/data/datasources/health_local_data_source_impl.dart",
-          "lib/features/steps/domain/usecases/sync_health_steps_usecase.dart",
-          "lib/features/steps/presentation/providers/health_sync_provider.dart",
-          "lib/features/steps/presentation/widgets/health_permission_dialog.dart",
-          "lib/features/settings/presentation/screens/health_settings_screen.dart"
-        ],
-        "filesToRead": [
-          "lib/features/steps/domain/repositories/steps_repository.dart",
-          "lib/features/steps/presentation/providers/steps_provider.dart",
-          "lib/core/network/api_client.dart"
-        ],
-        "estimatedComplexity": "high",
-        "dependencies": [
-          "epic-platform-setup",
-          "epic-dashboard-completion",
-          "epic-platform-setup",
-          "epic-dashboard-completion"
-        ],
-        "executionOrder": 3,
-        "followsPatterns": [
-          "Health package for cross-platform health data",
-          "Platform channel for native integration",
-          "Background fetch patterns"
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-websocket-client",
-        "title": "Real-Time WebSocket Client Integration",
-        "description": "Implement Socket.io client for real-time step synchronization with backend. Backend has Socket.io at src/socket/ with events: steps-updated, goal-progress, sharing:joined. Requires socket_io_client package and event handlers matching backend types.ts definitions.",
+        "description": "Implement native health data integration using the health package. Configure platform permissions for HealthKit (iOS) and Health Connect (Android). Create abstraction layer for cross-platform health data access.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -246,34 +115,102 @@
           "lib/features/steps/presentation/providers/steps_provider.dart"
         ],
         "filesToCreate": [
-          "lib/core/socket/socket_service.dart",
-          "lib/core/socket/socket_service_impl.dart",
-          "lib/core/socket/socket_events.dart",
-          "lib/core/socket/socket_connection_state.dart",
-          "lib/features/steps/data/datasources/steps_socket_data_source.dart",
-          "lib/features/goals/data/datasources/goals_socket_data_source.dart",
-          "lib/features/sharing/data/datasources/sharing_socket_data_source.dart",
-          "lib/features/notifications/domain/entities/activity_notification.dart",
-          "lib/features/notifications/presentation/providers/notifications_provider.dart",
-          "lib/features/notifications/presentation/widgets/activity_toast_widget.dart"
+          "ios/Runner/Info.plist.health",
+          "android/app/src/main/AndroidManifest.xml.health",
+          "lib/core/services/health_service.dart",
+          "lib/core/services/health_service_impl.dart",
+          "lib/features/steps/data/datasources/health_local_data_source.dart",
+          "lib/features/steps/domain/usecases/sync_health_steps_usecase.dart",
+          "lib/features/steps/presentation/providers/health_sync_provider.dart"
         ],
         "filesToRead": [
-          "lib/core/storage/secure_storage.dart",
-          "lib/core/network/api_client.dart",
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/features/steps/domain/usecases/record_steps_usecase.dart",
+          "lib/core/storage/local_storage.dart"
+        ],
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-groups-ui"
+        ],
+        "executionOrder": 2,
+        "followsPatterns": [
+          "Service abstraction pattern from ApiClient",
+          "Repository pattern for data access",
+          "UseCase pattern for business logic"
+        ],
+        "repoType": "frontend"
+      },
+      {
+        "id": "epic-websocket-realtime-client",
+        "title": "Real-Time WebSocket Client",
+        "description": "Implement Socket.io client for real-time step synchronization with backend. Handle connection lifecycle, automatic reconnection, and offline state. Integrate with Riverpod for reactive state management.",
+        "targetRepository": "app-pasos-frontend-flutter",
+        "affectedRepositories": [
+          "app-pasos-frontend-flutter"
+        ],
+        "filesToModify": [
+          "pubspec.yaml",
+          "lib/core/di/injection_container.dart",
           "lib/features/steps/presentation/providers/steps_provider.dart"
         ],
-        "estimatedComplexity": "high",
+        "filesToCreate": [
+          "lib/core/services/socket_service.dart",
+          "lib/core/services/socket_service_impl.dart",
+          "lib/core/services/socket_event_types.dart",
+          "lib/features/steps/presentation/providers/realtime_steps_provider.dart",
+          "lib/features/goals/presentation/providers/realtime_goals_provider.dart"
+        ],
+        "filesToRead": [
+          "project-app-pasos-backend/src/socket/index.ts",
+          "project-app-pasos-backend/src/socket/types.ts",
+          "project-app-pasos-backend/src/socket/handlers/goals.handler.ts",
+          "lib/core/storage/secure_storage.dart"
+        ],
+        "estimatedComplexity": "complex",
         "dependencies": [
-          "epic-dashboard-completion",
-          "epic-sharing-friends-ui",
-          "epic-platform-setup",
-          "epic-dashboard-completion"
+          "epic-goals-groups-ui",
+          "epic-goals-groups-ui",
+          "epic-health-api-integration"
         ],
         "executionOrder": 3,
         "followsPatterns": [
-          "socket_io_client for Flutter",
-          "Singleton socket service",
-          "Event-driven architecture matching backend"
+          "Singleton service pattern",
+          "Riverpod provider for reactive state",
+          "Event types matching backend socket/types.ts"
+        ],
+        "repoType": "frontend"
+      },
+      {
+        "id": "epic-platform-setup-merge",
+        "title": "Flutter Platform Configuration",
+        "description": "Configure iOS and Android platform settings including build configurations, app icons, splash screens, and signing configurations. Note: PR #6 contains only metadata, actual platform files need implementation.",
+        "targetRepository": "app-pasos-frontend-flutter",
+        "affectedRepositories": [
+          "app-pasos-frontend-flutter"
+        ],
+        "filesToModify": [
+          "pubspec.yaml",
+          "ios/Runner/Info.plist",
+          "android/app/build.gradle",
+          "android/app/src/main/AndroidManifest.xml"
+        ],
+        "filesToCreate": [
+          "ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+          "android/app/src/main/res/values/strings.xml",
+          "lib/core/config/app_config.dart",
+          "lib/core/config/environment.dart"
+        ],
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-health-api-integration"
+        ],
+        "executionOrder": 3,
+        "followsPatterns": [
+          "Standard Flutter platform configuration",
+          "Environment-based configuration pattern"
         ],
         "repoType": "frontend"
       }
