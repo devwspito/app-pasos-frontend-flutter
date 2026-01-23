@@ -1,0 +1,159 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1afec52ab9de7df94dd31a59",
+    "timestamp": "2026-01-23T02:21:16.901Z",
+    "phase": "techlead",
+    "epicId": "epic-native-health-integration",
+    "savedAt": "2026-01-23T02:21:16.902Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-native-health-integration",
+    "storiesCount": 5,
+    "architecture": "## Native Health API Integration Architecture\n\n### Clean Architecture Layers\n\n```\n┌─────────────────────────────────────────────────────────────┐\n│                    PRESENTATION LAYER                        │\n│  ┌─────────────────────────────────────────────────────────┐│\n│  │ HealthSyncProvider (Riverpod StateNotifier)             ││\n│  │ - Manages sync state (syncing, lastSync, permissions)   ││\n│  │ - Exposes syncNow(), requestPermissions()               ││\n│  └─────────────────────────────────────────────────────────┘│\n└─────────────────────────────────────────────────────────────┘\n                              │\n                              ▼\n┌─────────────────────────────────────────────────────────────┐\n│                      DOMAIN LAYER                            │\n│  ┌─────────────────────────────────────────────────────────┐│\n│  │ SyncHealthStepsUseCase                                  ││\n│  │ - Orchestrates health read → backend post               ││\n│  │ - Handles duplicate prevention                          ││\n│  │ - Returns SyncResult                                    ││\n│  └─────────────────────────────────────────────────────────┘│\n└─────────────────────────────────────────────────────────────┘\n                              │\n                              ▼\n┌─────────────────────────────────────────────────────────────┐\n│                    SERVICE LAYER                             │\n│  ┌───────────────────────┐  ┌───────────────────────────────┐│\n│  │ HealthService         │  │ BackgroundSyncService         ││\n│  │ (Abstract Interface)  │  │ - WorkManager (Android)       ││\n│  │                       │  │ - background_fetch (iOS)      ││\n│  │ HealthServiceImpl     │  │ - 15-min periodic sync        ││\n│  │ - Apple HealthKit     │  └───────────────────────────────┘│\n│  │ - Health Connect      │                                   │\n│  └───────────────────────┘                                   │\n└─────────────────────────────────────────────────────────────┘\n                              │\n                              ▼\n┌─────────────────────────────────────────────────────────────┐\n│                  DATA/REPOSITORY LAYER                       │\n│  ┌─────────────────────────────────────────────────────────┐│\n│  │ StepsRepository.recordSteps(count, source)              ││\n│  │ - POST /api/steps with healthKit/googleFit source       ││\n│  └─────────────────────────────────────────────────────────┘│\n└─────────────────────────────────────────────────────────────┘\n```\n\n### SOLID Principles Compliance\n\n1. **SRP**: Each class has single responsibility\n   - HealthService: Only health data access\n   - SyncUseCase: Only sync orchestration\n   - Provider: Only UI state management\n\n2. **OCP**: Open for extension via interfaces\n   - HealthService interface allows mock implementations\n   - New health data types can be added without modifying existing code\n\n3. **LSP**: Implementations are substitutable\n   - HealthServiceImpl can be swapped with MockHealthService\n\n4. **ISP**: Focused interfaces\n   - HealthService only defines health operations\n   - Not bundled with unrelated functionality\n\n5. **DIP**: Depends on abstractions\n   - UseCase depends on HealthService interface, not impl\n   - DI container manages concrete implementations\n\n### Dependency Flow (Unidirectional)\n\n```\nProvider → UseCase → HealthService (interface)\n                  → StepsRepository (interface)\n                  ↓\n           HealthServiceImpl (health package)\n           StepsRepositoryImpl (Dio/API)\n```\n\n### Background Sync Strategy\n\n- **iOS**: background_fetch with UIBackgroundModes\n- **Android**: WorkManager with 15-minute minimum interval\n- **Battery-efficient**: Uses platform-recommended intervals\n- **Mutex protection**: Prevents concurrent sync operations\n\n### Setup Commands\n```bash\nflutter pub get\nflutter create . --platforms=ios,android  # If platforms don't exist\n```\n\n### Verification Commands\n- Typecheck: `flutter analyze`\n- Test: `flutter test`\n- Build iOS: `flutter build ios --no-codesign`\n- Build Android: `flutter build apk --debug`",
+    "stories": [
+      {
+        "id": "epic-native-health-integration-story-1",
+        "title": "Add Health and Background Packages to pubspec.yaml and Create Platform Configuration Files",
+        "description": "Add all required packages (health, workmanager, background_fetch) to pubspec.yaml and create iOS/Android platform configuration files with HealthKit and Health Connect permissions.\n\n🔧 PATTERNS TO USE:\n- Follow existing pubspec.yaml structure with versioned dependencies\n- Create iOS/Android platform folders if they don't exist (run `flutter create .` first)\n- iOS: Add NSHealthShareUsageDescription and NSHealthUpdateUsageDescription to Info.plist\n- Android: Add Health Connect permissions and queries to AndroidManifest.xml\n- Android: Configure minSdk 26+ and add Health Connect SDK in build.gradle\n\n📦 REQUIRED PACKAGES:\n- health: ^10.2.0 (for health data access)\n- workmanager: ^0.5.2 (for Android background tasks)\n- background_fetch: ^1.2.1 (for iOS background fetch)\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT use deprecated health package versions (< 10.0.0)\n- DO NOT forget UIBackgroundModes in Info.plist for background fetch\n- DO NOT set minSdk below 26 (Health Connect requirement)\n\n🧪 VERIFICATION:\n1. Run: flutter pub get\n2. Run: flutter analyze\n3. Verify no dependency conflicts in pubspec.lock",
+        "epicId": "epic-native-health-integration",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "ios/Runner/Info.plist",
+          "android/app/src/main/AndroidManifest.xml",
+          "android/app/src/main/res/values/health_permissions.xml",
+          "android/app/build.gradle"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml exists, When developer adds health package ^10.2.0, workmanager ^0.5.2, and background_fetch ^1.2.1, Then flutter pub get succeeds without errors",
+          "Given iOS platform folder created, When Info.plist is created with NSHealthShareUsageDescription and UIBackgroundModes, Then iOS project compiles",
+          "Given Android platform folder created, When AndroidManifest.xml includes Health Connect permissions and queries, Then Android project compiles",
+          "Given build.gradle is configured, When minSdk is set to 26 and Health Connect dependency added, Then gradle sync succeeds"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-2",
+        "title": "Create HealthService Abstract Interface in lib/core/services/health_service.dart",
+        "description": "Create the abstract HealthService interface defining the contract for health data operations including permission requests, step reading, and platform availability checks.\n\n🔧 PATTERNS TO USE:\n- Follow existing abstract interface pattern from StepsRepository\n- Use `abstract interface class` (Dart 3 syntax) as seen in steps_repository.dart\n- Define Future-returning async methods for all operations\n- Document all methods with dartdoc comments\n\n📦 REQUIRED METHODS:\n- `Future<bool> isAvailable()` - Check if health API is available on platform\n- `Future<bool> requestPermissions()` - Request read access for step data\n- `Future<bool> hasPermissions()` - Check if permissions already granted\n- `Future<int> readStepCount({required DateTime start, required DateTime end})` - Read steps for date range\n- `Future<List<HealthDataPoint>> readStepData({required DateTime start, required DateTime end})` - Read detailed step records\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT use concrete class - must be abstract interface\n- DO NOT import platform-specific packages in the interface\n- DO NOT include implementation details in interface\n\n🧪 VERIFICATION:\n1. Run: dart analyze lib/core/services/health_service.dart\n2. Verify no analyzer warnings or errors\n3. Ensure interface has no implementation code",
+        "epicId": "epic-native-health-integration",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-native-health-integration-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/repositories/steps_repository.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/services/health_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given lib/core/services folder exists, When health_service.dart is created with abstract interface, Then dart analyze passes",
+          "Given HealthService interface, When it defines isAvailable method, Then method returns Future<bool>",
+          "Given HealthService interface, When it defines requestPermissions method, Then method returns Future<bool>",
+          "Given HealthService interface, When it defines readStepCount method with start/end params, Then method returns Future<int>",
+          "Given HealthService interface, When it defines readStepData method, Then method returns Future<List<HealthDataPoint>>"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-3",
+        "title": "Create HealthServiceImpl Implementation in lib/core/services/health_service_impl.dart",
+        "description": "Implement HealthServiceImpl that uses the health package to read step data from Apple HealthKit (iOS) and Health Connect (Android).\n\n🔧 PATTERNS TO USE:\n- Follow singleton pattern similar to SecureStorageImpl in secure_storage.dart\n- Implement HealthService interface created in story-2\n- Use health package's Health class for platform-agnostic health access\n- Handle platform differences internally (HealthKit vs Health Connect)\n- Cache permission status to avoid repeated checks\n\n📦 REQUIRED IMPLEMENTATION:\n- Initialize Health() instance on construction\n- isAvailable(): Check Platform.isIOS || Platform.isAndroid and Health().isHealthConnectAvailable()\n- requestPermissions(): Request HealthDataType.STEPS read permission\n- hasPermissions(): Check existing permissions via Health().hasPermissions()\n- readStepCount(): Aggregate step data from Health().getHealthDataFromTypes()\n- readStepData(): Return raw health data points for detailed analysis\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT throw exceptions for permission denied - return false\n- DO NOT call requestPermissions without checking hasPermissions first\n- DO NOT hardcode date ranges - always use parameters\n- DO NOT ignore platform availability checks\n\n🧪 VERIFICATION:\n1. Run: dart analyze lib/core/services/health_service_impl.dart\n2. Run: flutter build ios --no-codesign (compile check)\n3. Verify implements HealthService interface correctly",
+        "epicId": "epic-native-health-integration",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-health-integration-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/health_service.dart",
+          "lib/core/storage/secure_storage.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/services/health_service_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthService interface exists, When HealthServiceImpl is created, Then it implements all interface methods",
+          "Given health package is available, When isAvailable() is called on iOS/Android, Then returns true",
+          "Given permissions not granted, When requestPermissions() is called, Then prompts user for HealthKit/Health Connect access",
+          "Given permissions granted, When readStepCount() is called with date range, Then returns aggregated step count as int",
+          "Given permissions granted, When readStepData() is called, Then returns list of HealthDataPoint objects"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-4",
+        "title": "Create SyncHealthStepsUseCase in lib/features/steps/domain/usecases/sync_health_steps_usecase.dart",
+        "description": "Create the use case that orchestrates reading steps from HealthService and posting them to the backend via StepsRepository.\n\n🔧 PATTERNS TO USE:\n- Follow existing use case pattern from RecordStepsUseCase\n- Use `final class` with constructor dependency injection\n- Implement `call()` method as the main execution point\n- Inject both HealthService and StepsRepository\n- Document with dartdoc including usage example\n\n📦 REQUIRED IMPLEMENTATION:\n- Constructor takes HealthService and StepsRepository\n- call() method:\n  1. Check if health service is available\n  2. Check/request permissions\n  3. Read step count from last sync to now\n  4. Call repository.recordSteps() with source='healthKit' or 'googleFit'\n  5. Return SyncResult with success status and step count\n- Handle duplicate prevention by tracking last sync timestamp\n- Use LocalStorage to persist lastSyncTimestamp\n\n📦 REQUIRED DATA CLASS:\n- SyncResult: {success: bool, stepsSync: int, lastSyncTime: DateTime, error: String?}\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT sync if permissions not granted - return error result\n- DO NOT sync 0 steps - skip API call if no new steps\n- DO NOT use DateTime.now() without timezone consideration\n- DO NOT call repository directly without use case - follow clean architecture\n\n🧪 VERIFICATION:\n1. Run: dart analyze lib/features/steps/domain/usecases/sync_health_steps_usecase.dart\n2. Verify SyncResult class is properly defined\n3. Ensure call() method returns Future<SyncResult>",
+        "epicId": "epic-native-health-integration",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-integration-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/usecases/record_steps_usecase.dart",
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/core/storage/local_storage.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/domain/usecases/sync_health_steps_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthService and StepsRepository are injected, When SyncHealthStepsUseCase is constructed, Then both dependencies are stored",
+          "Given health service is available with permissions, When call() is executed, Then steps are read from health API",
+          "Given steps are read successfully, When count > 0, Then repository.recordSteps() is called with correct source",
+          "Given sync completes, When result is returned, Then SyncResult contains success=true and stepsSync count",
+          "Given health service unavailable, When call() is executed, Then returns SyncResult with success=false and error message"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-5",
+        "title": "Create HealthSyncProvider, BackgroundSyncService, and Register in DI Container",
+        "description": "Create the Riverpod provider for managing health sync state, the background sync service for periodic synchronization, and register all health services in the dependency injection container.\n\n🔧 PATTERNS TO USE:\n- Follow StateNotifier pattern from StepsNotifier in steps_provider.dart\n- Follow state class pattern from StepsState in steps_state.dart\n- Follow DI registration pattern from injection_container.dart\n- Use workmanager for Android background tasks\n- Use background_fetch for iOS background fetch\n\n📦 REQUIRED IN health_sync_provider.dart:\n- HealthSyncState: {status: HealthSyncStatus, lastSyncTime: DateTime?, isSyncing: bool, permissionStatus: PermissionStatus, error: String?}\n- HealthSyncNotifier extends StateNotifier<HealthSyncState>:\n  - requestPermissions(): Request health permissions\n  - syncNow(): Manual sync trigger using SyncHealthStepsUseCase\n  - checkPermissionStatus(): Update permission state\n- healthSyncProvider: StateNotifierProvider<HealthSyncNotifier, HealthSyncState>\n\n📦 REQUIRED IN background_sync_service.dart:\n- BackgroundSyncService class:\n  - initialize(): Configure workmanager and background_fetch\n  - registerPeriodicSync(): Setup 15-minute interval sync\n  - executeSync(): Called by background task, uses SyncHealthStepsUseCase\n  - cancelSync(): Disable background sync\n\n📦 REQUIRED IN injection_container.dart:\n- Register HealthService (HealthServiceImpl)\n- Register SyncHealthStepsUseCase\n- Register BackgroundSyncService\n- Add _registerHealthDependencies() method\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT create multiple HealthService instances - use singleton via DI\n- DO NOT sync in foreground and background simultaneously - use mutex\n- DO NOT ignore battery optimization - use battery-efficient scheduling\n- DO NOT register dependencies out of order - health depends on storage\n\n🧪 VERIFICATION:\n1. Run: dart analyze lib/features/steps/presentation/providers/health_sync_provider.dart\n2. Run: dart analyze lib/core/services/background_sync_service.dart\n3. Run: dart analyze lib/core/di/injection_container.dart\n4. Verify all DI registrations compile without circular dependencies",
+        "epicId": "epic-native-health-integration",
+        "priority": 5,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-health-integration-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/presentation/providers/health_sync_provider.dart",
+          "lib/core/services/background_sync_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthSyncState class is created, When it includes status/lastSyncTime/isSyncing/permissionStatus/error fields, Then state is complete",
+          "Given HealthSyncNotifier is created, When syncNow() is called, Then it uses SyncHealthStepsUseCase and updates state",
+          "Given healthSyncProvider is exported, When used in widget, Then ref.watch(healthSyncProvider) returns HealthSyncState",
+          "Given BackgroundSyncService is created, When initialize() is called, Then workmanager/background_fetch are configured",
+          "Given registerPeriodicSync() is called, When interval is set to 15 minutes, Then periodic task is scheduled",
+          "Given injection_container.dart is updated, When configureDependencies() runs, Then HealthService/SyncUseCase/BackgroundSync are registered"
+        ]
+      }
+    ]
+  }
+}
