@@ -1,0 +1,47 @@
+name: workspace
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Dependency Injection
+  get_it: ^8.0.3
+
+  # Network
+  dio: ^5.8.0
+  connectivity_plus: ^6.1.4
+
+  # Storage
+  flutter_secure_storage: ^9.2.4
+
+  # Environment
+  flutter_dotenv: ^5.2.1
+
+  # Value equality for classes
+  equatable: ^2.0.5
+
+  # Date/time formatting
+  intl: ^0.20.2
+
+  # Logging utility
+  logger: ^2.5.0
+
+  # Routing
+  go_router: ^14.6.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
