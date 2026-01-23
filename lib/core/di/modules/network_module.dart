@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../config/environment.dart';
 import '../../network/api_client.dart';
 import '../../network/auth_interceptor.dart';
 import '../../network/connectivity_interceptor.dart';
@@ -70,8 +70,8 @@ abstract final class NetworkModule {
     // Add auth interceptor for JWT token handling
     dio.interceptors.add(sl<AuthInterceptor>());
 
-    // Add logging interceptor in development mode (last to log final request)
-    if (Environment.isDevelopment) {
+    // Add logging interceptor in debug mode (last to log final request)
+    if (kDebugMode) {
       dio.interceptors.add(
         LogInterceptor(
           requestHeader: true,
