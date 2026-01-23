@@ -3,6 +3,8 @@ import 'package:get_it/get_it.dart';
 
 import '../network/api_client.dart';
 import '../network/api_interceptors.dart';
+import '../services/health_service.dart';
+import '../services/health_service_impl.dart';
 import '../storage/local_storage.dart';
 import '../storage/secure_storage.dart';
 
@@ -47,6 +49,16 @@ Future<void> _registerCoreDependencies() async {
 
   // Network - depends on storage
   _registerNetworkServices();
+
+  // Health Services
+  _registerHealthServices();
+}
+
+/// Registers health-related services.
+void _registerHealthServices() {
+  sl.registerLazySingleton<HealthService>(
+    () => HealthServiceImpl(),
+  );
 }
 
 /// Registers storage services with proper async initialization.
