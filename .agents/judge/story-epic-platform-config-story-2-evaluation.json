@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "09fb1502f00abc4638c73758",
+    "timestamp": "2026-01-23T16:59:04.118Z",
+    "phase": "judge",
+    "storyId": "epic-platform-config-story-2",
+    "savedAt": "2026-01-23T16:59:04.118Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-platform-config-story-2",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
