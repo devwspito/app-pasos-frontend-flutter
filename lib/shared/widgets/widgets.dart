@@ -13,3 +13,6 @@ export 'app_error.dart';
 export 'app_loading.dart';
 export 'app_scaffold.dart';
 export 'app_text_field.dart';
+export 'progress_ring.dart';
+export 'stat_card.dart';
+export 'step_counter_display.dart';
