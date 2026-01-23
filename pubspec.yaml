@@ -1,0 +1,88 @@
+name: app_pasos
+description: Mobile application for step tracking built with Flutter.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.16.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Dependency Injection
+  get_it: ^7.6.4
+  injectable: ^2.3.2
+
+  # Networking
+  dio: ^5.4.0
+  web_socket_channel: ^2.4.0
+  connectivity_plus: ^5.0.0
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+
+  # Environment Configuration
+  flutter_dotenv: ^5.1.0
+
+  # Data Models & Serialization
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+  # Utilities
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  intl: ^0.18.1
+
+  # Health APIs
+  health: ^10.0.0
+
+  # Push Notifications
+  firebase_messaging: ^14.7.0
+
+  # Charts & Visualization
+  fl_chart: ^0.66.0
+
+  # Material Design Icons
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.0
+  injectable_generator: ^2.4.0
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+
+  # Linting
+  flutter_lints: ^3.0.0
+
+  # Testing
+  mockito: ^5.4.0
+  bloc_test: ^9.1.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+
+  # Additional assets (to be expanded)
+  # assets:
+  #   - assets/images/
+  #   - assets/fonts/
+
+  # Fonts configuration (to be expanded)
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: assets/fonts/CustomFont-Regular.ttf
