@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.example.workspace"
-    compileSdk = flutter.compileSdkVersion
+    // Health Connect requires compileSdk 34 or higher for latest features
+    compileSdk = maxOf(flutter.compileSdkVersion, 34)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -22,10 +23,10 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.workspace"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Health Connect requires minimum API 26 (Android 8.0)
+        // Using maxOf to ensure we meet the minimum while respecting flutter defaults
+        minSdk = maxOf(flutter.minSdkVersion, 26)
+        targetSdk = maxOf(flutter.targetSdkVersion, 34)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
