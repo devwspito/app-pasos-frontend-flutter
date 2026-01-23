@@ -1,0 +1,174 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1afec52ab9de7df94dd31a59",
+    "timestamp": "2026-01-23T02:01:34.324Z",
+    "phase": "techlead",
+    "epicId": "epic-dashboard-step-tracking",
+    "savedAt": "2026-01-23T02:01:34.324Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-dashboard-step-tracking",
+    "storiesCount": 5,
+    "architecture": "## Architecture Overview\n\nThis epic implements the Dashboard & Step Tracking feature following **Clean Architecture** with **Riverpod** state management.\n\n### Layer Structure:\n```\nlib/features/steps/\n├── data/\n│   ├── datasources/\n│   │   └── steps_remote_data_source.dart  ← NEW (Story 1)\n│   ├── models/\n│   │   ├── step_model.dart                ← EXISTS\n│   │   ├── step_stats_model.dart          ← EXISTS\n│   │   └── weekly_trend_model.dart        ← EXISTS\n│   └── repositories/\n│       └── steps_repository_impl.dart     ← NEW (Story 1)\n├── domain/\n│   ├── entities/                          ← EXISTS\n│   ├── repositories/\n│   │   └── steps_repository.dart          ← EXISTS (interface)\n│   └── usecases/                          ← EXISTS\n└── presentation/\n    ├── providers/                         ← EXISTS\n    ├── screens/\n    │   └── dashboard_screen.dart          ← NEW (Story 2)\n    └── widgets/\n        ├── steps_counter_widget.dart      ← NEW (Story 2)\n        ├── weekly_chart_widget.dart       ← NEW (Story 3)\n        ├── hourly_chart_widget.dart       ← NEW (Story 4)\n        └── stats_summary_widget.dart      ← NEW (Story 5)\n```\n\n### Data Flow:\n1. `DashboardScreen` → watches `stepsProvider`\n2. `StepsNotifier` → calls use cases\n3. Use cases → call `StepsRepository` interface\n4. `StepsRepositoryImpl` → calls `StepsRemoteDataSource`\n5. `StepsRemoteDataSource` → calls `ApiClient` (Dio)\n\n### Dependency Injection:\n- `GetIt` registers: `StepsRemoteDataSource`, `StepsRepositoryImpl`\n- `Riverpod` overrides: `stepsRepositoryProvider` with `sl<StepsRepository>()`\n\n### Setup Commands:\n```bash\nflutter pub get\n```\n\n### Verification Commands:\n- Typecheck: `dart analyze lib/`\n- Test: `flutter test`\n- Build: `flutter build apk --debug`",
+    "stories": [
+      {
+        "id": "epic-dashboard-step-tracking-story-1",
+        "title": "Create StepsRemoteDataSource and StepsRepositoryImpl in lib/features/steps/data/",
+        "description": "Implement the data layer connecting to backend API for step tracking.\n\n🔧 **PATTERNS TO USE:**\n- Use `ApiClient` from `lib/core/network/api_client.dart` via GetIt: `sl<ApiClient>()`\n- Follow model pattern from `StepStatsModel.fromJson()` in `lib/features/steps/data/models/step_stats_model.dart`\n- Register services in `injection_container.dart` using `sl.registerLazySingleton()`\n- Implement `StepsRepository` interface from `lib/features/steps/domain/repositories/steps_repository.dart`\n\n📦 **REQUIRED STRUCTURE:**\n- `StepsRemoteDataSource` abstract class with concrete `StepsRemoteDataSourceImpl`\n- Methods: `getTodayStats()`, `getWeeklyTrend()`, `getHourlyBreakdown(date)`, `recordSteps(count, source)`, `syncSteps()`\n- `StepsRepositoryImpl` implements `StepsRepository` interface, uses `StepsRemoteDataSource`\n- Add `fl_chart: ^0.66.0` to pubspec.yaml dependencies\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create new Dio instance - use existing `sl<ApiClient>()`\n- DO NOT throw raw exceptions - convert to `ServerException`, `NetworkException` from `lib/core/errors/exceptions.dart`\n- DO NOT forget to register in DI container\n\n🔗 **API ENDPOINTS** (add to `lib/core/constants/api_endpoints.dart`):\n- GET `/steps/today` → StepStats\n- GET `/steps/weekly` → List<WeeklyTrendModel>\n- GET `/steps/hourly?date=YYYY-MM-DD` → List<StepRecord>\n- POST `/steps` body: {stepCount, source} → StepRecord\n- POST `/steps/sync` → void\n\n**VERIFICATION:**\n1. flutter pub get (fl_chart installed)\n2. dart analyze lib/features/steps/data/\n3. flutter test (no compilation errors)",
+        "epicId": "epic-dashboard-step-tracking",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/features/steps/data/models/step_stats_model.dart",
+          "lib/features/steps/data/models/weekly_trend_model.dart",
+          "lib/features/steps/data/models/step_model.dart",
+          "lib/core/network/api_client.dart",
+          "lib/core/di/injection_container.dart",
+          "lib/core/errors/exceptions.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/constants/api_endpoints.dart",
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/data/datasources/steps_remote_data_source.dart",
+          "lib/features/steps/data/repositories/steps_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the app starts, When injection_container.dart is called, Then StepsRemoteDataSource and StepsRepositoryImpl are registered in GetIt",
+          "Given a valid API response, When getTodayStats() is called, Then StepStats entity is returned with correct mapping",
+          "Given a network error, When any datasource method is called, Then NetworkException is thrown",
+          "Given fl_chart dependency, When flutter pub get runs, Then dependency is resolved successfully"
+        ]
+      },
+      {
+        "id": "epic-dashboard-step-tracking-story-2",
+        "title": "Create DashboardScreen and StepsCounterWidget in lib/features/steps/presentation/",
+        "description": "Implement the main dashboard screen as app home with prominent step counter.\n\n🔧 **PATTERNS TO USE:**\n- Use `ref.watch(stepsProvider)` to observe `StepsState` from `lib/features/steps/presentation/providers/steps_provider.dart`\n- Use `ref.read(stepsProvider.notifier).loadTodayStats()` to trigger data load\n- Use shared widgets: `LoadingIndicator`, `AppErrorWidget` from `lib/shared/widgets/widgets.dart`\n- Follow screen structure from `lib/features/auth/presentation/screens/login_screen.dart`\n\n📦 **REQUIRED STRUCTURE:**\n- `DashboardScreen` as ConsumerStatefulWidget with initState calling `loadTodayStats()`\n- `RefreshIndicator` wrapping content for pull-to-refresh using `ref.read(stepsProvider.notifier).refresh()`\n- `StepsCounterWidget` shows: current steps, goal steps, circular progress ring (CustomPaint or Stack with CircularProgressIndicator)\n- Handle states: `StepsStatus.loading` → LoadingIndicator, `StepsStatus.error` → AppErrorWidget with retry\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use StatelessWidget - need lifecycle for initial data load\n- DO NOT call notifier methods in build() - use initState or ref.listen\n- DO NOT hardcode colors - use `Theme.of(context).colorScheme`\n\n🛣️ **ROUTING** (update in `lib/app.dart`):\n- Change initialLocation from '/' to '/dashboard'\n- Add route: `GoRoute(path: '/dashboard', name: 'dashboard', builder: (_, __) => const DashboardScreen())`\n\n**VERIFICATION:**\n1. dart analyze lib/features/steps/presentation/screens/\n2. dart analyze lib/features/steps/presentation/widgets/steps_counter_widget.dart\n3. flutter build apk --debug (compiles successfully)",
+        "epicId": "epic-dashboard-step-tracking",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-step-tracking-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/error_widget.dart",
+          "lib/features/auth/presentation/screens/login_screen.dart",
+          "lib/app.dart"
+        ],
+        "filesToModify": [
+          "lib/app.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/presentation/screens/dashboard_screen.dart",
+          "lib/features/steps/presentation/widgets/steps_counter_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given app launches, When DashboardScreen loads, Then loadTodayStats() is called automatically",
+          "Given steps data is loading, When screen renders, Then LoadingIndicator is displayed centered",
+          "Given steps data loaded, When screen renders, Then StepsCounterWidget shows today's steps and progress ring",
+          "Given user pulls down, When RefreshIndicator triggers, Then refresh() is called and data reloads",
+          "Given an error occurs, When screen renders, Then AppErrorWidget shows with retry button"
+        ]
+      },
+      {
+        "id": "epic-dashboard-step-tracking-story-3",
+        "title": "Create WeeklyChartWidget with fl_chart BarChart in lib/features/steps/presentation/widgets/",
+        "description": "Implement weekly bar chart showing 7-day step history using fl_chart.\n\n🔧 **PATTERNS TO USE:**\n- Use `fl_chart` package: `BarChart` widget with `BarChartData`\n- Access weekly data from `StepsState.weeklyTrend` (List<WeeklyTrendModel>)\n- Use `ref.watch(stepsProvider).weeklyTrend` in ConsumerWidget\n- Follow `WeeklyTrendModel` structure from `lib/features/steps/data/models/weekly_trend_model.dart`\n\n📦 **REQUIRED STRUCTURE:**\n- `WeeklyChartWidget` as ConsumerWidget accepting optional `goalSteps` parameter\n- `BarChart` with 7 bars, one per day (Mon-Sun)\n- X-axis: day labels from `WeeklyTrendModel.dayOfWeek`\n- Y-axis: step counts, max value = max(steps) * 1.2 for padding\n- Goal line: horizontal dashed line at `goalSteps` using `extraLinesData`\n- Touch interaction: show tooltip with exact step count on bar tap using `BarTouchData`\n- Highlight today's bar with accent color using `WeeklyTrendModel.isToday`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode bar colors - use theme colors: `colorScheme.primary`, `colorScheme.primaryContainer`\n- DO NOT ignore empty data - show empty state message if `weeklyTrend.isEmpty`\n- DO NOT forget null safety on `weeklyTrend` list access\n\n📊 **fl_chart configuration:**\n```dart\nBarChart(\n  BarChartData(\n    barGroups: [...],\n    titlesData: FlTitlesData(...),\n    extraLinesData: ExtraLinesData(horizontalLines: [goalLine]),\n    barTouchData: BarTouchData(touchTooltipData: ...),\n  ),\n)\n```\n\n**VERIFICATION:**\n1. dart analyze lib/features/steps/presentation/widgets/weekly_chart_widget.dart\n2. flutter build apk --debug",
+        "epicId": "epic-dashboard-step-tracking",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-step-tracking-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/models/weekly_trend_model.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/core/theme/app_colors.dart",
+          "pubspec.yaml"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/presentation/widgets/weekly_chart_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given 7 days of step data, When WeeklyChartWidget renders, Then 7 bars are displayed with correct heights",
+          "Given day labels, When chart renders, Then X-axis shows Mon-Sun labels from weeklyTrend",
+          "Given a daily goal, When chart renders, Then horizontal goal line is visible",
+          "Given user taps a bar, When touch event fires, Then tooltip shows exact step count for that day",
+          "Given today's data exists, When chart renders, Then today's bar is highlighted with accent color"
+        ]
+      },
+      {
+        "id": "epic-dashboard-step-tracking-story-4",
+        "title": "Create HourlyChartWidget with fl_chart LineChart in lib/features/steps/presentation/widgets/",
+        "description": "Implement hourly breakdown chart for detailed daily step analysis using fl_chart.\n\n🔧 **PATTERNS TO USE:**\n- Use `fl_chart` package: `LineChart` widget with `LineChartData`\n- Access hourly data from `StepsState.hourlyData` (List<StepRecord>)\n- Use `ref.watch(stepsProvider).hourlyData` and `ref.read(stepsProvider.notifier).loadHourlyData(date)`\n- Follow `StepRecord` structure from `lib/features/steps/domain/entities/step_record.dart`\n\n📦 **REQUIRED STRUCTURE:**\n- `HourlyChartWidget` as ConsumerStatefulWidget with `selectedDate` parameter\n- `LineChart` with 24 data points (hours 0-23)\n- X-axis: hour labels (0, 6, 12, 18, 24 or similar intervals)\n- Y-axis: step counts per hour\n- Area fill: gradient below line using `belowBarData`\n- Peak hour highlighting: identify max steps hour, show marker/annotation\n- Touch interaction: show exact hour and steps on point tap\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT call loadHourlyData in build() - use initState or didUpdateWidget\n- DO NOT show 24 X-axis labels - too crowded, show every 6 hours\n- DO NOT ignore loading state - show shimmer or loading indicator while fetching\n\n📊 **fl_chart configuration:**\n```dart\nLineChart(\n  LineChartData(\n    lineBarsData: [LineChartBarData(spots: [...], belowBarData: ...)],\n    titlesData: FlTitlesData(...),\n    lineTouchData: LineTouchData(touchTooltipData: ...),\n  ),\n)\n```\n\n**VERIFICATION:**\n1. dart analyze lib/features/steps/presentation/widgets/hourly_chart_widget.dart\n2. flutter build apk --debug",
+        "epicId": "epic-dashboard-step-tracking",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-step-tracking-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/core/theme/app_colors.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/presentation/widgets/hourly_chart_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given hourly step data, When HourlyChartWidget renders, Then line chart shows 24-hour distribution",
+          "Given X-axis labels, When chart renders, Then hour labels show at reasonable intervals (0, 6, 12, 18)",
+          "Given step distribution, When chart renders, Then peak hour is visually highlighted",
+          "Given user taps a point, When touch event fires, Then tooltip shows hour and step count",
+          "Given date changes, When selectedDate prop updates, Then loadHourlyData is called for new date"
+        ]
+      },
+      {
+        "id": "epic-dashboard-step-tracking-story-5",
+        "title": "Create StatsSummaryWidget showing streak, average, and best day in lib/features/steps/presentation/widgets/",
+        "description": "Implement widget showing key statistics: current streak, daily average, personal best.\n\n🔧 **PATTERNS TO USE:**\n- Use `ref.watch(stepsProvider)` to access `StepsState`\n- Use `AppCard` from `lib/shared/widgets/app_card.dart` for card styling\n- Calculate stats from `StepsState.weeklyTrend` and `StepsState.todayStats`\n- Follow widget patterns from `lib/shared/widgets/` for consistent styling\n\n📦 **REQUIRED STRUCTURE:**\n- `StatsSummaryWidget` as ConsumerWidget\n- Three stat cards in a Row or horizontal ListView:\n  1. **Current Streak**: consecutive days meeting goal (calculate from weeklyTrend where steps >= goalSteps)\n  2. **Daily Average**: `todayStats.weeklyAverage` formatted as integer\n  3. **Personal Best**: max steps from weeklyTrend, with day name\n- Each card shows: icon, label, value, optional trend indicator (up/down arrow)\n- Use `AppCard` with custom child for each stat\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT calculate streak in build() if expensive - use useMemoized or cache in state\n- DO NOT hardcode text styles - use `Theme.of(context).textTheme`\n- DO NOT ignore null safety - weeklyTrend could be empty\n\n📐 **Layout suggestion:**\n```dart\nRow(\n  children: [\n    Expanded(child: _StatCard(icon: Icons.local_fire_department, label: 'Streak', value: '$streak days')),\n    SizedBox(width: 12),\n    Expanded(child: _StatCard(icon: Icons.show_chart, label: 'Average', value: '${average.toInt()}')),\n    SizedBox(width: 12),\n    Expanded(child: _StatCard(icon: Icons.emoji_events, label: 'Best', value: '$bestSteps')),\n  ],\n)\n```\n\n**VERIFICATION:**\n1. dart analyze lib/features/steps/presentation/widgets/stats_summary_widget.dart\n2. flutter build apk --debug",
+        "epicId": "epic-dashboard-step-tracking",
+        "priority": 5,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-dashboard-step-tracking-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_state.dart",
+          "lib/features/steps/domain/entities/step_stats.dart",
+          "lib/features/steps/data/models/weekly_trend_model.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/core/theme/app_spacing.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/presentation/widgets/stats_summary_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given weekly step data, When StatsSummaryWidget renders, Then streak count shows consecutive goal-meeting days",
+          "Given todayStats exists, When widget renders, Then daily average displays weeklyAverage as integer",
+          "Given weeklyTrend has data, When widget renders, Then personal best shows max steps and day name",
+          "Given empty weeklyTrend, When widget renders, Then graceful fallback values shown (0 streak, 0 average, no best)",
+          "Given theme colors, When widget renders, Then cards use AppCard styling with theme-consistent colors"
+        ]
+      }
+    ]
+  }
+}
