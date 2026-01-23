@@ -2,8 +2,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 
 import 'modules/bloc_module.dart';
-import 'modules/network_module.dart';
-import 'modules/storage_module.dart';
 
 /// Global service locator instance.
 ///
@@ -28,15 +26,19 @@ final GetIt sl = GetIt.instance;
 ///
 /// The function is async to allow for future async initialization
 /// requirements (e.g., loading environment variables).
+///
+/// Module registration order (add as they are created):
+/// 1. StorageModule - base infrastructure, no dependencies
+/// 2. NetworkModule - may depend on storage for tokens
+/// 3. RouterModule - may depend on auth state
+/// 4. BlocModule - depends on repositories/services from above modules
 Future<void> configureDependencies() async {
   // Load environment variables first
   await dotenv.load(fileName: '.env');
 
-  // Register modules in dependency order:
-  // 1. Storage - base infrastructure, no dependencies
-  // 2. Network - may depend on storage for tokens
-  // 3. BLoC - depends on repositories/services from above modules
-  StorageModule.register(sl);
-  NetworkModule.register(sl);
+  // Register modules in dependency order
+  // TODO: Add StorageModule.register(sl) when created
+  // TODO: Add NetworkModule.register(sl) when created
+  // TODO: Add RouterModule.register(sl) when created
   BlocModule.register(sl);
 }
