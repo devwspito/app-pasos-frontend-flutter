@@ -1,0 +1,126 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "09fb1502f00abc4638c73758",
+    "timestamp": "2026-01-23T16:51:50.887Z",
+    "phase": "techlead",
+    "epicId": "epic-platform-config",
+    "savedAt": "2026-01-23T16:51:50.888Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-platform-config",
+    "storiesCount": 5,
+    "architecture": "**Platform Configuration Architecture**\n\nThis epic creates the complete iOS and Android platform configuration files from scratch since the Flutter project has an incomplete platform structure.\n\n**iOS Configuration (Stories 1-2):**\n- Info.plist: App metadata, permissions, URL schemes for deep linking\n- Runner.entitlements: App capabilities including associated domains and keychain access\n\n**Android Configuration (Stories 3-5):**\n- AndroidManifest.xml: App manifest with permissions, activities, and deep linking intent filters\n- build.gradle.kts: Kotlin DSL build configuration with Flutter plugin integration\n- MainActivity.kt: Flutter activity entry point\n- strings.xml: App string resources\n\n**Deep Linking Configuration:**\n- URL Scheme: apppasosfrontendflutter (from .env APP_SCHEME)\n- Associated Domain: app.example.com (from .env APP_HOST)\n\n**Setup Commands:**\n```bash\nflutter pub get\n```\n\n**Verification Commands:**\n- Build iOS: flutter build ios --no-codesign (or flutter build ios --simulator)\n- Build Android: flutter build apk --debug\n- Analyze: flutter analyze",
+    "stories": [
+      {
+        "id": "epic-platform-config-story-1",
+        "title": "Create iOS Info.plist with app configuration and permissions",
+        "description": "Create the complete iOS Info.plist configuration file from scratch.\n\n🔧 **PATTERNS TO USE:**\n- Use standard Flutter iOS Info.plist structure\n- Include CFBundleURLTypes for deep linking with scheme 'apppasosfrontendflutter' (from .env APP_SCHEME)\n- Include NSAppTransportSecurity for development HTTP access\n\n📦 **REQUIRED CONTENT:**\n- CFBundleDisplayName: App Pasos\n- CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)\n- CFBundleURLSchemes: apppasosfrontendflutter\n- UILaunchStoryboardName: LaunchScreen\n- UISupportedInterfaceOrientations\n- NSCameraUsageDescription (if needed)\n- NSPhotoLibraryUsageDescription (if needed)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT assume file exists - CREATE it from scratch\n- DO NOT use hardcoded bundle IDs - use $(PRODUCT_BUNDLE_IDENTIFIER)\n\n🧪 **VERIFICATION:**\n- File exists at ios/Runner/Info.plist\n- Valid XML plist format\n- Contains deep linking URL scheme",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          ".env"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "ios/Runner/Info.plist"
+        ],
+        "acceptanceCriteria": [
+          "Given iOS Runner directory exists, When Info.plist is created, Then it contains valid XML plist structure",
+          "Given deep linking is required, When Info.plist is created, Then CFBundleURLSchemes contains 'apppasosfrontendflutter'",
+          "Given app needs permissions, When Info.plist is created, Then appropriate usage descriptions are included"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-2",
+        "title": "Create iOS Runner.entitlements for app capabilities",
+        "description": "Create the iOS entitlements file for app capabilities.\n\n🔧 **PATTERNS TO USE:**\n- Standard iOS entitlements XML structure\n- Include associated domains for deep linking\n- Include keychain access groups if using flutter_secure_storage\n\n📦 **REQUIRED CONTENT:**\n```xml\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>com.apple.developer.associated-domains</key>\n    <array>\n        <string>applinks:app.example.com</string>\n    </array>\n    <key>keychain-access-groups</key>\n    <array>\n        <string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>\n    </array>\n</dict>\n</plist>\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode team IDs\n- DO NOT use incorrect domain format\n\n🧪 **VERIFICATION:**\n- File exists at ios/Runner/Runner.entitlements\n- Valid XML plist format",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          ".env"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "ios/Runner/Runner.entitlements"
+        ],
+        "acceptanceCriteria": [
+          "Given iOS app needs capabilities, When Runner.entitlements is created, Then it contains associated-domains for deep linking",
+          "Given flutter_secure_storage is used, When Runner.entitlements is created, Then keychain-access-groups is configured"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-3",
+        "title": "Create Android AndroidManifest.xml with permissions and deep linking",
+        "description": "Create the complete Android manifest file from scratch.\n\n🔧 **PATTERNS TO USE:**\n- Standard Flutter Android manifest structure\n- Include intent-filter for deep linking with scheme 'apppasosfrontendflutter'\n- Include INTERNET permission\n\n📦 **REQUIRED CONTENT:**\n```xml\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <uses-permission android:name=\"android.permission.INTERNET\"/>\n    <application\n        android:label=\"App Pasos\"\n        android:name=\"${applicationName}\"\n        android:icon=\"@mipmap/ic_launcher\">\n        <activity\n            android:name=\".MainActivity\"\n            android:exported=\"true\"\n            android:launchMode=\"singleTop\"\n            android:theme=\"@style/LaunchTheme\"\n            android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode\"\n            android:hardwareAccelerated=\"true\"\n            android:windowSoftInputMode=\"adjustResize\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\"/>\n                <category android:name=\"android.intent.category.LAUNCHER\"/>\n            </intent-filter>\n            <!-- Deep linking -->\n            <intent-filter>\n                <action android:name=\"android.intent.action.VIEW\"/>\n                <category android:name=\"android.intent.category.DEFAULT\"/>\n                <category android:name=\"android.intent.category.BROWSABLE\"/>\n                <data android:scheme=\"apppasosfrontendflutter\"/>\n            </intent-filter>\n        </activity>\n        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" />\n    </application>\n</manifest>\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT forget android:exported=\"true\" for main activity\n- DO NOT use wrong deep link scheme\n\n🧪 **VERIFICATION:**\n- File exists at android/app/src/main/AndroidManifest.xml\n- Valid XML format",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          ".env"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "android/app/src/main/AndroidManifest.xml"
+        ],
+        "acceptanceCriteria": [
+          "Given Android app directory exists, When AndroidManifest.xml is created, Then it contains valid Android manifest structure",
+          "Given deep linking is required, When AndroidManifest.xml is created, Then intent-filter with scheme 'apppasosfrontendflutter' exists",
+          "Given network access is needed, When AndroidManifest.xml is created, Then INTERNET permission is declared"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-4",
+        "title": "Create Android build.gradle.kts with SDK and dependencies config",
+        "description": "Create the Android app-level build.gradle.kts file from scratch.\n\n🔧 **PATTERNS TO USE:**\n- Use Kotlin DSL (.kts) format\n- Apply Flutter gradle plugin\n- Configure compileSdk, minSdk, targetSdk\n\n📦 **REQUIRED CONTENT:**\n```kotlin\nplugins {\n    id(\"com.android.application\")\n    id(\"kotlin-android\")\n    id(\"dev.flutter.flutter-gradle-plugin\")\n}\n\nandroid {\n    namespace = \"com.example.app_pasos\"\n    compileSdk = flutter.compileSdkVersion\n    ndkVersion = flutter.ndkVersion\n\n    compileOptions {\n        sourceCompatibility = JavaVersion.VERSION_1_8\n        targetCompatibility = JavaVersion.VERSION_1_8\n    }\n\n    kotlinOptions {\n        jvmTarget = \"1.8\"\n    }\n\n    defaultConfig {\n        applicationId = \"com.example.app_pasos\"\n        minSdk = flutter.minSdkVersion\n        targetSdk = flutter.targetSdkVersion\n        versionCode = flutter.versionCode\n        versionName = flutter.versionName\n    }\n\n    buildTypes {\n        release {\n            signingConfig = signingConfigs.getByName(\"debug\")\n        }\n    }\n}\n\nflutter {\n    source = \"../..\"\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use Groovy syntax (.gradle) - use Kotlin DSL (.kts)\n- DO NOT hardcode SDK versions - use flutter.* properties\n\n🧪 **VERIFICATION:**\n- File exists at android/app/build.gradle.kts\n- Valid Kotlin DSL syntax",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "android/app/build.gradle.kts"
+        ],
+        "acceptanceCriteria": [
+          "Given Android app needs build configuration, When build.gradle.kts is created, Then it uses Kotlin DSL format",
+          "Given Flutter integration is needed, When build.gradle.kts is created, Then flutter-gradle-plugin is applied",
+          "Given SDK versions should be dynamic, When build.gradle.kts is created, Then flutter.compileSdkVersion etc are used"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-5",
+        "title": "Create Android MainActivity.kt and strings.xml resources",
+        "description": "Create the Android MainActivity and string resources.\n\n🔧 **PATTERNS TO USE:**\n- Use FlutterActivity as base class\n- Standard Kotlin syntax\n- Package name: com.example.app_pasos\n\n📦 **REQUIRED CONTENT for MainActivity.kt:**\n```kotlin\npackage com.example.app_pasos\n\nimport io.flutter.embedding.android.FlutterActivity\n\nclass MainActivity: FlutterActivity()\n```\n\n📦 **REQUIRED CONTENT for strings.xml:**\n```xml\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n    <string name=\"app_name\">App Pasos</string>\n</resources>\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use deprecated FlutterActivity from v1\n- DO NOT forget to create res/values directory structure\n\n🧪 **VERIFICATION:**\n- File exists at android/app/src/main/kotlin/com/example/app_pasos/MainActivity.kt\n- File exists at android/app/src/main/res/values/strings.xml\n- Valid Kotlin and XML syntax",
+        "epicId": "epic-platform-config",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-platform-config-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "android/app/src/main/kotlin/com/example/app_pasos/MainActivity.kt",
+          "android/app/src/main/res/values/strings.xml"
+        ],
+        "acceptanceCriteria": [
+          "Given Android needs entry point, When MainActivity.kt is created, Then it extends FlutterActivity",
+          "Given Android needs string resources, When strings.xml is created, Then app_name is defined",
+          "Given package structure is required, When files are created, Then correct directory structure exists"
+        ]
+      }
+    ]
+  }
+}
