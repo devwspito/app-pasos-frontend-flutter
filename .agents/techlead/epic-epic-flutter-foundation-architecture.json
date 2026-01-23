@@ -1,0 +1,147 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "2a15fea35a2f78bb3cf7a0f7",
+    "timestamp": "2026-01-23T12:17:45.246Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-23T12:17:45.247Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-foundation",
+    "storiesCount": 5,
+    "architecture": "## Flutter Foundation Architecture\n\n### Pattern: Clean Architecture with Feature-Based Modules\n\n**Core Structure:**\n```\nlib/\n├── main.dart                    # Entry point with ProviderScope\n├── core/\n│   ├── config/\n│   │   ├── app_config.dart      # Environment-based configuration\n│   │   └── environment.dart     # Environment enum and helpers\n│   ├── di/\n│   │   ├── injection_container.dart  # get_it setup\n│   │   └── register_module.dart      # Manual registrations\n│   ├── errors/\n│   │   ├── exceptions.dart      # ServerException, CacheException\n│   │   ├── failures.dart        # Failure classes with Equatable\n│   │   └── error_handler.dart   # Centralized error handling\n│   ├── network/\n│   │   ├── dio_client.dart      # Singleton HTTP client\n│   │   ├── api_endpoints.dart   # API route constants\n│   │   ├── api_response.dart    # Generic response wrapper\n│   │   └── interceptors/\n│   │       ├── auth_interceptor.dart    # Bearer token injection\n│   │       ├── error_interceptor.dart   # DioException → ServerException\n│   │       └── logging_interceptor.dart # Debug logging\n│   ├── usecases/\n│   │   └── usecase.dart         # Abstract UseCase<T, Params>\n│   └── utils/\n│       ├── constants.dart       # App-wide constants\n│       ├── date_utils.dart      # Date formatting (ISO8601)\n│       ├── extensions.dart      # String, BuildContext extensions\n│       └── validators.dart      # Email, password, username validation\n```\n\n### SOLID Principles Compliance:\n\n1. **SRP**: Each class has single responsibility (DioClient for HTTP, Validators for validation)\n2. **OCP**: UseCase abstract class allows extension without modification\n3. **LSP**: All Failures extend base Failure class correctly\n4. **ISP**: Small, focused interfaces (Interceptor methods)\n5. **DIP**: DioClient depends on AppConfig abstraction, not hardcoded values\n\n### Key Dependencies:\n- **DI**: get_it + injectable (code generation)\n- **HTTP**: Dio with interceptors\n- **State**: flutter_riverpod\n- **Routing**: go_router\n- **Storage**: flutter_secure_storage\n- **Functional**: dartz (Either<Failure, T>)\n\n### API Contract (Backend Integration):\n- Base URL: `http://localhost:3001/api`\n- WebSocket: `ws://localhost:3001`\n- Endpoints match backend routes: /auth/*, /steps/*, /sharing/*, /goals/*, /users/*\n\n### Environment Configuration:\n- Load .env with flutter_dotenv\n- AppConfig singleton provides typed access\n- Supports development, staging, production environments",
+    "stories": [
+      {
+        "id": "epic-flutter-foundation-story-1",
+        "title": "Configure pubspec.yaml with all required dependencies",
+        "description": "Update pubspec.yaml to add all required dependencies for Clean Architecture Flutter app.\n\n🔧 **PATTERNS TO USE:**\n- Keep existing flutter SDK and cupertino_icons dependencies\n- Add dependencies in alphabetical order within each section\n- Use exact versions from epic spec (dio ^5.4.0, etc.)\n\n📦 **REQUIRED DEPENDENCIES:**\n```yaml\ndependencies:\n  dio: ^5.4.0\n  flutter_riverpod: ^2.4.9\n  go_router: ^13.0.0\n  flutter_secure_storage: ^9.0.0\n  health: ^10.0.0\n  socket_io_client: ^2.0.3\n  fl_chart: ^0.66.0\n  workmanager: ^0.5.2\n  get_it: ^7.6.4\n  injectable: ^2.3.2\n  equatable: ^2.0.5\n  dartz: ^0.10.1\n  intl: ^0.18.1\n  flutter_dotenv: ^5.1.0\n\ndev_dependencies:\n  injectable_generator: ^2.4.1\n  build_runner: ^2.4.8\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT remove existing dependencies\n- DO NOT use 'any' version constraints\n- DO NOT forget flutter_dotenv for environment config\n\n**VERIFICATION:**\n```bash\nflutter pub get\nflutter analyze\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [
+          "lib/pubspec.yaml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml exists, When dependencies are added, Then flutter pub get succeeds without errors",
+          "Given all dependencies are added, When flutter analyze runs, Then no dependency resolution errors occur",
+          "Given flutter_dotenv is added, When checking pubspec.yaml, Then assets section includes .env file"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-2",
+        "title": "Create core folder structure with error classes and base UseCase",
+        "description": "Create lib/core/ directory structure with di/, network/, errors/, utils/, config/ directories and implement Failure/Exception classes.\n\n🔧 **PATTERNS TO USE:**\n- Use Equatable for Failure classes (for value equality)\n- Use dartz Either<Failure, T> pattern for error handling\n- Abstract UseCase class with call() method\n\n📦 **FILES TO CREATE:**\n\n**lib/core/errors/failures.dart:**\n```dart\nimport 'package:equatable/equatable.dart';\n\nabstract class Failure extends Equatable {\n  final String message;\n  const Failure(this.message);\n  @override\n  List<Object> get props => [message];\n}\n\nclass ServerFailure extends Failure {\n  const ServerFailure([String message = 'Server error']) : super(message);\n}\n\nclass CacheFailure extends Failure {\n  const CacheFailure([String message = 'Cache error']) : super(message);\n}\n\nclass NetworkFailure extends Failure {\n  const NetworkFailure([String message = 'Network error']) : super(message);\n}\n```\n\n**lib/core/errors/exceptions.dart:**\n```dart\nclass ServerException implements Exception {\n  final String message;\n  final int? statusCode;\n  ServerException({this.message = 'Server error', this.statusCode});\n}\n\nclass CacheException implements Exception {\n  final String message;\n  CacheException({this.message = 'Cache error'});\n}\n```\n\n**lib/core/usecases/usecase.dart:**\n```dart\nimport 'package:dartz/dartz.dart';\nimport '../errors/failures.dart';\n\nabstract class UseCase<Type, Params> {\n  Future<Either<Failure, Type>> call(Params params);\n}\n\nclass NoParams extends Equatable {\n  @override\n  List<Object> get props => [];\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create classes without Equatable for Failures\n- DO NOT use dynamic types in UseCase\n- DO NOT forget to export classes in barrel files\n\n**VERIFICATION:**\n```bash\nflutter analyze lib/core/errors/\nflutter analyze lib/core/usecases/\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/errors/failures.dart",
+          "lib/core/errors/exceptions.dart",
+          "lib/core/errors/error_handler.dart",
+          "lib/core/usecases/usecase.dart",
+          "lib/core/di/injection_container.dart",
+          "lib/core/di/register_module.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given core/errors/ directory is created, When importing failures.dart, Then ServerFailure, CacheFailure, NetworkFailure classes are available",
+          "Given UseCase abstract class exists, When extending it, Then call() method signature uses Either<Failure, T>",
+          "Given injection_container.dart exists, When importing it, Then configureDependencies() function is available"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-3",
+        "title": "Configure Dio HTTP client with interceptors in lib/core/network/",
+        "description": "Create DioClient singleton with base URL from environment and implement Auth, Error, and Logging interceptors.\n\n🔧 **PATTERNS TO USE:**\n- Singleton pattern for DioClient using get_it\n- InterceptorsWrapper for custom interceptors\n- Environment-based base URL from AppConfig\n\n📦 **FILES TO CREATE:**\n\n**lib/core/network/api_endpoints.dart:**\n```dart\nclass ApiEndpoints {\n  // Auth\n  static const String login = '/auth/login';\n  static const String register = '/auth/register';\n  static const String logout = '/auth/logout';\n  static const String refreshToken = '/auth/refresh';\n  \n  // Steps\n  static const String steps = '/steps';\n  static const String syncSteps = '/steps/sync';\n  \n  // Sharing\n  static const String sharing = '/sharing';\n  static const String shareWithUser = '/sharing/user';\n  \n  // Goals\n  static const String goals = '/goals';\n  static const String dailyGoal = '/goals/daily';\n  \n  // Users\n  static const String users = '/users';\n  static const String userProfile = '/users/profile';\n}\n```\n\n**lib/core/network/dio_client.dart:**\n```dart\nimport 'package:dio/dio.dart';\nimport 'package:injectable/injectable.dart';\nimport '../config/app_config.dart';\nimport 'interceptors/auth_interceptor.dart';\nimport 'interceptors/error_interceptor.dart';\nimport 'interceptors/logging_interceptor.dart';\n\n@lazySingleton\nclass DioClient {\n  late final Dio _dio;\n  \n  DioClient(AppConfig config) {\n    _dio = Dio(BaseOptions(\n      baseUrl: config.apiBaseUrl,\n      connectTimeout: const Duration(seconds: 30),\n      receiveTimeout: const Duration(seconds: 30),\n      headers: {'Content-Type': 'application/json'},\n    ));\n    \n    _dio.interceptors.addAll([\n      AuthInterceptor(),\n      ErrorInterceptor(),\n      LoggingInterceptor(),\n    ]);\n  }\n  \n  Future<Response<T>> get<T>(String path, {Map<String, dynamic>? queryParameters}) =>\n      _dio.get<T>(path, queryParameters: queryParameters);\n      \n  Future<Response<T>> post<T>(String path, {dynamic data}) =>\n      _dio.post<T>(path, data: data);\n      \n  Future<Response<T>> put<T>(String path, {dynamic data}) =>\n      _dio.put<T>(path, data: data);\n      \n  Future<Response<T>> delete<T>(String path) =>\n      _dio.delete<T>(path);\n}\n```\n\n**lib/core/network/interceptors/auth_interceptor.dart:**\n```dart\nimport 'package:dio/dio.dart';\nimport 'package:flutter_secure_storage/flutter_secure_storage.dart';\n\nclass AuthInterceptor extends Interceptor {\n  final _storage = const FlutterSecureStorage();\n  \n  @override\n  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {\n    final token = await _storage.read(key: 'access_token');\n    if (token != null) {\n      options.headers['Authorization'] = 'Bearer $token';\n    }\n    handler.next(options);\n  }\n}\n```\n\n**lib/core/network/interceptors/error_interceptor.dart:**\n```dart\nimport 'package:dio/dio.dart';\nimport '../../errors/exceptions.dart';\n\nclass ErrorInterceptor extends Interceptor {\n  @override\n  void onError(DioException err, ErrorInterceptorHandler handler) {\n    throw ServerException(\n      message: err.response?.data?['message'] ?? err.message ?? 'Unknown error',\n      statusCode: err.response?.statusCode,\n    );\n  }\n}\n```\n\n**lib/core/network/api_response.dart:**\n```dart\nclass ApiResponse<T> {\n  final bool success;\n  final T? data;\n  final String? message;\n  final String? error;\n  \n  ApiResponse({required this.success, this.data, this.message, this.error});\n  \n  factory ApiResponse.fromJson(Map<String, dynamic> json, T Function(dynamic)? fromJson) {\n    return ApiResponse(\n      success: json['success'] ?? false,\n      data: json['data'] != null && fromJson != null ? fromJson(json['data']) : null,\n      message: json['message'],\n      error: json['error'],\n    );\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode base URL - use AppConfig\n- DO NOT create multiple Dio instances - use singleton\n- DO NOT forget to convert DioException to ServerException in error interceptor\n\n**VERIFICATION:**\n```bash\nflutter analyze lib/core/network/\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-flutter-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/network/dio_client.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/network/api_response.dart",
+          "lib/core/network/interceptors/auth_interceptor.dart",
+          "lib/core/network/interceptors/error_interceptor.dart",
+          "lib/core/network/interceptors/logging_interceptor.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given DioClient is created, When injected via get_it, Then it uses base URL from AppConfig",
+          "Given AuthInterceptor is active, When token exists in secure storage, Then requests include Bearer token header",
+          "Given ErrorInterceptor catches DioException, When error occurs, Then ServerException is thrown with status code",
+          "Given ApiEndpoints class exists, When accessing endpoints, Then all paths match backend API routes"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-4",
+        "title": "Create utility classes and extensions in lib/core/utils/",
+        "description": "Implement Validators, DateUtils, and String/BuildContext extensions for convenience methods.\n\n🔧 **PATTERNS TO USE:**\n- Static methods for Validators class\n- Extension methods on String and BuildContext\n- RegExp for validation patterns\n\n📦 **FILES TO CREATE:**\n\n**lib/core/utils/validators.dart:**\n```dart\nclass Validators {\n  static final RegExp _emailRegex = RegExp(\n    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',\n  );\n  \n  static final RegExp _passwordRegex = RegExp(\n    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$',\n  );\n  \n  static bool isValidEmail(String email) => _emailRegex.hasMatch(email);\n  \n  static bool isValidPassword(String password) => _passwordRegex.hasMatch(password);\n  \n  static bool isValidUsername(String username) =>\n      username.length >= 3 && username.length <= 20 && RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username);\n  \n  static String? validateEmail(String? value) {\n    if (value == null || value.isEmpty) return 'Email is required';\n    if (!isValidEmail(value)) return 'Invalid email format';\n    return null;\n  }\n  \n  static String? validatePassword(String? value) {\n    if (value == null || value.isEmpty) return 'Password is required';\n    if (value.length < 8) return 'Password must be at least 8 characters';\n    if (!isValidPassword(value)) return 'Password must contain uppercase, lowercase, and number';\n    return null;\n  }\n  \n  static String? validateUsername(String? value) {\n    if (value == null || value.isEmpty) return 'Username is required';\n    if (!isValidUsername(value)) return 'Username must be 3-20 alphanumeric characters';\n    return null;\n  }\n}\n```\n\n**lib/core/utils/date_utils.dart:**\n```dart\nimport 'package:intl/intl.dart';\n\nclass AppDateUtils {\n  static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');\n  static final DateFormat _timeFormat = DateFormat('HH:mm');\n  static final DateFormat _dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm:ss');\n  \n  static String formatDate(DateTime date) => _dateFormat.format(date);\n  \n  static String formatTime(DateTime date) => _timeFormat.format(date);\n  \n  static String formatDateTime(DateTime date) => _dateTimeFormat.format(date);\n  \n  static DateTime? parseDate(String dateStr) {\n    try {\n      return _dateFormat.parse(dateStr);\n    } catch (_) {\n      return null;\n    }\n  }\n  \n  static int extractHour(DateTime date) => date.hour;\n  \n  static DateTime startOfDay(DateTime date) =>\n      DateTime(date.year, date.month, date.day);\n      \n  static DateTime endOfDay(DateTime date) =>\n      DateTime(date.year, date.month, date.day, 23, 59, 59);\n      \n  static bool isSameDay(DateTime a, DateTime b) =>\n      a.year == b.year && a.month == b.month && a.day == b.day;\n}\n```\n\n**lib/core/utils/extensions.dart:**\n```dart\nimport 'package:flutter/material.dart';\n\nextension StringExtension on String {\n  String get capitalized => isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';\n  \n  String get titleCase => split(' ').map((word) => word.capitalized).join(' ');\n  \n  bool get isBlank => trim().isEmpty;\n  \n  bool get isNotBlank => !isBlank;\n}\n\nextension BuildContextExtension on BuildContext {\n  ThemeData get theme => Theme.of(this);\n  \n  TextTheme get textTheme => theme.textTheme;\n  \n  ColorScheme get colorScheme => theme.colorScheme;\n  \n  Size get screenSize => MediaQuery.of(this).size;\n  \n  double get screenWidth => screenSize.width;\n  \n  double get screenHeight => screenSize.height;\n  \n  void showSnackBar(String message, {bool isError = false}) {\n    ScaffoldMessenger.of(this).showSnackBar(\n      SnackBar(\n        content: Text(message),\n        backgroundColor: isError ? colorScheme.error : null,\n      ),\n    );\n  }\n}\n```\n\n**lib/core/utils/constants.dart:**\n```dart\nclass AppConstants {\n  // Storage keys\n  static const String accessTokenKey = 'access_token';\n  static const String refreshTokenKey = 'refresh_token';\n  static const String userIdKey = 'user_id';\n  \n  // Default values\n  static const int defaultDailyGoal = 10000;\n  static const int syncIntervalMinutes = 15;\n  \n  // Pagination\n  static const int defaultPageSize = 20;\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use DateTime.parse directly - use AppDateUtils.parseDate\n- DO NOT hardcode storage keys - use AppConstants\n- DO NOT access theme without context extension\n\n**VERIFICATION:**\n```bash\nflutter analyze lib/core/utils/\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/utils/validators.dart",
+          "lib/core/utils/date_utils.dart",
+          "lib/core/utils/extensions.dart",
+          "lib/core/utils/constants.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given Validators class exists, When validating email 'test@example.com', Then isValidEmail returns true",
+          "Given Validators class exists, When validating password 'weak', Then validatePassword returns error message",
+          "Given AppDateUtils exists, When formatting DateTime, Then output matches 'yyyy-MM-dd' format",
+          "Given StringExtension exists, When calling 'hello'.capitalized, Then returns 'Hello'"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-5",
+        "title": "Create main.dart with ProviderScope and DI initialization",
+        "description": "Replace default main.dart with proper app initialization including ProviderScope wrapper, dependency injection setup, and environment configuration.\n\n🔧 **PATTERNS TO USE:**\n- WidgetsFlutterBinding.ensureInitialized() before async operations\n- Load .env file with flutter_dotenv\n- configureDependencies() from injection_container.dart\n- ProviderScope from flutter_riverpod wrapping App\n\n📦 **FILES TO CREATE/MODIFY:**\n\n**lib/core/config/environment.dart:**\n```dart\nimport 'package:flutter_dotenv/flutter_dotenv.dart';\n\nenum Environment { development, staging, production }\n\nclass EnvironmentConfig {\n  static Environment get current {\n    final env = dotenv.env['ENVIRONMENT'] ?? 'development';\n    switch (env) {\n      case 'production':\n        return Environment.production;\n      case 'staging':\n        return Environment.staging;\n      default:\n        return Environment.development;\n    }\n  }\n  \n  static bool get isDevelopment => current == Environment.development;\n  static bool get isProduction => current == Environment.production;\n}\n```\n\n**lib/core/config/app_config.dart:**\n```dart\nimport 'package:flutter_dotenv/flutter_dotenv.dart';\nimport 'package:injectable/injectable.dart';\n\n@lazySingleton\nclass AppConfig {\n  String get apiBaseUrl => dotenv.env['API_BASE_URL'] ?? 'http://localhost:3001/api';\n  String get wsUrl => dotenv.env['WS_URL'] ?? 'ws://localhost:3001';\n  bool get enableAnalytics => dotenv.env['ENABLE_ANALYTICS'] == 'true';\n  bool get enableCrashlytics => dotenv.env['ENABLE_CRASHLYTICS'] == 'true';\n  String get appScheme => dotenv.env['APP_SCHEME'] ?? 'apppasos';\n  String get appHost => dotenv.env['APP_HOST'] ?? 'app.pasos.com';\n}\n```\n\n**lib/main.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:flutter_dotenv/flutter_dotenv.dart';\nimport 'package:flutter_riverpod/flutter_riverpod.dart';\nimport 'core/di/injection_container.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  \n  // Load environment variables\n  await dotenv.load(fileName: '.env');\n  \n  // Initialize dependency injection\n  await configureDependencies();\n  \n  runApp(const ProviderScope(child: App()));\n}\n\nclass App extends StatelessWidget {\n  const App({super.key});\n  \n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      title: 'Pasos App',\n      debugShowCheckedModeBanner: false,\n      theme: ThemeData(\n        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),\n        useMaterial3: true,\n      ),\n      home: const Scaffold(\n        body: Center(\n          child: Text('Pasos App - Foundation Ready'),\n        ),\n      ),\n    );\n  }\n}\n```\n\n**lib/core/di/injection_container.dart (update):**\n```dart\nimport 'package:get_it/get_it.dart';\nimport 'package:injectable/injectable.dart';\nimport 'injection_container.config.dart';\n\nfinal getIt = GetIt.instance;\n\n@InjectableInit()\nFuture<void> configureDependencies() async => getIt.init();\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT call runApp before WidgetsFlutterBinding.ensureInitialized()\n- DO NOT forget to load .env before accessing dotenv.env\n- DO NOT create App without ProviderScope wrapper\n- DO NOT forget to add .env to assets in pubspec.yaml\n\n**VERIFICATION:**\n```bash\nflutter analyze lib/\nflutter build apk --debug 2>&1 | head -50\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/main.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/config/app_config.dart",
+          "lib/core/config/environment.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given main.dart is updated, When app starts, Then WidgetsFlutterBinding.ensureInitialized() is called first",
+          "Given .env file exists, When app loads, Then dotenv.env contains API_BASE_URL",
+          "Given configureDependencies() is called, When accessing getIt, Then DioClient can be resolved",
+          "Given App widget exists, When building, Then it is wrapped with ProviderScope"
+        ]
+      }
+    ]
+  }
+}
