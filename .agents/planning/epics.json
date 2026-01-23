@@ -1,125 +1,151 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "2a15fea35a2f78bb3cf7a0f7",
-    "timestamp": "2026-01-23T12:13:47.508Z",
+    "taskId": "c669e76b0100789afe66f950",
+    "timestamp": "2026-01-23T12:32:50.077Z",
     "phase": "planning",
-    "savedAt": "2026-01-23T12:13:47.508Z",
+    "savedAt": "2026-01-23T12:32:50.078Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "fin123",
+    "taskTitle": "fn1231",
     "taskDescription": "Descripción de tareas para completar el frontend en Flutter\n\nCompletar los 9 epics del frontend de la aplicación \"Pasos\" (contador de pasos social) usando Flutter.\n\n================================================================================\n\nCONTEXTO\n\n================================================================================\n\nEl backend ya está completo en: project-app-pasos-backend\n\nEl frontend debe ir en: project-app-pasos-frontend-flutter (crear nueva estructura)\n\nUsar Flutter para aplicación móvil nativa multiplataforma (iOS/Android)\n\n================================================================================\n\nEPICS A IMPLEMENTAR\n\n================================================================================\n\nFLUTTER FOUNDATION\n\nSetup de Flutter + estructura del proyecto\n\nConfiguración de dependencias base (provider/bloc, dio, etc.)\n\nPLATFORM CONFIG\n\nConfiguración para iOS/Android\n\nPermisos para Health APIs (HealthKit/Google Fit)\n\nConfiguración de AndroidManifest.xml y Info.plist\n\nUI FOUNDATION\n\nSistema de diseño con Material Design 3\n\nRouting y navegación (go_router)\n\nTema oscuro/claro (ThemeData)\n\nWidgets reutilizables\n\nAUTH UI\n\nPantallas de login, registro y recuperación de contraseña\n\nGestión de estado de autenticación\n\nAlmacenamiento seguro de tokens (flutter_secure_storage)\n\nDASHBOARD\n\nVista principal con contador de pasos\n\nHistorial de actividad\n\nGráficos (fl_chart o charts_flutter)\n\nPull-to-refresh\n\nSHARING UI\n\nLista de amigos\n\nGestión de compartir datos con amigos\n\nSolicitudes de amistad\n\nVista de actividad de amigos\n\nGOALS UI\n\nGrupos y metas compartidas\n\nCreación y edición de metas\n\nProgreso de grupos\n\nRankings\n\nNATIVE INTEGRATION\n\nIntegración con podómetro nativo usando health package\n\nLectura de pasos desde HealthKit (iOS)\n\nLectura de pasos desde Google Fit/Health Connect (Android)\n\nBackground sync de datos\n\nREAL-TIME CLIENT\n\nIntegración WebSocket con web_socket_channel\n\nActualizaciones en tiempo real\n\nNotificaciones push (firebase_messaging)\n\nManejo de reconexión",
     "epicsCount": 9,
     "epics": [
       {
         "id": "epic-flutter-foundation",
-        "title": "Flutter Foundation - Project Setup and Core Infrastructure",
-        "description": "Initialize Flutter project with Clean Architecture structure, configure pubspec.yaml with all dependencies (riverpod, dio, go_router, flutter_secure_storage, health, socket_io_client, fl_chart, workmanager), set up dependency injection with get_it, create Dio HTTP client with auth/error/logging interceptors, define API endpoints matching backend routes, and establish error handling infrastructure",
+        "title": "Flutter Foundation - Project Setup & Architecture",
+        "description": "Setup Flutter project with clean architecture, configure dependencies (dio, provider, go_router, flutter_secure_storage, flutter_dotenv), create core folder structure with data/domain/presentation layers, configure environment handling",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
-        "filesToModify": [],
-        "filesToCreate": [
+        "filesToModify": [
           "pubspec.yaml",
-          "analysis_options.yaml",
           "lib/main.dart",
-          "lib/core/di/injection_container.dart",
-          "lib/core/di/register_module.dart",
-          "lib/core/network/dio_client.dart",
-          "lib/core/network/api_endpoints.dart",
-          "lib/core/network/api_response.dart",
-          "lib/core/network/interceptors/auth_interceptor.dart",
-          "lib/core/network/interceptors/error_interceptor.dart",
-          "lib/core/network/interceptors/logging_interceptor.dart",
-          "lib/core/errors/exceptions.dart",
-          "lib/core/errors/failures.dart",
-          "lib/core/errors/error_handler.dart",
-          "lib/core/utils/constants.dart",
-          "lib/core/utils/validators.dart",
-          "lib/core/utils/extensions.dart",
-          "lib/core/utils/date_utils.dart",
+          "analysis_options.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/constants/app_constants.dart",
+          "lib/core/constants/api_endpoints.dart",
+          "lib/core/config/environment.dart",
           "lib/core/config/app_config.dart",
-          "lib/core/config/environment.dart"
+          "lib/core/errors/app_exception.dart",
+          "lib/core/errors/failure.dart",
+          "lib/core/network/api_client.dart",
+          "lib/core/network/dio_client.dart",
+          "lib/core/network/network_info.dart",
+          "lib/core/storage/secure_storage.dart",
+          "lib/core/utils/logger.dart",
+          "lib/core/utils/validators.dart",
+          "lib/core/extensions/string_extensions.dart",
+          "lib/core/extensions/datetime_extensions.dart",
+          "lib/injection_container.dart",
+          "assets/.env",
+          "assets/.env.example"
         ],
         "filesToRead": [
-          "project-app-pasos-backend/package.json",
-          "project-app-pasos-backend/src/types/index.ts"
+          "pubspec.yaml",
+          "lib/main.dart",
+          ".env.example"
         ],
         "estimatedComplexity": "moderate",
         "dependencies": [],
         "executionOrder": 1,
         "followsPatterns": [
-          "Clean Architecture with feature-based modules",
-          "Dependency injection with get_it and injectable",
-          "Environment-based configuration with flutter_dotenv",
-          "API response wrapper matching backend ApiResponse<T>"
+          "Clean architecture with feature-based structure",
+          "Environment configuration via flutter_dotenv",
+          "Dependency injection setup"
         ],
         "stories": [
           {
-            "id": "story-flutter-init",
-            "title": "Initialize Flutter project with pubspec.yaml",
-            "description": "Create new Flutter project, configure pubspec.yaml with dependencies: dio ^5.4.0, riverpod ^2.4.9, go_router ^13.0.0, flutter_secure_storage ^9.0.0, health ^10.0.0, socket_io_client ^2.0.3, fl_chart ^0.66.0, workmanager ^0.5.2, get_it ^7.6.4, injectable ^2.3.2, equatable ^2.0.5, dartz ^0.10.1, intl ^0.18.1",
-            "filesToCreate": [
-              "pubspec.yaml",
-              "analysis_options.yaml"
+            "id": "story-001",
+            "title": "Configure pubspec.yaml with required dependencies",
+            "description": "Add dio, provider, go_router, flutter_secure_storage, flutter_dotenv, health, web_socket_channel, fl_chart, firebase_messaging, intl, equatable packages",
+            "filesToModify": [
+              "pubspec.yaml"
             ],
             "priority": 1,
             "complexity": "simple"
           },
           {
-            "id": "story-core-structure",
-            "title": "Create core folder structure and base classes",
-            "description": "Set up lib/core/ with di/, network/, errors/, utils/, config/ directories. Create Failure classes (ServerFailure, CacheFailure, NetworkFailure), Exception classes (ServerException, CacheException), and base UseCase class",
+            "id": "story-002",
+            "title": "Create core folder structure and constants",
+            "description": "Setup lib/core/ with constants, config, errors, network, storage, utils, extensions folders and base files",
             "filesToCreate": [
-              "lib/core/di/injection_container.dart",
-              "lib/core/di/register_module.dart",
-              "lib/core/errors/exceptions.dart",
-              "lib/core/errors/failures.dart",
-              "lib/core/errors/error_handler.dart",
-              "lib/core/utils/constants.dart",
-              "lib/core/config/app_config.dart",
-              "lib/core/config/environment.dart"
+              "lib/core/constants/app_constants.dart",
+              "lib/core/constants/api_endpoints.dart"
             ],
             "priority": 2,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-dio-setup",
-            "title": "Configure Dio HTTP client with interceptors",
-            "description": "Create DioClient singleton with base URL from environment. Implement AuthInterceptor (add Bearer token to requests), ErrorInterceptor (convert DioException to ServerException), LoggingInterceptor (debug request/response). Define ApiEndpoints class with constants matching backend: auth, steps, sharing, goals, users",
-            "filesToCreate": [
-              "lib/core/network/dio_client.dart",
-              "lib/core/network/api_endpoints.dart",
-              "lib/core/network/api_response.dart",
-              "lib/core/network/interceptors/auth_interceptor.dart",
-              "lib/core/network/interceptors/error_interceptor.dart",
-              "lib/core/network/interceptors/logging_interceptor.dart"
-            ],
-            "priority": 3,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-utils",
-            "title": "Create utility classes and extensions",
-            "description": "Implement Validators (email, password, username matching backend rules), DateUtils (formatting YYYY-MM-DD, hour extraction), String/BuildContext extensions for convenience methods",
-            "filesToCreate": [
-              "lib/core/utils/validators.dart",
-              "lib/core/utils/extensions.dart",
-              "lib/core/utils/date_utils.dart"
-            ],
-            "priority": 4,
             "complexity": "simple"
           },
           {
-            "id": "story-main-entry",
-            "title": "Create main.dart with app initialization",
-            "description": "Configure main.dart with ProviderScope wrapper, dependency injection initialization via configureDependencies(), and runApp with App widget",
+            "id": "story-003",
+            "title": "Implement environment configuration",
+            "description": "Create environment handling with flutter_dotenv for API_BASE_URL, WS_URL, feature flags",
             "filesToCreate": [
-              "lib/main.dart"
+              "lib/core/config/environment.dart",
+              "lib/core/config/app_config.dart",
+              "assets/.env",
+              "assets/.env.example"
+            ],
+            "priority": 3,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-004",
+            "title": "Implement API client with Dio",
+            "description": "Create DioClient with interceptors for auth token injection, error handling, retry logic, logging",
+            "filesToCreate": [
+              "lib/core/network/api_client.dart",
+              "lib/core/network/dio_client.dart",
+              "lib/core/network/network_info.dart"
+            ],
+            "priority": 4,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-005",
+            "title": "Create error handling infrastructure",
+            "description": "Implement AppException, Failure classes, and Result pattern for API responses",
+            "filesToCreate": [
+              "lib/core/errors/app_exception.dart",
+              "lib/core/errors/failure.dart"
             ],
             "priority": 5,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-006",
+            "title": "Setup secure storage service",
+            "description": "Implement SecureStorage wrapper for flutter_secure_storage to persist tokens",
+            "filesToCreate": [
+              "lib/core/storage/secure_storage.dart"
+            ],
+            "priority": 6,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-007",
+            "title": "Create utility classes and extensions",
+            "description": "Add Logger, Validators, String/DateTime extensions for common operations",
+            "filesToCreate": [
+              "lib/core/utils/logger.dart",
+              "lib/core/utils/validators.dart",
+              "lib/core/extensions/string_extensions.dart",
+              "lib/core/extensions/datetime_extensions.dart"
+            ],
+            "priority": 7,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-008",
+            "title": "Setup dependency injection container",
+            "description": "Create injection_container.dart with GetIt or Provider setup for all services",
+            "filesToCreate": [
+              "lib/injection_container.dart"
+            ],
+            "priority": 8,
             "complexity": "simple"
           }
         ],
@@ -127,188 +153,210 @@
       },
       {
         "id": "epic-platform-config",
-        "title": "Platform Configuration - iOS/Android Health API Setup",
-        "description": "Configure iOS and Android platform-specific files for health data access. iOS: Info.plist with NSHealthShareUsageDescription/NSHealthUpdateUsageDescription, Runner.entitlements with HealthKit capability, Podfile with health package. Android: AndroidManifest.xml with ACTIVITY_RECOGNITION and health permissions, build.gradle with compileSdk 34+ for Health Connect, gradle configurations",
+        "title": "Platform Configuration - iOS & Android Health Permissions",
+        "description": "Configure iOS Info.plist for HealthKit permissions, Android AndroidManifest.xml for Google Fit/Health Connect permissions, setup platform-specific build configurations",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
-        "filesToModify": [],
-        "filesToCreate": [
+        "filesToModify": [
           "ios/Runner/Info.plist",
-          "ios/Runner/Runner.entitlements",
-          "ios/Runner/DebugProfile.entitlements",
-          "ios/Podfile",
           "android/app/src/main/AndroidManifest.xml",
-          "android/app/build.gradle",
-          "android/build.gradle",
-          "android/settings.gradle",
-          "android/gradle.properties",
-          "lib/core/platform/health_permissions.dart",
-          "lib/core/platform/platform_info.dart"
+          "android/app/build.gradle.kts"
         ],
-        "filesToRead": [],
+        "filesToCreate": [
+          "ios/Runner/Runner.entitlements",
+          "lib/core/platform/health_permissions.dart",
+          "lib/core/platform/platform_service.dart"
+        ],
+        "filesToRead": [
+          "ios/Runner/Info.plist",
+          "android/app/src/main/AndroidManifest.xml"
+        ],
         "estimatedComplexity": "moderate",
         "dependencies": [
           "epic-flutter-foundation"
         ],
         "executionOrder": 1,
         "followsPatterns": [
-          "iOS HealthKit requires entitlements and usage descriptions",
-          "Android Health Connect requires minSdk 26 and compileSdk 34",
-          "Platform-specific permission handling with graceful degradation"
+          "Platform-specific configurations",
+          "Health API permission declarations"
         ],
         "stories": [
           {
-            "id": "story-ios-healthkit",
+            "id": "story-009",
             "title": "Configure iOS HealthKit permissions",
-            "description": "Create Info.plist with NSHealthShareUsageDescription ('Pasos needs to read your step data'), NSHealthUpdateUsageDescription ('Pasos saves your step data'). Create Runner.entitlements enabling HealthKit capability. Configure Podfile with platform :ios, '13.0' minimum and health package pod",
+            "description": "Add NSHealthShareUsageDescription, NSHealthUpdateUsageDescription to Info.plist, create Runner.entitlements with HealthKit capability",
+            "filesToModify": [
+              "ios/Runner/Info.plist"
+            ],
             "filesToCreate": [
-              "ios/Runner/Info.plist",
-              "ios/Runner/Runner.entitlements",
-              "ios/Runner/DebugProfile.entitlements",
-              "ios/Podfile"
+              "ios/Runner/Runner.entitlements"
             ],
             "priority": 1,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-android-health",
+            "id": "story-010",
             "title": "Configure Android Health Connect permissions",
-            "description": "Create AndroidManifest.xml with permissions: ACTIVITY_RECOGNITION, BODY_SENSORS, health.permission.STEPS_READ, health.permission.STEPS_WRITE. Configure build.gradle with compileSdk 34, minSdk 26. Set up gradle.properties and settings.gradle for Health Connect compatibility",
-            "filesToCreate": [
+            "description": "Add ACTIVITY_RECOGNITION, BODY_SENSORS permissions to AndroidManifest.xml, configure Health Connect intent filters",
+            "filesToModify": [
               "android/app/src/main/AndroidManifest.xml",
-              "android/app/build.gradle",
-              "android/build.gradle",
-              "android/settings.gradle",
-              "android/gradle.properties"
+              "android/app/build.gradle.kts"
             ],
             "priority": 2,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-platform-utils",
-            "title": "Create platform-specific utilities",
-            "description": "Create HealthPermissions class for requesting/checking health permissions with platform-specific handling. Create PlatformInfo utility for detecting iOS vs Android and available health features",
+            "id": "story-011",
+            "title": "Create platform permission service",
+            "description": "Implement HealthPermissions service to check and request health data permissions on both platforms",
             "filesToCreate": [
               "lib/core/platform/health_permissions.dart",
-              "lib/core/platform/platform_info.dart"
+              "lib/core/platform/platform_service.dart"
             ],
             "priority": 3,
-            "complexity": "simple"
+            "complexity": "moderate"
           }
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-ui-foundation",
-        "title": "UI Foundation - Design System and Navigation",
-        "description": "Implement Material Design 3 theming with light/dark modes using ColorScheme.fromSeed. Create go_router navigation configuration with auth guards. Build comprehensive reusable widget library including buttons, text fields, cards, loading states, error displays, and step-specific components",
+        "title": "UI Foundation - Design System & Navigation",
+        "description": "Implement Material Design 3 theme system with light/dark mode, configure go_router for navigation, create reusable widget library (buttons, inputs, cards, loading states), setup responsive layouts",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
-        "filesToModify": [],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
         "filesToCreate": [
           "lib/core/theme/app_theme.dart",
           "lib/core/theme/app_colors.dart",
-          "lib/core/theme/app_text_styles.dart",
+          "lib/core/theme/app_typography.dart",
           "lib/core/theme/app_spacing.dart",
-          "lib/core/theme/app_decorations.dart",
           "lib/core/router/app_router.dart",
           "lib/core/router/route_names.dart",
           "lib/core/router/route_guards.dart",
-          "lib/core/router/route_transitions.dart",
-          "lib/shared/widgets/app_button.dart",
-          "lib/shared/widgets/app_text_field.dart",
-          "lib/shared/widgets/app_card.dart",
-          "lib/shared/widgets/loading_indicator.dart",
-          "lib/shared/widgets/error_widget.dart",
+          "lib/shared/widgets/buttons/primary_button.dart",
+          "lib/shared/widgets/buttons/secondary_button.dart",
+          "lib/shared/widgets/buttons/icon_button_widget.dart",
+          "lib/shared/widgets/inputs/text_input.dart",
+          "lib/shared/widgets/inputs/password_input.dart",
+          "lib/shared/widgets/inputs/search_input.dart",
+          "lib/shared/widgets/cards/info_card.dart",
+          "lib/shared/widgets/cards/stat_card.dart",
+          "lib/shared/widgets/loading/loading_indicator.dart",
+          "lib/shared/widgets/loading/shimmer_loading.dart",
           "lib/shared/widgets/empty_state.dart",
-          "lib/shared/widgets/avatar_widget.dart",
-          "lib/shared/widgets/step_counter_display.dart",
-          "lib/shared/widgets/progress_ring.dart",
-          "lib/shared/widgets/pull_to_refresh.dart",
+          "lib/shared/widgets/error_state.dart",
           "lib/shared/widgets/app_scaffold.dart",
+          "lib/shared/widgets/bottom_nav_bar.dart",
           "lib/app.dart"
         ],
-        "filesToRead": [],
+        "filesToRead": [
+          "lib/main.dart"
+        ],
         "estimatedComplexity": "moderate",
         "dependencies": [
+          "epic-flutter-foundation",
           "epic-flutter-foundation"
         ],
-        "executionOrder": 1,
+        "executionOrder": 2,
         "followsPatterns": [
-          "Material Design 3 with dynamic color",
-          "ThemeData with seedColor for consistent palette",
-          "go_router with ShellRoute for bottom navigation",
-          "Reusable widgets with consistent API"
+          "Material Design 3 with ColorScheme",
+          "go_router for declarative routing",
+          "Reusable widget components"
         ],
         "stories": [
           {
-            "id": "story-theme-setup",
-            "title": "Create Material Design 3 theme system",
-            "description": "Implement AppTheme class with lightTheme and darkTheme using ColorScheme.fromSeed(seedColor: primaryColor). Create AppColors with semantic tokens (primary, secondary, error, surface, background). Create AppTextStyles with Material 3 typography scale. Create AppSpacing with 4px base unit (xs:4, sm:8, md:16, lg:24, xl:32). Create AppDecorations for common BoxDecoration patterns",
+            "id": "story-012",
+            "title": "Implement Material Design 3 theme system",
+            "description": "Create AppTheme with light/dark ThemeData using ColorScheme.fromSeed, custom colors, typography scales",
             "filesToCreate": [
               "lib/core/theme/app_theme.dart",
               "lib/core/theme/app_colors.dart",
-              "lib/core/theme/app_text_styles.dart",
-              "lib/core/theme/app_spacing.dart",
-              "lib/core/theme/app_decorations.dart"
+              "lib/core/theme/app_typography.dart",
+              "lib/core/theme/app_spacing.dart"
             ],
             "priority": 1,
             "complexity": "moderate"
           },
           {
-            "id": "story-router-setup",
-            "title": "Configure go_router navigation",
-            "description": "Create AppRouter with GoRouter configuration. Define RouteNames constants: splash, login, register, forgotPassword, dashboard, history, stats, friends, friendRequests, searchUsers, friendProfile, goals, goalDetail, createGoal, inviteMembers, healthSetup, settings. Create AuthGuard redirect logic checking auth state. Create RouteTransitions for consistent page animations",
+            "id": "story-013",
+            "title": "Setup go_router navigation",
+            "description": "Configure AppRouter with routes for auth, dashboard, sharing, goals screens, implement RouteGuards for authentication",
             "filesToCreate": [
               "lib/core/router/app_router.dart",
               "lib/core/router/route_names.dart",
-              "lib/core/router/route_guards.dart",
-              "lib/core/router/route_transitions.dart"
+              "lib/core/router/route_guards.dart"
             ],
             "priority": 2,
             "complexity": "moderate"
           },
           {
-            "id": "story-base-widgets",
-            "title": "Build base reusable widgets",
-            "description": "Create AppButton with variants (primary, secondary, outline, text) and states (loading, disabled). Create AppTextField with label, hint, error, prefix/suffix icons, obscure text support. Create AppCard with elevation and padding options. Create LoadingIndicator (circular, linear). Create AppErrorWidget with retry callback. Create EmptyState with icon, title, subtitle, action button",
+            "id": "story-014",
+            "title": "Create button widgets library",
+            "description": "Implement PrimaryButton, SecondaryButton, IconButtonWidget with loading states and disabled states",
             "filesToCreate": [
-              "lib/shared/widgets/app_button.dart",
-              "lib/shared/widgets/app_text_field.dart",
-              "lib/shared/widgets/app_card.dart",
-              "lib/shared/widgets/loading_indicator.dart",
-              "lib/shared/widgets/error_widget.dart",
-              "lib/shared/widgets/empty_state.dart"
+              "lib/shared/widgets/buttons/primary_button.dart",
+              "lib/shared/widgets/buttons/secondary_button.dart",
+              "lib/shared/widgets/buttons/icon_button_widget.dart"
             ],
             "priority": 3,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-specialized-widgets",
-            "title": "Build step-specific widgets",
-            "description": "Create AvatarWidget with initials fallback and optional online indicator. Create StepCounterDisplay with animated number transition and optional goal progress. Create ProgressRing with percentage and color customization. Create PullToRefresh wrapper widget. Create AppScaffold with consistent app bar and optional bottom navigation",
+            "id": "story-015",
+            "title": "Create input widgets library",
+            "description": "Implement TextInput, PasswordInput, SearchInput with validation support and error states",
             "filesToCreate": [
-              "lib/shared/widgets/avatar_widget.dart",
-              "lib/shared/widgets/step_counter_display.dart",
-              "lib/shared/widgets/progress_ring.dart",
-              "lib/shared/widgets/pull_to_refresh.dart",
-              "lib/shared/widgets/app_scaffold.dart"
+              "lib/shared/widgets/inputs/text_input.dart",
+              "lib/shared/widgets/inputs/password_input.dart",
+              "lib/shared/widgets/inputs/search_input.dart"
             ],
             "priority": 4,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-app-widget",
-            "title": "Create root App widget",
-            "description": "Create app.dart with MaterialApp.router, ThemeMode provider for dark/light switching, GoRouter configuration, and global error handling",
+            "id": "story-016",
+            "title": "Create card and display widgets",
+            "description": "Implement InfoCard, StatCard for displaying data, LoadingIndicator, ShimmerLoading for loading states",
+            "filesToCreate": [
+              "lib/shared/widgets/cards/info_card.dart",
+              "lib/shared/widgets/cards/stat_card.dart",
+              "lib/shared/widgets/loading/loading_indicator.dart",
+              "lib/shared/widgets/loading/shimmer_loading.dart"
+            ],
+            "priority": 5,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-017",
+            "title": "Create layout widgets",
+            "description": "Implement EmptyState, ErrorState for edge cases, AppScaffold with common layout, BottomNavBar for main navigation",
+            "filesToCreate": [
+              "lib/shared/widgets/empty_state.dart",
+              "lib/shared/widgets/error_state.dart",
+              "lib/shared/widgets/app_scaffold.dart",
+              "lib/shared/widgets/bottom_nav_bar.dart"
+            ],
+            "priority": 6,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-018",
+            "title": "Create App widget with providers",
+            "description": "Implement App widget in app.dart with MaterialApp.router, theme, and provider setup, update main.dart",
             "filesToCreate": [
               "lib/app.dart"
             ],
-            "priority": 5,
+            "filesToModify": [
+              "lib/main.dart"
+            ],
+            "priority": 7,
             "complexity": "simple"
           }
         ],
@@ -316,8 +364,8 @@
       },
       {
         "id": "epic-auth-ui",
-        "title": "Auth UI - Authentication Screens and State Management",
-        "description": "Implement complete authentication flow with login, registration, and password recovery screens. Create auth state management using Riverpod StateNotifier. Implement secure token storage with flutter_secure_storage and automatic token refresh. Integrate with backend POST /api/auth/register, POST /api/auth/login, POST /api/auth/refresh, GET /api/auth/me endpoints",
+        "title": "Auth UI - Authentication Screens & State Management",
+        "description": "Implement login, registration, password recovery screens, create auth state management with Provider, integrate with backend auth API, implement secure token storage and auto-refresh",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -326,32 +374,28 @@
           "lib/core/router/app_router.dart"
         ],
         "filesToCreate": [
-          "lib/features/auth/data/datasources/auth_remote_datasource.dart",
-          "lib/features/auth/data/datasources/auth_local_datasource.dart",
-          "lib/features/auth/data/repositories/auth_repository_impl.dart",
           "lib/features/auth/data/models/user_model.dart",
           "lib/features/auth/data/models/auth_tokens_model.dart",
+          "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+          "lib/features/auth/data/repositories/auth_repository_impl.dart",
           "lib/features/auth/domain/entities/user.dart",
           "lib/features/auth/domain/entities/auth_tokens.dart",
           "lib/features/auth/domain/repositories/auth_repository.dart",
           "lib/features/auth/domain/usecases/login_usecase.dart",
           "lib/features/auth/domain/usecases/register_usecase.dart",
-          "lib/features/auth/domain/usecases/logout_usecase.dart",
-          "lib/features/auth/domain/usecases/get_current_user_usecase.dart",
           "lib/features/auth/domain/usecases/refresh_token_usecase.dart",
+          "lib/features/auth/domain/usecases/get_current_user_usecase.dart",
           "lib/features/auth/presentation/providers/auth_provider.dart",
-          "lib/features/auth/presentation/providers/auth_state.dart",
           "lib/features/auth/presentation/screens/login_screen.dart",
           "lib/features/auth/presentation/screens/register_screen.dart",
           "lib/features/auth/presentation/screens/forgot_password_screen.dart",
           "lib/features/auth/presentation/screens/splash_screen.dart",
-          "lib/features/auth/presentation/widgets/auth_form_field.dart",
-          "lib/features/auth/presentation/widgets/social_login_button.dart"
+          "lib/features/auth/presentation/widgets/auth_form.dart",
+          "lib/features/auth/presentation/widgets/social_login_buttons.dart"
         ],
         "filesToRead": [
           "project-app-pasos-backend/src/routes/auth.routes.ts",
-          "project-app-pasos-backend/src/models/User.ts",
-          "project-app-pasos-backend/src/services/auth.service.ts"
+          "project-app-pasos-backend/src/models/User.ts"
         ],
         "estimatedComplexity": "complex",
         "dependencies": [
@@ -361,85 +405,117 @@
         ],
         "executionOrder": 2,
         "followsPatterns": [
-          "Clean Architecture data/domain/presentation layers",
-          "Riverpod StateNotifier for auth state",
-          "flutter_secure_storage for token persistence",
-          "Automatic token refresh on 401 response"
+          "Clean architecture layers",
+          "Provider state management",
+          "Secure token storage"
         ],
         "stories": [
           {
-            "id": "story-auth-domain",
-            "title": "Create auth domain layer",
-            "description": "Define User entity (id, username, email, createdAt). Define AuthTokens entity (accessToken, refreshToken, expiresIn). Create AuthRepository interface with login, register, logout, getCurrentUser, refreshToken, isLoggedIn methods. Create use cases: LoginUseCase, RegisterUseCase, LogoutUseCase, GetCurrentUserUseCase, RefreshTokenUseCase",
+            "id": "story-019",
+            "title": "Create auth domain entities and repository interface",
+            "description": "Define User, AuthTokens entities, AuthRepository interface with login, register, refresh, getCurrentUser methods",
             "filesToCreate": [
               "lib/features/auth/domain/entities/user.dart",
               "lib/features/auth/domain/entities/auth_tokens.dart",
-              "lib/features/auth/domain/repositories/auth_repository.dart",
-              "lib/features/auth/domain/usecases/login_usecase.dart",
-              "lib/features/auth/domain/usecases/register_usecase.dart",
-              "lib/features/auth/domain/usecases/logout_usecase.dart",
-              "lib/features/auth/domain/usecases/get_current_user_usecase.dart",
-              "lib/features/auth/domain/usecases/refresh_token_usecase.dart"
+              "lib/features/auth/domain/repositories/auth_repository.dart"
             ],
             "priority": 1,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-auth-data",
-            "title": "Implement auth data layer",
-            "description": "Create UserModel with fromJson/toJson matching backend User. Create AuthTokensModel with fromJson/toJson. Create AuthRemoteDataSource calling POST /api/auth/register (username, email, password), POST /api/auth/login (email, password), POST /api/auth/refresh (refreshToken), GET /api/auth/me. Create AuthLocalDataSource using FlutterSecureStorage for tokens. Create AuthRepositoryImpl combining both datasources",
+            "id": "story-020",
+            "title": "Implement auth data models",
+            "description": "Create UserModel, AuthTokensModel with fromJson/toJson for API serialization",
             "filesToCreate": [
               "lib/features/auth/data/models/user_model.dart",
-              "lib/features/auth/data/models/auth_tokens_model.dart",
-              "lib/features/auth/data/datasources/auth_remote_datasource.dart",
-              "lib/features/auth/data/datasources/auth_local_datasource.dart",
-              "lib/features/auth/data/repositories/auth_repository_impl.dart"
+              "lib/features/auth/data/models/auth_tokens_model.dart"
             ],
             "priority": 2,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-auth-state",
-            "title": "Create auth state management",
-            "description": "Define AuthState sealed class with states: AuthInitial, AuthLoading, Authenticated(user), Unauthenticated, AuthError(message). Create AuthNotifier extending StateNotifier<AuthState> with login, register, logout, checkAuthStatus, refreshToken methods. Create authProvider using StateNotifierProvider",
+            "id": "story-021",
+            "title": "Implement auth remote datasource",
+            "description": "Create AuthRemoteDataSource calling POST /auth/register, /auth/login, /auth/refresh, GET /auth/me",
             "filesToCreate": [
-              "lib/features/auth/presentation/providers/auth_state.dart",
-              "lib/features/auth/presentation/providers/auth_provider.dart"
+              "lib/features/auth/data/datasources/auth_remote_datasource.dart"
             ],
             "priority": 3,
             "complexity": "moderate"
           },
           {
-            "id": "story-login-screen",
-            "title": "Build login screen",
-            "description": "Create LoginScreen with email and password AppTextFields, login AppButton, forgot password link, register navigation link. Validate email format and password not empty. Show loading state during login. Handle errors with SnackBar. Navigate to dashboard on success",
+            "id": "story-022",
+            "title": "Implement auth repository",
+            "description": "Create AuthRepositoryImpl handling API calls, token storage, error mapping",
             "filesToCreate": [
-              "lib/features/auth/presentation/screens/login_screen.dart",
-              "lib/features/auth/presentation/widgets/auth_form_field.dart"
+              "lib/features/auth/data/repositories/auth_repository_impl.dart"
             ],
             "priority": 4,
             "complexity": "moderate"
           },
           {
-            "id": "story-register-screen",
-            "title": "Build registration screen",
-            "description": "Create RegisterScreen with username (3-30 chars, unique check via GET /api/users/check/username/:username), email (valid format, unique check), password (min 6 chars), confirm password fields. Real-time validation with debounce. Show loading, handle errors, navigate to dashboard on success",
+            "id": "story-023",
+            "title": "Create auth use cases",
+            "description": "Implement LoginUseCase, RegisterUseCase, RefreshTokenUseCase, GetCurrentUserUseCase",
             "filesToCreate": [
-              "lib/features/auth/presentation/screens/register_screen.dart"
+              "lib/features/auth/domain/usecases/login_usecase.dart",
+              "lib/features/auth/domain/usecases/register_usecase.dart",
+              "lib/features/auth/domain/usecases/refresh_token_usecase.dart",
+              "lib/features/auth/domain/usecases/get_current_user_usecase.dart"
             ],
             "priority": 5,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-024",
+            "title": "Implement auth provider",
+            "description": "Create AuthProvider with ChangeNotifier managing auth state, auto token refresh, logout",
+            "filesToCreate": [
+              "lib/features/auth/presentation/providers/auth_provider.dart"
+            ],
+            "priority": 6,
             "complexity": "moderate"
           },
           {
-            "id": "story-splash-forgot",
-            "title": "Build splash and forgot password screens",
-            "description": "Create SplashScreen checking stored tokens, attempting auto-login via GET /api/auth/me, redirecting to dashboard or login. Create ForgotPasswordScreen with email input (placeholder for future email recovery implementation)",
+            "id": "story-025",
+            "title": "Implement login screen",
+            "description": "Create LoginScreen with email/password form, validation, error handling, navigation to register",
             "filesToCreate": [
-              "lib/features/auth/presentation/screens/splash_screen.dart",
-              "lib/features/auth/presentation/screens/forgot_password_screen.dart",
-              "lib/features/auth/presentation/widgets/social_login_button.dart"
+              "lib/features/auth/presentation/screens/login_screen.dart"
             ],
-            "priority": 6,
+            "priority": 7,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-026",
+            "title": "Implement register screen",
+            "description": "Create RegisterScreen with username/email/password form, username availability check, validation",
+            "filesToCreate": [
+              "lib/features/auth/presentation/screens/register_screen.dart"
+            ],
+            "priority": 8,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-027",
+            "title": "Implement forgot password and splash screens",
+            "description": "Create ForgotPasswordScreen, SplashScreen for initial auth check and navigation",
+            "filesToCreate": [
+              "lib/features/auth/presentation/screens/forgot_password_screen.dart",
+              "lib/features/auth/presentation/screens/splash_screen.dart"
+            ],
+            "priority": 9,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-028",
+            "title": "Create auth form widgets",
+            "description": "Implement reusable AuthForm widget, SocialLoginButtons placeholder for future OAuth",
+            "filesToCreate": [
+              "lib/features/auth/presentation/widgets/auth_form.dart",
+              "lib/features/auth/presentation/widgets/social_login_buttons.dart"
+            ],
+            "priority": 10,
             "complexity": "simple"
           }
         ],
@@ -447,8 +523,8 @@
       },
       {
         "id": "epic-dashboard",
-        "title": "Dashboard - Step Counter and Activity Visualization",
-        "description": "Build main dashboard showing real-time step count with animated counter, daily goal progress ring, weekly step trend bar chart, hourly activity line chart, and comprehensive statistics. Implement pull-to-refresh for data updates. Integrate with backend GET /api/steps/today, GET /api/steps/weekly, GET /api/steps/hourly-peaks, GET /api/steps/stats, POST /api/steps endpoints",
+        "title": "Dashboard - Step Counter & Activity History",
+        "description": "Implement main dashboard with real-time step counter display, daily/weekly/monthly charts using fl_chart, pull-to-refresh for data sync, activity history list, step recording functionality",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -457,38 +533,32 @@
           "lib/core/router/app_router.dart"
         ],
         "filesToCreate": [
-          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
-          "lib/features/dashboard/data/repositories/steps_repository_impl.dart",
-          "lib/features/dashboard/data/models/step_record_model.dart",
-          "lib/features/dashboard/data/models/step_stats_model.dart",
-          "lib/features/dashboard/data/models/weekly_trend_model.dart",
-          "lib/features/dashboard/data/models/hourly_peak_model.dart",
-          "lib/features/dashboard/domain/entities/step_record.dart",
-          "lib/features/dashboard/domain/entities/step_stats.dart",
-          "lib/features/dashboard/domain/entities/weekly_trend.dart",
-          "lib/features/dashboard/domain/entities/hourly_peak.dart",
-          "lib/features/dashboard/domain/repositories/steps_repository.dart",
-          "lib/features/dashboard/domain/usecases/get_today_steps_usecase.dart",
-          "lib/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart",
-          "lib/features/dashboard/domain/usecases/get_hourly_peaks_usecase.dart",
-          "lib/features/dashboard/domain/usecases/get_stats_usecase.dart",
-          "lib/features/dashboard/domain/usecases/record_steps_usecase.dart",
-          "lib/features/dashboard/presentation/providers/dashboard_provider.dart",
-          "lib/features/dashboard/presentation/providers/dashboard_state.dart",
-          "lib/features/dashboard/presentation/screens/dashboard_screen.dart",
-          "lib/features/dashboard/presentation/screens/history_screen.dart",
-          "lib/features/dashboard/presentation/screens/stats_screen.dart",
-          "lib/features/dashboard/presentation/widgets/step_counter_card.dart",
-          "lib/features/dashboard/presentation/widgets/weekly_chart.dart",
-          "lib/features/dashboard/presentation/widgets/hourly_chart.dart",
-          "lib/features/dashboard/presentation/widgets/stats_card.dart",
-          "lib/features/dashboard/presentation/widgets/activity_list_item.dart",
-          "lib/features/dashboard/presentation/widgets/daily_goal_ring.dart"
+          "lib/features/steps/data/models/step_model.dart",
+          "lib/features/steps/data/models/step_stats_model.dart",
+          "lib/features/steps/data/models/weekly_trend_model.dart",
+          "lib/features/steps/data/datasources/steps_remote_datasource.dart",
+          "lib/features/steps/data/repositories/steps_repository_impl.dart",
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/domain/entities/step_stats.dart",
+          "lib/features/steps/domain/entities/weekly_trend.dart",
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/features/steps/domain/usecases/get_today_steps_usecase.dart",
+          "lib/features/steps/domain/usecases/get_weekly_trend_usecase.dart",
+          "lib/features/steps/domain/usecases/record_steps_usecase.dart",
+          "lib/features/steps/domain/usecases/get_stats_usecase.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/presentation/screens/dashboard_screen.dart",
+          "lib/features/steps/presentation/screens/history_screen.dart",
+          "lib/features/steps/presentation/widgets/step_counter_card.dart",
+          "lib/features/steps/presentation/widgets/daily_progress_ring.dart",
+          "lib/features/steps/presentation/widgets/weekly_chart.dart",
+          "lib/features/steps/presentation/widgets/hourly_chart.dart",
+          "lib/features/steps/presentation/widgets/stats_summary.dart",
+          "lib/features/steps/presentation/widgets/activity_list_item.dart"
         ],
         "filesToRead": [
           "project-app-pasos-backend/src/routes/steps.routes.ts",
-          "project-app-pasos-backend/src/models/Step.ts",
-          "project-app-pasos-backend/src/services/steps.service.ts"
+          "project-app-pasos-backend/src/models/Step.ts"
         ],
         "estimatedComplexity": "complex",
         "dependencies": [
@@ -498,91 +568,130 @@
         ],
         "executionOrder": 2,
         "followsPatterns": [
-          "fl_chart for BarChart and LineChart visualization",
-          "AnimatedBuilder for smooth number transitions",
-          "RefreshIndicator for pull-to-refresh",
-          "Step source types: native, manual, web"
+          "Clean architecture layers",
+          "fl_chart for data visualization",
+          "Pull-to-refresh pattern"
         ],
         "stories": [
           {
-            "id": "story-steps-domain",
-            "title": "Create steps domain layer",
-            "description": "Define StepRecord entity (id, count, timestamp, source, hour, date). Define StepStats (todaySteps, weeklySteps, monthlySteps, allTimeSteps, averageDaily). Define WeeklyTrend (date, totalSteps). Define HourlyPeak (hour, steps). Create StepsRepository interface and use cases for getTodaySteps, getWeeklyTrend, getHourlyPeaks(date), getStats, recordSteps(count, source)",
+            "id": "story-029",
+            "title": "Create steps domain entities and repository",
+            "description": "Define StepRecord, StepStats, WeeklyTrend entities, StepsRepository interface",
             "filesToCreate": [
-              "lib/features/dashboard/domain/entities/step_record.dart",
-              "lib/features/dashboard/domain/entities/step_stats.dart",
-              "lib/features/dashboard/domain/entities/weekly_trend.dart",
-              "lib/features/dashboard/domain/entities/hourly_peak.dart",
-              "lib/features/dashboard/domain/repositories/steps_repository.dart",
-              "lib/features/dashboard/domain/usecases/get_today_steps_usecase.dart",
-              "lib/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart",
-              "lib/features/dashboard/domain/usecases/get_hourly_peaks_usecase.dart",
-              "lib/features/dashboard/domain/usecases/get_stats_usecase.dart",
-              "lib/features/dashboard/domain/usecases/record_steps_usecase.dart"
+              "lib/features/steps/domain/entities/step_record.dart",
+              "lib/features/steps/domain/entities/step_stats.dart",
+              "lib/features/steps/domain/entities/weekly_trend.dart",
+              "lib/features/steps/domain/repositories/steps_repository.dart"
             ],
             "priority": 1,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-steps-data",
-            "title": "Implement steps data layer",
-            "description": "Create StepRecordModel, StepStatsModel, WeeklyTrendModel, HourlyPeakModel with JSON serialization matching backend responses. Create StepsRemoteDataSource calling GET /api/steps/today, /weekly, /hourly-peaks?date=, /stats, POST /api/steps. Create StepsRepositoryImpl",
+            "id": "story-030",
+            "title": "Implement steps data models",
+            "description": "Create StepModel, StepStatsModel, WeeklyTrendModel with JSON serialization",
             "filesToCreate": [
-              "lib/features/dashboard/data/models/step_record_model.dart",
-              "lib/features/dashboard/data/models/step_stats_model.dart",
-              "lib/features/dashboard/data/models/weekly_trend_model.dart",
-              "lib/features/dashboard/data/models/hourly_peak_model.dart",
-              "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
-              "lib/features/dashboard/data/repositories/steps_repository_impl.dart"
+              "lib/features/steps/data/models/step_model.dart",
+              "lib/features/steps/data/models/step_stats_model.dart",
+              "lib/features/steps/data/models/weekly_trend_model.dart"
             ],
             "priority": 2,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-dashboard-state",
-            "title": "Create dashboard state management",
-            "description": "Define DashboardState with todaySteps, dailyGoal (default 10000), weeklyTrend list, hourlyPeaks list, stats, isLoading, error. Create DashboardNotifier with loadDashboard, refreshData, setDailyGoal methods. Cache last fetch time to prevent excessive refreshes",
+            "id": "story-031",
+            "title": "Implement steps remote datasource",
+            "description": "Create StepsRemoteDataSource calling GET /steps/today, /steps/weekly, /steps/stats, POST /steps",
             "filesToCreate": [
-              "lib/features/dashboard/presentation/providers/dashboard_state.dart",
-              "lib/features/dashboard/presentation/providers/dashboard_provider.dart"
+              "lib/features/steps/data/datasources/steps_remote_datasource.dart"
             ],
             "priority": 3,
             "complexity": "moderate"
           },
           {
-            "id": "story-dashboard-screen",
-            "title": "Build main dashboard screen",
-            "description": "Create DashboardScreen with StepCounterCard (large animated step count, daily goal progress ring, percentage), quick stats row (weekly total, average daily), mini weekly chart preview, bottom navigation bar (Dashboard, Friends, Goals, Profile tabs)",
+            "id": "story-032",
+            "title": "Implement steps repository",
+            "description": "Create StepsRepositoryImpl with caching strategy for offline support",
             "filesToCreate": [
-              "lib/features/dashboard/presentation/screens/dashboard_screen.dart",
-              "lib/features/dashboard/presentation/widgets/step_counter_card.dart",
-              "lib/features/dashboard/presentation/widgets/daily_goal_ring.dart",
-              "lib/features/dashboard/presentation/widgets/stats_card.dart"
+              "lib/features/steps/data/repositories/steps_repository_impl.dart"
             ],
             "priority": 4,
             "complexity": "moderate"
           },
           {
-            "id": "story-charts",
-            "title": "Build fl_chart visualizations",
-            "description": "Create WeeklyChart as BarChart showing 7 days with day abbreviations (Mon, Tue...), touch tooltip for exact values, color gradient. Create HourlyChart as LineChart showing 0-23 hours, smooth curve, gradient fill area, current hour indicator",
+            "id": "story-033",
+            "title": "Create steps use cases",
+            "description": "Implement GetTodayStepsUseCase, GetWeeklyTrendUseCase, RecordStepsUseCase, GetStatsUseCase",
             "filesToCreate": [
-              "lib/features/dashboard/presentation/widgets/weekly_chart.dart",
-              "lib/features/dashboard/presentation/widgets/hourly_chart.dart"
+              "lib/features/steps/domain/usecases/get_today_steps_usecase.dart",
+              "lib/features/steps/domain/usecases/get_weekly_trend_usecase.dart",
+              "lib/features/steps/domain/usecases/record_steps_usecase.dart",
+              "lib/features/steps/domain/usecases/get_stats_usecase.dart"
             ],
             "priority": 5,
-            "complexity": "complex"
+            "complexity": "simple"
           },
           {
-            "id": "story-history-stats",
-            "title": "Build history and stats screens",
-            "description": "Create HistoryScreen with date-grouped ListView of ActivityListItem (time, steps, source icon). Create StatsScreen with detailed StatsCards for today, this week, this month, all time, best day ever, current streak",
+            "id": "story-034",
+            "title": "Implement steps provider",
+            "description": "Create StepsProvider managing step data state, refresh logic, sync with health APIs",
             "filesToCreate": [
-              "lib/features/dashboard/presentation/screens/history_screen.dart",
-              "lib/features/dashboard/presentation/screens/stats_screen.dart",
-              "lib/features/dashboard/presentation/widgets/activity_list_item.dart"
+              "lib/features/steps/presentation/providers/steps_provider.dart"
             ],
             "priority": 6,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-035",
+            "title": "Implement step counter widgets",
+            "description": "Create StepCounterCard with animated counter, DailyProgressRing with circular progress",
+            "filesToCreate": [
+              "lib/features/steps/presentation/widgets/step_counter_card.dart",
+              "lib/features/steps/presentation/widgets/daily_progress_ring.dart"
+            ],
+            "priority": 7,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-036",
+            "title": "Implement chart widgets",
+            "description": "Create WeeklyChart bar chart, HourlyChart line chart using fl_chart",
+            "filesToCreate": [
+              "lib/features/steps/presentation/widgets/weekly_chart.dart",
+              "lib/features/steps/presentation/widgets/hourly_chart.dart"
+            ],
+            "priority": 8,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-037",
+            "title": "Implement stats and activity widgets",
+            "description": "Create StatsSummary showing totals/averages, ActivityListItem for history",
+            "filesToCreate": [
+              "lib/features/steps/presentation/widgets/stats_summary.dart",
+              "lib/features/steps/presentation/widgets/activity_list_item.dart"
+            ],
+            "priority": 9,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-038",
+            "title": "Implement dashboard screen",
+            "description": "Create DashboardScreen with step counter, progress ring, charts, pull-to-refresh",
+            "filesToCreate": [
+              "lib/features/steps/presentation/screens/dashboard_screen.dart"
+            ],
+            "priority": 10,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-039",
+            "title": "Implement history screen",
+            "description": "Create HistoryScreen with paginated activity list, date filtering",
+            "filesToCreate": [
+              "lib/features/steps/presentation/screens/history_screen.dart"
+            ],
+            "priority": 11,
             "complexity": "moderate"
           }
         ],
@@ -590,8 +699,8 @@
       },
       {
         "id": "epic-sharing-ui",
-        "title": "Sharing UI - Friends and Social Activity",
-        "description": "Implement complete social features including friends list with activity preview, friend request management (incoming/outgoing), user search with debounce, and friend profile view with shared statistics. Integrate with backend GET/POST /api/sharing/*, GET /api/users/search endpoints",
+        "title": "Sharing UI - Friends & Social Features",
+        "description": "Implement friends list, user search, sharing request management (send, accept, reject), view friend activity, shared step statistics display",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -600,35 +709,30 @@
           "lib/core/router/app_router.dart"
         ],
         "filesToCreate": [
-          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
-          "lib/features/sharing/data/datasources/users_remote_datasource.dart",
-          "lib/features/sharing/data/repositories/sharing_repository_impl.dart",
           "lib/features/sharing/data/models/sharing_relationship_model.dart",
           "lib/features/sharing/data/models/shared_user_stats_model.dart",
-          "lib/features/sharing/data/models/user_search_result_model.dart",
+          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
+          "lib/features/sharing/data/repositories/sharing_repository_impl.dart",
           "lib/features/sharing/domain/entities/sharing_relationship.dart",
-          "lib/features/sharing/domain/entities/shared_user_stats.dart",
-          "lib/features/sharing/domain/entities/user_search_result.dart",
+          "lib/features/sharing/domain/entities/shared_user.dart",
           "lib/features/sharing/domain/repositories/sharing_repository.dart",
           "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
           "lib/features/sharing/domain/usecases/send_request_usecase.dart",
           "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
           "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart",
-          "lib/features/sharing/domain/usecases/get_shared_stats_usecase.dart",
-          "lib/features/sharing/domain/usecases/search_users_usecase.dart",
+          "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart",
           "lib/features/sharing/presentation/providers/sharing_provider.dart",
-          "lib/features/sharing/presentation/providers/sharing_state.dart",
-          "lib/features/sharing/presentation/providers/user_search_provider.dart",
           "lib/features/sharing/presentation/screens/friends_screen.dart",
-          "lib/features/sharing/presentation/screens/friend_requests_screen.dart",
-          "lib/features/sharing/presentation/screens/search_users_screen.dart",
-          "lib/features/sharing/presentation/screens/friend_profile_screen.dart",
-          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/sharing/presentation/screens/friend_detail_screen.dart",
+          "lib/features/sharing/presentation/screens/add_friend_screen.dart",
+          "lib/features/sharing/presentation/screens/requests_screen.dart",
+          "lib/features/sharing/presentation/widgets/friend_list_item.dart",
           "lib/features/sharing/presentation/widgets/friend_request_card.dart",
-          "lib/features/sharing/presentation/widgets/user_search_result_tile.dart",
-          "lib/features/sharing/presentation/widgets/friend_activity_card.dart",
-          "lib/features/sharing/presentation/widgets/relationship_status_badge.dart"
+          "lib/features/sharing/presentation/widgets/user_search_result.dart",
+          "lib/features/sharing/presentation/widgets/friend_stats_card.dart",
+          "lib/features/users/data/datasources/users_remote_datasource.dart",
+          "lib/features/users/data/models/user_search_model.dart",
+          "lib/features/users/domain/usecases/search_users_usecase.dart"
         ],
         "filesToRead": [
           "project-app-pasos-backend/src/routes/sharing.routes.ts",
@@ -639,97 +743,137 @@
         "dependencies": [
           "epic-auth-ui",
           "epic-ui-foundation",
+          "epic-dashboard",
           "epic-ui-foundation"
         ],
         "executionOrder": 2,
         "followsPatterns": [
-          "Search debounce with Timer (300ms delay)",
-          "Relationship status: pending, accepted, bidirectional, rejected",
-          "Tab-based UI for incoming/outgoing requests",
-          "Pull-to-refresh for friends list"
+          "Clean architecture layers",
+          "Search with debounce",
+          "Pull-to-refresh for lists"
         ],
         "stories": [
           {
-            "id": "story-sharing-domain",
-            "title": "Create sharing domain layer",
-            "description": "Define SharingRelationship entity (id, requesterId, targetId, status, createdAt, acceptedAt, partnerUsername, partnerEmail). Define SharedUserStats (userId, username, todaySteps, weeklySteps). Define UserSearchResult (id, username, email). Create SharingRepository and use cases for getRelationships(status?), sendRequest(targetId), acceptRequest(id), rejectRequest(id), revokeSharing(id), getSharedStats(userId), searchUsers(query, limit)",
+            "id": "story-040",
+            "title": "Create sharing domain entities and repository",
+            "description": "Define SharingRelationship, SharedUser entities with status enum, SharingRepository interface",
             "filesToCreate": [
               "lib/features/sharing/domain/entities/sharing_relationship.dart",
-              "lib/features/sharing/domain/entities/shared_user_stats.dart",
-              "lib/features/sharing/domain/entities/user_search_result.dart",
-              "lib/features/sharing/domain/repositories/sharing_repository.dart",
-              "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
-              "lib/features/sharing/domain/usecases/send_request_usecase.dart",
-              "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
-              "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
-              "lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart",
-              "lib/features/sharing/domain/usecases/get_shared_stats_usecase.dart",
-              "lib/features/sharing/domain/usecases/search_users_usecase.dart"
+              "lib/features/sharing/domain/entities/shared_user.dart",
+              "lib/features/sharing/domain/repositories/sharing_repository.dart"
             ],
             "priority": 1,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-sharing-data",
-            "title": "Implement sharing data layer",
-            "description": "Create SharingRelationshipModel, SharedUserStatsModel, UserSearchResultModel with JSON serialization. Create SharingRemoteDataSource calling GET /api/sharing?status=, POST /api/sharing/request, PUT /api/sharing/:id/accept, PUT /api/sharing/:id/reject, DELETE /api/sharing/:id, GET /api/sharing/:userId/stats. Create UsersRemoteDataSource calling GET /api/users/search?q=&limit=. Create SharingRepositoryImpl",
+            "id": "story-041",
+            "title": "Implement sharing data models",
+            "description": "Create SharingRelationshipModel, SharedUserStatsModel with JSON serialization",
             "filesToCreate": [
               "lib/features/sharing/data/models/sharing_relationship_model.dart",
-              "lib/features/sharing/data/models/shared_user_stats_model.dart",
-              "lib/features/sharing/data/models/user_search_result_model.dart",
-              "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
-              "lib/features/sharing/data/datasources/users_remote_datasource.dart",
-              "lib/features/sharing/data/repositories/sharing_repository_impl.dart"
+              "lib/features/sharing/data/models/shared_user_stats_model.dart"
             ],
             "priority": 2,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-sharing-state",
-            "title": "Create sharing state management",
-            "description": "Define SharingState with friends (accepted relationships), incomingRequests (pending where user is target), outgoingRequests (pending where user is requester), isLoading, error. Create SharingNotifier with loadRelationships, sendRequest, acceptRequest, rejectRequest, revokeSharing, loadFriendStats. Create UserSearchProvider with search(query), clear, debounce logic",
+            "id": "story-042",
+            "title": "Implement sharing remote datasource",
+            "description": "Create SharingRemoteDataSource calling all /sharing endpoints",
             "filesToCreate": [
-              "lib/features/sharing/presentation/providers/sharing_state.dart",
-              "lib/features/sharing/presentation/providers/sharing_provider.dart",
-              "lib/features/sharing/presentation/providers/user_search_provider.dart"
+              "lib/features/sharing/data/datasources/sharing_remote_datasource.dart"
             ],
             "priority": 3,
             "complexity": "moderate"
           },
           {
-            "id": "story-friends-screen",
-            "title": "Build friends list screen",
-            "description": "Create FriendsScreen with ListView of FriendCard showing avatar, username, today's steps. Include badge showing pending incoming requests count. FAB to navigate to search. Empty state when no friends. Pull-to-refresh. Tap navigates to friend profile",
+            "id": "story-043",
+            "title": "Implement sharing repository",
+            "description": "Create SharingRepositoryImpl handling relationships and stats",
             "filesToCreate": [
-              "lib/features/sharing/presentation/screens/friends_screen.dart",
-              "lib/features/sharing/presentation/widgets/friend_card.dart",
-              "lib/features/sharing/presentation/widgets/friend_activity_card.dart",
-              "lib/features/sharing/presentation/widgets/relationship_status_badge.dart"
+              "lib/features/sharing/data/repositories/sharing_repository_impl.dart"
             ],
             "priority": 4,
             "complexity": "moderate"
           },
           {
-            "id": "story-requests-screen",
-            "title": "Build friend requests screen",
-            "description": "Create FriendRequestsScreen with TabBar (Incoming, Outgoing). Incoming tab shows FriendRequestCard with accept/reject buttons. Outgoing tab shows pending requests with cancel option. Real-time count update when accepting/rejecting",
+            "id": "story-044",
+            "title": "Create sharing use cases",
+            "description": "Implement GetRelationshipsUseCase, SendRequestUseCase, AcceptRequestUseCase, RejectRequestUseCase, GetFriendStatsUseCase",
             "filesToCreate": [
-              "lib/features/sharing/presentation/screens/friend_requests_screen.dart",
-              "lib/features/sharing/presentation/widgets/friend_request_card.dart"
+              "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
+              "lib/features/sharing/domain/usecases/send_request_usecase.dart",
+              "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
+              "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
+              "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart"
             ],
             "priority": 5,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-045",
+            "title": "Implement user search feature",
+            "description": "Create UsersRemoteDataSource, UserSearchModel, SearchUsersUseCase for friend search",
+            "filesToCreate": [
+              "lib/features/users/data/datasources/users_remote_datasource.dart",
+              "lib/features/users/data/models/user_search_model.dart",
+              "lib/features/users/domain/usecases/search_users_usecase.dart"
+            ],
+            "priority": 6,
             "complexity": "moderate"
           },
           {
-            "id": "story-search-profile",
-            "title": "Build search and profile screens",
-            "description": "Create SearchUsersScreen with TextField, debounced search (300ms), ListView of UserSearchResultTile with send request button. Handle already-friends and pending states. Create FriendProfileScreen showing friend's avatar, username, todaySteps, weeklyTrend chart, revoke sharing button with confirmation dialog",
+            "id": "story-046",
+            "title": "Implement sharing provider",
+            "description": "Create SharingProvider managing friends list, pending requests, search state",
             "filesToCreate": [
-              "lib/features/sharing/presentation/screens/search_users_screen.dart",
-              "lib/features/sharing/presentation/widgets/user_search_result_tile.dart",
-              "lib/features/sharing/presentation/screens/friend_profile_screen.dart"
+              "lib/features/sharing/presentation/providers/sharing_provider.dart"
             ],
-            "priority": 6,
+            "priority": 7,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-047",
+            "title": "Create sharing widgets",
+            "description": "Implement FriendListItem, FriendRequestCard, UserSearchResult, FriendStatsCard",
+            "filesToCreate": [
+              "lib/features/sharing/presentation/widgets/friend_list_item.dart",
+              "lib/features/sharing/presentation/widgets/friend_request_card.dart",
+              "lib/features/sharing/presentation/widgets/user_search_result.dart",
+              "lib/features/sharing/presentation/widgets/friend_stats_card.dart"
+            ],
+            "priority": 8,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-048",
+            "title": "Implement friends screen",
+            "description": "Create FriendsScreen with tabs for friends list and pending requests",
+            "filesToCreate": [
+              "lib/features/sharing/presentation/screens/friends_screen.dart"
+            ],
+            "priority": 9,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-049",
+            "title": "Implement friend detail screen",
+            "description": "Create FriendDetailScreen showing friend's stats, activity, revoke option",
+            "filesToCreate": [
+              "lib/features/sharing/presentation/screens/friend_detail_screen.dart"
+            ],
+            "priority": 10,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-050",
+            "title": "Implement add friend and requests screens",
+            "description": "Create AddFriendScreen with user search, RequestsScreen for managing pending requests",
+            "filesToCreate": [
+              "lib/features/sharing/presentation/screens/add_friend_screen.dart",
+              "lib/features/sharing/presentation/screens/requests_screen.dart"
+            ],
+            "priority": 11,
             "complexity": "moderate"
           }
         ],
@@ -737,8 +881,8 @@
       },
       {
         "id": "epic-goals-ui",
-        "title": "Goals UI - Group Goals and Leaderboards",
-        "description": "Build complete group goals feature with goal creation, invitation management, progress tracking with animated rings, member leaderboards sorted by contribution, and goal completion celebration. Integrate with backend /api/goals/* endpoints",
+        "title": "Goals UI - Group Goals & Progress Tracking",
+        "description": "Implement group goals list, goal creation form, goal detail with member progress, invitation management, rankings/leaderboard, leave goal functionality",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -747,11 +891,11 @@
           "lib/core/router/app_router.dart"
         ],
         "filesToCreate": [
-          "lib/features/goals/data/datasources/goals_remote_datasource.dart",
-          "lib/features/goals/data/repositories/goals_repository_impl.dart",
           "lib/features/goals/data/models/group_goal_model.dart",
           "lib/features/goals/data/models/goal_member_model.dart",
           "lib/features/goals/data/models/goal_progress_model.dart",
+          "lib/features/goals/data/datasources/goals_remote_datasource.dart",
+          "lib/features/goals/data/repositories/goals_repository_impl.dart",
           "lib/features/goals/domain/entities/group_goal.dart",
           "lib/features/goals/domain/entities/goal_member.dart",
           "lib/features/goals/domain/entities/goal_progress.dart",
@@ -764,18 +908,15 @@
           "lib/features/goals/domain/usecases/leave_goal_usecase.dart",
           "lib/features/goals/domain/usecases/get_goal_progress_usecase.dart",
           "lib/features/goals/presentation/providers/goals_provider.dart",
-          "lib/features/goals/presentation/providers/goals_state.dart",
-          "lib/features/goals/presentation/providers/goal_detail_provider.dart",
           "lib/features/goals/presentation/screens/goals_list_screen.dart",
           "lib/features/goals/presentation/screens/goal_detail_screen.dart",
           "lib/features/goals/presentation/screens/create_goal_screen.dart",
           "lib/features/goals/presentation/screens/invite_members_screen.dart",
           "lib/features/goals/presentation/widgets/goal_card.dart",
-          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
-          "lib/features/goals/presentation/widgets/member_ranking_card.dart",
-          "lib/features/goals/presentation/widgets/goal_leaderboard.dart",
-          "lib/features/goals/presentation/widgets/goal_invitation_card.dart",
-          "lib/features/goals/presentation/widgets/date_range_picker.dart"
+          "lib/features/goals/presentation/widgets/goal_progress_bar.dart",
+          "lib/features/goals/presentation/widgets/member_ranking_item.dart",
+          "lib/features/goals/presentation/widgets/goal_form.dart",
+          "lib/features/goals/presentation/widgets/invitation_card.dart"
         ],
         "filesToRead": [
           "project-app-pasos-backend/src/routes/goals.routes.ts",
@@ -791,21 +932,61 @@
         ],
         "executionOrder": 2,
         "followsPatterns": [
-          "Date picker for start/end dates with validation",
-          "Progress percentage calculation",
-          "Leaderboard sorted by member contribution",
-          "Goal status: active, completed based on date and progress"
+          "Clean architecture layers",
+          "Form validation",
+          "List with pull-to-refresh"
         ],
         "stories": [
           {
-            "id": "story-goals-domain",
-            "title": "Create goals domain layer",
-            "description": "Define GroupGoal entity (id, title, description, targetSteps, startDate, endDate, creatorId, isCreator, memberCount). Define GoalMember (userId, username, status, joinedAt, contributedSteps). Define GoalProgress (goalId, currentSteps, targetSteps, progressPercentage, isCompleted, memberContributions list). Create GoalsRepository and use cases: createGoal, getUserGoals, getGoalDetails(id), inviteUser(goalId, userId), joinGoal(id), leaveGoal(id), getGoalProgress(id)",
+            "id": "story-051",
+            "title": "Create goals domain entities and repository",
+            "description": "Define GroupGoal, GoalMember, GoalProgress entities, GoalsRepository interface",
             "filesToCreate": [
               "lib/features/goals/domain/entities/group_goal.dart",
               "lib/features/goals/domain/entities/goal_member.dart",
               "lib/features/goals/domain/entities/goal_progress.dart",
-              "lib/features/goals/domain/repositories/goals_repository.dart",
+              "lib/features/goals/domain/repositories/goals_repository.dart"
+            ],
+            "priority": 1,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-052",
+            "title": "Implement goals data models",
+            "description": "Create GroupGoalModel, GoalMemberModel, GoalProgressModel with JSON serialization",
+            "filesToCreate": [
+              "lib/features/goals/data/models/group_goal_model.dart",
+              "lib/features/goals/data/models/goal_member_model.dart",
+              "lib/features/goals/data/models/goal_progress_model.dart"
+            ],
+            "priority": 2,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-053",
+            "title": "Implement goals remote datasource",
+            "description": "Create GoalsRemoteDataSource calling all /goals endpoints",
+            "filesToCreate": [
+              "lib/features/goals/data/datasources/goals_remote_datasource.dart"
+            ],
+            "priority": 3,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-054",
+            "title": "Implement goals repository",
+            "description": "Create GoalsRepositoryImpl handling goal CRUD and membership operations",
+            "filesToCreate": [
+              "lib/features/goals/data/repositories/goals_repository_impl.dart"
+            ],
+            "priority": 4,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-055",
+            "title": "Create goals use cases",
+            "description": "Implement CreateGoalUseCase, GetUserGoalsUseCase, GetGoalDetailsUseCase, InviteUserUseCase, JoinGoalUseCase, LeaveGoalUseCase, GetGoalProgressUseCase",
+            "filesToCreate": [
               "lib/features/goals/domain/usecases/create_goal_usecase.dart",
               "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
               "lib/features/goals/domain/usecases/get_goal_details_usecase.dart",
@@ -814,70 +995,62 @@
               "lib/features/goals/domain/usecases/leave_goal_usecase.dart",
               "lib/features/goals/domain/usecases/get_goal_progress_usecase.dart"
             ],
-            "priority": 1,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-goals-data",
-            "title": "Implement goals data layer",
-            "description": "Create GroupGoalModel, GoalMemberModel, GoalProgressModel with JSON serialization matching backend responses. Create GoalsRemoteDataSource calling POST /api/goals, GET /api/goals, GET /api/goals/:id, POST /api/goals/:id/invite, PUT /api/goals/:id/join, DELETE /api/goals/:id/leave, GET /api/goals/:id/progress. Create GoalsRepositoryImpl",
-            "filesToCreate": [
-              "lib/features/goals/data/models/group_goal_model.dart",
-              "lib/features/goals/data/models/goal_member_model.dart",
-              "lib/features/goals/data/models/goal_progress_model.dart",
-              "lib/features/goals/data/datasources/goals_remote_datasource.dart",
-              "lib/features/goals/data/repositories/goals_repository_impl.dart"
-            ],
-            "priority": 2,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-goals-state",
-            "title": "Create goals state management",
-            "description": "Define GoalsState with activeGoals, completedGoals, pendingInvitations, isLoading, error. Create GoalsNotifier with loadUserGoals, createGoal, joinGoal. Create GoalDetailProvider for selected goal with loadDetails, loadProgress, inviteUser, leaveGoal",
-            "filesToCreate": [
-              "lib/features/goals/presentation/providers/goals_state.dart",
-              "lib/features/goals/presentation/providers/goals_provider.dart",
-              "lib/features/goals/presentation/providers/goal_detail_provider.dart"
-            ],
-            "priority": 3,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-goals-list",
-            "title": "Build goals list screen",
-            "description": "Create GoalsListScreen with TabBar (Active, Completed, Invitations). Active tab shows GoalCard with title, progress ring, days remaining, member avatars. Invitations tab shows GoalInvitationCard with accept/decline. FAB to create new goal. Pull-to-refresh",
-            "filesToCreate": [
-              "lib/features/goals/presentation/screens/goals_list_screen.dart",
-              "lib/features/goals/presentation/widgets/goal_card.dart",
-              "lib/features/goals/presentation/widgets/goal_invitation_card.dart"
-            ],
-            "priority": 4,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-goal-detail",
-            "title": "Build goal detail screen",
-            "description": "Create GoalDetailScreen with header (title, description, dates, creator badge), large GoalProgressIndicator ring, GoalLeaderboard showing MemberRankingCard sorted by contribution (rank medal for top 3), invite button (if creator), leave button (if not creator)",
-            "filesToCreate": [
-              "lib/features/goals/presentation/screens/goal_detail_screen.dart",
-              "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
-              "lib/features/goals/presentation/widgets/goal_leaderboard.dart",
-              "lib/features/goals/presentation/widgets/member_ranking_card.dart"
-            ],
             "priority": 5,
-            "complexity": "complex"
+            "complexity": "simple"
           },
           {
-            "id": "story-create-invite",
-            "title": "Build create goal and invite screens",
-            "description": "Create CreateGoalScreen with form: title TextField (max 100 chars), description TextField (max 500 chars, optional), targetSteps number input (min 1), DateRangePicker for start/end dates (end must be after start). Create InviteMembersScreen showing accepted friends with invite toggle",
+            "id": "story-056",
+            "title": "Implement goals provider",
+            "description": "Create GoalsProvider managing goals list, current goal, invitations state",
             "filesToCreate": [
-              "lib/features/goals/presentation/screens/create_goal_screen.dart",
-              "lib/features/goals/presentation/screens/invite_members_screen.dart",
-              "lib/features/goals/presentation/widgets/date_range_picker.dart"
+              "lib/features/goals/presentation/providers/goals_provider.dart"
             ],
             "priority": 6,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-057",
+            "title": "Create goals widgets",
+            "description": "Implement GoalCard, GoalProgressBar, MemberRankingItem, GoalForm, InvitationCard",
+            "filesToCreate": [
+              "lib/features/goals/presentation/widgets/goal_card.dart",
+              "lib/features/goals/presentation/widgets/goal_progress_bar.dart",
+              "lib/features/goals/presentation/widgets/member_ranking_item.dart",
+              "lib/features/goals/presentation/widgets/goal_form.dart",
+              "lib/features/goals/presentation/widgets/invitation_card.dart"
+            ],
+            "priority": 7,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-058",
+            "title": "Implement goals list screen",
+            "description": "Create GoalsListScreen with active goals, pending invitations tabs",
+            "filesToCreate": [
+              "lib/features/goals/presentation/screens/goals_list_screen.dart"
+            ],
+            "priority": 8,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-059",
+            "title": "Implement goal detail screen",
+            "description": "Create GoalDetailScreen with progress, member rankings, leave option",
+            "filesToCreate": [
+              "lib/features/goals/presentation/screens/goal_detail_screen.dart"
+            ],
+            "priority": 9,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-060",
+            "title": "Implement create goal and invite screens",
+            "description": "Create CreateGoalScreen with form, InviteMembersScreen for adding members to goal",
+            "filesToCreate": [
+              "lib/features/goals/presentation/screens/create_goal_screen.dart",
+              "lib/features/goals/presentation/screens/invite_members_screen.dart"
+            ],
+            "priority": 10,
             "complexity": "moderate"
           }
         ],
@@ -885,38 +1058,34 @@
       },
       {
         "id": "epic-native-integration",
-        "title": "Native Integration - Health API Step Tracking",
-        "description": "Implement native step data integration using health package. Handle HealthKit (iOS) and Health Connect (Android) permission flows. Read step data from device health stores. Implement background sync service using workmanager to periodically sync native steps to backend via POST /api/steps with source='native'",
+        "title": "Native Integration - Health API & Pedometer",
+        "description": "Implement health package integration for HealthKit (iOS) and Google Fit/Health Connect (Android), background step sync service, pedometer real-time updates, data reconciliation between native and manual entries",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
         "filesToModify": [
-          "lib/features/dashboard/presentation/providers/dashboard_provider.dart"
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/steps/data/repositories/steps_repository_impl.dart"
         ],
         "filesToCreate": [
           "lib/features/health/data/datasources/health_datasource.dart",
           "lib/features/health/data/repositories/health_repository_impl.dart",
-          "lib/features/health/domain/entities/health_step_data.dart",
-          "lib/features/health/domain/entities/health_permission_status.dart",
+          "lib/features/health/domain/entities/health_data.dart",
           "lib/features/health/domain/repositories/health_repository.dart",
+          "lib/features/health/domain/usecases/get_steps_from_health_usecase.dart",
           "lib/features/health/domain/usecases/request_permissions_usecase.dart",
-          "lib/features/health/domain/usecases/check_permissions_usecase.dart",
-          "lib/features/health/domain/usecases/get_today_native_steps_usecase.dart",
-          "lib/features/health/domain/usecases/get_steps_range_usecase.dart",
           "lib/features/health/domain/usecases/sync_steps_usecase.dart",
           "lib/features/health/presentation/providers/health_provider.dart",
-          "lib/features/health/presentation/providers/health_state.dart",
-          "lib/features/health/presentation/screens/health_setup_screen.dart",
           "lib/features/health/presentation/screens/health_permissions_screen.dart",
           "lib/features/health/presentation/widgets/permission_request_card.dart",
-          "lib/features/health/presentation/widgets/sync_status_indicator.dart",
-          "lib/features/health/presentation/widgets/health_source_selector.dart",
-          "lib/core/services/background_sync_service.dart",
-          "lib/core/services/step_sync_manager.dart",
-          "lib/core/services/workmanager_config.dart"
+          "lib/features/health/services/health_service.dart",
+          "lib/features/health/services/background_sync_service.dart",
+          "lib/features/health/services/pedometer_service.dart"
         ],
-        "filesToRead": [],
+        "filesToRead": [
+          "lib/core/platform/health_permissions.dart"
+        ],
         "estimatedComplexity": "complex",
         "dependencies": [
           "epic-platform-config",
@@ -925,206 +1094,283 @@
         ],
         "executionOrder": 3,
         "followsPatterns": [
-          "health package HealthFactory for cross-platform access",
-          "HealthDataType.STEPS for step reading",
-          "workmanager for periodic background tasks",
-          "Platform detection for iOS vs Android flows"
+          "health package integration",
+          "Background service pattern",
+          "Platform channel abstraction"
         ],
         "stories": [
           {
-            "id": "story-health-domain",
-            "title": "Create health domain layer",
-            "description": "Define HealthStepData entity (steps, startTime, endTime, source: healthKit|googleFit|healthConnect). Define HealthPermissionStatus (granted, denied, notDetermined, restricted). Create HealthRepository interface with requestPermissions, hasPermissions, getTodaySteps, getStepsInRange(start, end), isHealthAvailable. Create use cases: RequestPermissionsUseCase, CheckPermissionsUseCase, GetTodayNativeStepsUseCase, GetStepsRangeUseCase, SyncStepsUseCase",
+            "id": "story-061",
+            "title": "Create health domain entities and repository",
+            "description": "Define HealthData entity, HealthRepository interface for native health APIs",
             "filesToCreate": [
-              "lib/features/health/domain/entities/health_step_data.dart",
-              "lib/features/health/domain/entities/health_permission_status.dart",
-              "lib/features/health/domain/repositories/health_repository.dart",
-              "lib/features/health/domain/usecases/request_permissions_usecase.dart",
-              "lib/features/health/domain/usecases/check_permissions_usecase.dart",
-              "lib/features/health/domain/usecases/get_today_native_steps_usecase.dart",
-              "lib/features/health/domain/usecases/get_steps_range_usecase.dart",
-              "lib/features/health/domain/usecases/sync_steps_usecase.dart"
+              "lib/features/health/domain/entities/health_data.dart",
+              "lib/features/health/domain/repositories/health_repository.dart"
             ],
             "priority": 1,
-            "complexity": "moderate"
+            "complexity": "simple"
           },
           {
-            "id": "story-health-data",
-            "title": "Implement health data layer with health package",
-            "description": "Create HealthDataSource using health package. Initialize HealthFactory. Request authorization for HealthDataType.STEPS read/write. Implement getTotalStepsInInterval(start, end), getHealthDataFromTypes. Handle platform differences: HealthKit on iOS, Health Connect on Android. Create HealthRepositoryImpl with proper error handling for permission denied, health unavailable",
+            "id": "story-062",
+            "title": "Implement health service",
+            "description": "Create HealthService wrapping health package for HealthKit/Google Fit access",
             "filesToCreate": [
-              "lib/features/health/data/datasources/health_datasource.dart",
-              "lib/features/health/data/repositories/health_repository_impl.dart"
+              "lib/features/health/services/health_service.dart"
             ],
             "priority": 2,
             "complexity": "complex"
           },
           {
-            "id": "story-health-state",
-            "title": "Create health state management",
-            "description": "Define HealthState with permissionStatus (HealthPermissionStatus), isHealthAvailable, nativeStepsToday, lastSyncTime, syncStatus (idle, syncing, success, error), error. Create HealthNotifier with checkPermissions, requestPermissions, syncNow, getTodayNativeSteps. Auto-check permissions on init",
+            "id": "story-063",
+            "title": "Implement health datasource",
+            "description": "Create HealthDataSource using HealthService to fetch step data from native APIs",
             "filesToCreate": [
-              "lib/features/health/presentation/providers/health_state.dart",
-              "lib/features/health/presentation/providers/health_provider.dart"
+              "lib/features/health/data/datasources/health_datasource.dart"
             ],
             "priority": 3,
             "complexity": "moderate"
           },
           {
-            "id": "story-health-screens",
-            "title": "Build health setup screens",
-            "description": "Create HealthSetupScreen for onboarding: explain why health access needed, show platform-specific instructions (HealthKit settings for iOS, Health Connect app for Android), PermissionRequestCard with request button, handle denied state with settings link. Create HealthPermissionsScreen for checking/re-requesting. Create SyncStatusIndicator showing last sync time, sync button",
+            "id": "story-064",
+            "title": "Implement health repository",
+            "description": "Create HealthRepositoryImpl coordinating native health data with backend sync",
             "filesToCreate": [
-              "lib/features/health/presentation/screens/health_setup_screen.dart",
-              "lib/features/health/presentation/screens/health_permissions_screen.dart",
-              "lib/features/health/presentation/widgets/permission_request_card.dart",
-              "lib/features/health/presentation/widgets/sync_status_indicator.dart",
-              "lib/features/health/presentation/widgets/health_source_selector.dart"
+              "lib/features/health/data/repositories/health_repository_impl.dart"
             ],
             "priority": 4,
             "complexity": "moderate"
           },
           {
-            "id": "story-background-sync",
-            "title": "Implement background sync service",
-            "description": "Create WorkmanagerConfig for registering periodic tasks. Create BackgroundSyncService using workmanager with 15-minute periodic sync. Create StepSyncManager that: reads native steps since last sync, calls POST /api/steps with source='native' for each hour's data, stores last sync timestamp in SharedPreferences. Handle sync conflicts, network errors, and retry logic",
+            "id": "story-065",
+            "title": "Create health use cases",
+            "description": "Implement GetStepsFromHealthUseCase, RequestPermissionsUseCase, SyncStepsUseCase",
             "filesToCreate": [
-              "lib/core/services/workmanager_config.dart",
-              "lib/core/services/background_sync_service.dart",
-              "lib/core/services/step_sync_manager.dart"
+              "lib/features/health/domain/usecases/get_steps_from_health_usecase.dart",
+              "lib/features/health/domain/usecases/request_permissions_usecase.dart",
+              "lib/features/health/domain/usecases/sync_steps_usecase.dart"
             ],
             "priority": 5,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-066",
+            "title": "Implement pedometer service",
+            "description": "Create PedometerService for real-time step counting using pedometer package",
+            "filesToCreate": [
+              "lib/features/health/services/pedometer_service.dart"
+            ],
+            "priority": 6,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-067",
+            "title": "Implement background sync service",
+            "description": "Create BackgroundSyncService for periodic step sync when app is backgrounded",
+            "filesToCreate": [
+              "lib/features/health/services/background_sync_service.dart"
+            ],
+            "priority": 7,
             "complexity": "complex"
+          },
+          {
+            "id": "story-068",
+            "title": "Implement health provider",
+            "description": "Create HealthProvider managing permissions state, sync status, real-time step updates",
+            "filesToCreate": [
+              "lib/features/health/presentation/providers/health_provider.dart"
+            ],
+            "priority": 8,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-069",
+            "title": "Implement health permissions screen",
+            "description": "Create HealthPermissionsScreen for requesting and managing health permissions",
+            "filesToCreate": [
+              "lib/features/health/presentation/screens/health_permissions_screen.dart",
+              "lib/features/health/presentation/widgets/permission_request_card.dart"
+            ],
+            "priority": 9,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-070",
+            "title": "Integrate health with steps provider",
+            "description": "Update StepsProvider and StepsRepository to merge native health data with backend data",
+            "filesToModify": [
+              "lib/features/steps/presentation/providers/steps_provider.dart",
+              "lib/features/steps/data/repositories/steps_repository_impl.dart"
+            ],
+            "priority": 10,
+            "complexity": "moderate"
           }
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-realtime-client",
-        "title": "Real-Time Client - WebSocket and Notifications",
-        "description": "Implement WebSocket client using socket_io_client for Socket.io protocol compatibility with backend. Handle connection lifecycle (connect on login, disconnect on logout), authentication via token, reconnection with exponential backoff. Dispatch socket events to relevant providers for real-time UI updates. Build in-app notification system",
+        "title": "Real-time Client - WebSocket & Push Notifications",
+        "description": "Implement WebSocket client with web_socket_channel for real-time step updates and goal progress, Firebase Cloud Messaging integration for push notifications, connection state management with auto-reconnect",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
         "filesToModify": [
-          "lib/features/dashboard/presentation/providers/dashboard_provider.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart",
           "lib/features/goals/presentation/providers/goals_provider.dart",
           "lib/features/sharing/presentation/providers/sharing_provider.dart",
-          "lib/core/di/injection_container.dart",
-          "lib/features/auth/presentation/providers/auth_provider.dart"
+          "pubspec.yaml",
+          "android/app/build.gradle.kts"
         ],
         "filesToCreate": [
           "lib/core/realtime/socket_client.dart",
           "lib/core/realtime/socket_events.dart",
-          "lib/core/realtime/socket_manager.dart",
+          "lib/core/realtime/connection_state.dart",
           "lib/core/realtime/reconnection_strategy.dart",
-          "lib/core/realtime/event_handlers/steps_event_handler.dart",
-          "lib/core/realtime/event_handlers/goals_event_handler.dart",
-          "lib/core/realtime/event_handlers/sharing_event_handler.dart",
+          "lib/features/notifications/services/notification_service.dart",
+          "lib/features/notifications/services/fcm_service.dart",
+          "lib/features/notifications/data/models/notification_model.dart",
           "lib/features/notifications/domain/entities/app_notification.dart",
-          "lib/features/notifications/domain/entities/notification_type.dart",
-          "lib/features/notifications/data/datasources/notification_local_datasource.dart",
-          "lib/features/notifications/data/repositories/notification_repository_impl.dart",
-          "lib/features/notifications/domain/repositories/notification_repository.dart",
           "lib/features/notifications/presentation/providers/notification_provider.dart",
-          "lib/features/notifications/presentation/providers/notification_state.dart",
+          "lib/features/notifications/presentation/screens/notifications_screen.dart",
+          "lib/features/notifications/presentation/widgets/notification_item.dart",
           "lib/features/notifications/presentation/widgets/notification_badge.dart",
-          "lib/features/notifications/presentation/widgets/notification_list_item.dart",
-          "lib/features/notifications/presentation/widgets/notification_popup.dart",
-          "lib/features/notifications/presentation/screens/notifications_screen.dart"
+          "android/app/google-services.json.example",
+          "ios/Runner/GoogleService-Info.plist.example"
         ],
         "filesToRead": [
           "project-app-pasos-backend/src/socket/types.ts",
-          "project-app-pasos-backend/src/socket/index.ts"
+          "project-app-pasos-backend/src/socket/handlers/sharing.handler.ts",
+          "project-app-pasos-backend/src/socket/handlers/goals.handler.ts"
         ],
         "estimatedComplexity": "complex",
         "dependencies": [
           "epic-flutter-foundation",
-          "epic-auth-ui",
           "epic-dashboard",
           "epic-sharing-ui",
           "epic-goals-ui",
           "epic-flutter-foundation",
-          "epic-auth-ui",
+          "epic-platform-config",
           "epic-dashboard",
           "epic-sharing-ui",
           "epic-goals-ui"
         ],
         "executionOrder": 3,
         "followsPatterns": [
-          "socket_io_client for Socket.io protocol",
-          "Exponential backoff: 1s, 2s, 4s, 8s, max 30s, max 10 retries",
-          "Event types: steps-updated, sharing:joined, goal-progress, goal:joined, goal:member-joined",
-          "StreamController for broadcasting events to providers"
+          "web_socket_channel for WebSocket",
+          "Firebase Messaging integration",
+          "Singleton connection manager"
         ],
         "stories": [
           {
-            "id": "story-socket-infrastructure",
+            "id": "story-071",
             "title": "Create WebSocket client infrastructure",
-            "description": "Create SocketClient class using socket_io_client package. Configure with backend URL and auth token in extraHeaders. Implement connect, disconnect, emit, on, off methods. Define SocketEvents class with constants: stepsUpdated, sharingJoined, goalProgress, goalJoined, goalMemberJoined, error (matching backend ServerToClientEvents)",
+            "description": "Implement SocketClient singleton with web_socket_channel, ConnectionState enum, auto-authentication",
             "filesToCreate": [
               "lib/core/realtime/socket_client.dart",
-              "lib/core/realtime/socket_events.dart"
+              "lib/core/realtime/socket_events.dart",
+              "lib/core/realtime/connection_state.dart"
             ],
             "priority": 1,
-            "complexity": "moderate"
-          },
-          {
-            "id": "story-socket-manager",
-            "title": "Implement socket manager and reconnection",
-            "description": "Create SocketManager singleton coordinating socket lifecycle. Connect on successful login, disconnect on logout. Create ReconnectionStrategy with exponential backoff (initialDelay: 1s, maxDelay: 30s, factor: 2, maxRetries: 10). Handle onDisconnect to trigger reconnection. Emit connection status changes via Stream",
-            "filesToCreate": [
-              "lib/core/realtime/socket_manager.dart",
-              "lib/core/realtime/reconnection_strategy.dart"
-            ],
-            "priority": 2,
             "complexity": "complex"
           },
           {
-            "id": "story-event-handlers",
-            "title": "Create socket event handlers",
-            "description": "Create StepsEventHandler listening for steps-updated (userId, steps, timestamp) - update dashboard if own userId or friend's. Create GoalsEventHandler for goal-progress (update progress) and goal:member-joined (refresh members). Create SharingEventHandler for sharing:joined (refresh relationships). Each handler uses StreamController to broadcast to providers",
+            "id": "story-072",
+            "title": "Implement reconnection strategy",
+            "description": "Create ReconnectionStrategy with exponential backoff, max retries, connection health check",
             "filesToCreate": [
-              "lib/core/realtime/event_handlers/steps_event_handler.dart",
-              "lib/core/realtime/event_handlers/goals_event_handler.dart",
-              "lib/core/realtime/event_handlers/sharing_event_handler.dart"
+              "lib/core/realtime/reconnection_strategy.dart"
+            ],
+            "priority": 2,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-073",
+            "title": "Integrate WebSocket with steps provider",
+            "description": "Update StepsProvider to listen for steps-updated events, broadcast step updates",
+            "filesToModify": [
+              "lib/features/steps/presentation/providers/steps_provider.dart"
             ],
             "priority": 3,
             "complexity": "moderate"
           },
           {
-            "id": "story-provider-integration",
-            "title": "Integrate socket with state providers",
-            "description": "Update DashboardProvider to subscribe to StepsEventHandler stream, refresh todaySteps on steps-updated for current user. Update GoalsProvider to subscribe to GoalsEventHandler, refresh goal progress. Update SharingProvider to subscribe to SharingEventHandler, refresh on sharing:joined. Update AuthProvider to call socketManager.connect on login, disconnect on logout. Register SocketManager as singleton in injection_container",
+            "id": "story-074",
+            "title": "Integrate WebSocket with goals provider",
+            "description": "Update GoalsProvider to listen for goal-progress, goal:joined events",
             "filesToModify": [
-              "lib/features/dashboard/presentation/providers/dashboard_provider.dart",
-              "lib/features/goals/presentation/providers/goals_provider.dart",
-              "lib/features/sharing/presentation/providers/sharing_provider.dart",
-              "lib/core/di/injection_container.dart",
-              "lib/features/auth/presentation/providers/auth_provider.dart"
+              "lib/features/goals/presentation/providers/goals_provider.dart"
             ],
             "priority": 4,
             "complexity": "moderate"
           },
           {
-            "id": "story-notifications",
-            "title": "Build in-app notification system",
-            "description": "Define AppNotification entity (id, type, title, body, timestamp, isRead, data). Define NotificationType enum (friendRequest, friendAccepted, goalInvitation, goalProgress, goalCompleted). Create NotificationRepository with getAll, markAsRead, clear, add. Create NotificationProvider with unreadCount, notifications list, markAllRead. Build NotificationBadge widget showing count. Build NotificationListItem with icon, text, timestamp, tap action. Build NotificationPopup for toast-style alerts. Build NotificationsScreen listing all",
-            "filesToCreate": [
-              "lib/features/notifications/domain/entities/app_notification.dart",
-              "lib/features/notifications/domain/entities/notification_type.dart",
-              "lib/features/notifications/domain/repositories/notification_repository.dart",
-              "lib/features/notifications/data/datasources/notification_local_datasource.dart",
-              "lib/features/notifications/data/repositories/notification_repository_impl.dart",
-              "lib/features/notifications/presentation/providers/notification_state.dart",
-              "lib/features/notifications/presentation/providers/notification_provider.dart",
-              "lib/features/notifications/presentation/widgets/notification_badge.dart",
-              "lib/features/notifications/presentation/widgets/notification_list_item.dart",
-              "lib/features/notifications/presentation/widgets/notification_popup.dart",
-              "lib/features/notifications/presentation/screens/notifications_screen.dart"
+            "id": "story-075",
+            "title": "Integrate WebSocket with sharing provider",
+            "description": "Update SharingProvider to listen for sharing:joined events, friend updates",
+            "filesToModify": [
+              "lib/features/sharing/presentation/providers/sharing_provider.dart"
             ],
             "priority": 5,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-076",
+            "title": "Setup Firebase Cloud Messaging",
+            "description": "Configure FCM in pubspec.yaml, create FCMService for token management, add google-services.json example",
+            "filesToModify": [
+              "pubspec.yaml",
+              "android/app/build.gradle.kts"
+            ],
+            "filesToCreate": [
+              "lib/features/notifications/services/fcm_service.dart",
+              "android/app/google-services.json.example",
+              "ios/Runner/GoogleService-Info.plist.example"
+            ],
+            "priority": 6,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-077",
+            "title": "Create notification domain layer",
+            "description": "Define AppNotification entity, NotificationModel with types (friend_request, goal_invite, etc)",
+            "filesToCreate": [
+              "lib/features/notifications/domain/entities/app_notification.dart",
+              "lib/features/notifications/data/models/notification_model.dart"
+            ],
+            "priority": 7,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-078",
+            "title": "Implement notification service",
+            "description": "Create NotificationService handling local notifications, FCM foreground/background handling",
+            "filesToCreate": [
+              "lib/features/notifications/services/notification_service.dart"
+            ],
+            "priority": 8,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-079",
+            "title": "Implement notification provider",
+            "description": "Create NotificationProvider managing notification list, unread count, mark as read",
+            "filesToCreate": [
+              "lib/features/notifications/presentation/providers/notification_provider.dart"
+            ],
+            "priority": 9,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-080",
+            "title": "Implement notifications UI",
+            "description": "Create NotificationsScreen, NotificationItem, NotificationBadge widgets",
+            "filesToCreate": [
+              "lib/features/notifications/presentation/screens/notifications_screen.dart",
+              "lib/features/notifications/presentation/widgets/notification_item.dart",
+              "lib/features/notifications/presentation/widgets/notification_badge.dart"
+            ],
+            "priority": 10,
             "complexity": "moderate"
           }
         ],
