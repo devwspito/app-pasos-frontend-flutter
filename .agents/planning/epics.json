@@ -1,21 +1,21 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "10f320470f7092e9ce178ef3",
-    "timestamp": "2026-01-23T21:59:39.122Z",
+    "taskId": "9c341525d762311ab2393452",
+    "timestamp": "2026-01-23T22:15:54.762Z",
     "phase": "planning",
-    "savedAt": "2026-01-23T21:59:39.122Z",
+    "savedAt": "2026-01-23T22:15:54.762Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "fn990",
+    "taskTitle": "fn1212443",
     "taskDescription": "Descripción de tareas para completar el frontend en Flutter\n\nCompletar los 9 epics del frontend de la aplicación \"Pasos\" (contador de pasos social) usando Flutter.\n\n================================================================================\n\nCONTEXTO\n\n================================================================================\n\nEl backend ya está completo en: project-app-pasos-backend\n\nEl frontend debe ir en: project-app-pasos-frontend-flutter (crear nueva estructura)\n\nUsar Flutter para aplicación móvil nativa multiplataforma (iOS/Android)\n\n================================================================================\n\nEPICS A IMPLEMENTAR\n\n================================================================================\n\nFLUTTER FOUNDATION\n\nSetup de Flutter + estructura del proyecto\n\nConfiguración de dependencias base (provider/bloc, dio, etc.)\n\nPLATFORM CONFIG\n\nConfiguración para iOS/Android\n\nPermisos para Health APIs (HealthKit/Google Fit)\n\nConfiguración de AndroidManifest.xml y Info.plist\n\nUI FOUNDATION\n\nSistema de diseño con Material Design 3\n\nRouting y navegación (go_router)\n\nTema oscuro/claro (ThemeData)\n\nWidgets reutilizables\n\nAUTH UI\n\nPantallas de login, registro y recuperación de contraseña\n\nGestión de estado de autenticación\n\nAlmacenamiento seguro de tokens (flutter_secure_storage)\n\nDASHBOARD\n\nVista principal con contador de pasos\n\nHistorial de actividad\n\nGráficos (fl_chart o charts_flutter)\n\nPull-to-refresh\n\nSHARING UI\n\nLista de amigos\n\nGestión de compartir datos con amigos\n\nSolicitudes de amistad\n\nVista de actividad de amigos\n\nGOALS UI\n\nGrupos y metas compartidas\n\nCreación y edición de metas\n\nProgreso de grupos\n\nRankings\n\nNATIVE INTEGRATION\n\nIntegración con podómetro nativo usando health package\n\nLectura de pasos desde HealthKit (iOS)\n\nLectura de pasos desde Google Fit/Health Connect (Android)\n\nBackground sync de datos\n\nREAL-TIME CLIENT\n\nIntegración WebSocket con web_socket_channel\n\nActualizaciones en tiempo real\n\nNotificaciones push (firebase_messaging)\n\nManejo de reconexión",
     "epicsCount": 9,
     "epics": [
       {
         "id": "epic-flutter-foundation",
         "title": "Flutter Foundation - Project Setup and Core Infrastructure",
-        "description": "Initialize Flutter project with proper folder structure following clean architecture, configure core dependencies (Riverpod, Dio, flutter_secure_storage), create environment configuration, API client with interceptors, and base utility classes",
+        "description": "Initialize Flutter project with clean architecture folder structure, configure core dependencies (flutter_riverpod, dio, flutter_secure_storage, freezed), create environment configuration for API endpoints, implement Dio client with interceptors for authentication and error handling, create base utility classes and extensions",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -39,11 +39,11 @@
           "lib/core/models/pagination.dart",
           "analysis_options.yaml",
           ".env.example",
-          ".gitignore"
+          ".gitignore",
+          "README.md"
         ],
         "filesToRead": [
           "project-app-pasos-backend/src/config/index.ts",
-          "project-app-pasos-backend/src/types/index.ts",
           "project-app-pasos-backend/package.json"
         ],
         "estimatedComplexity": "moderate",
@@ -52,15 +52,16 @@
         "followsPatterns": [
           "Feature-first folder structure under lib/features/",
           "Core utilities under lib/core/",
-          "Riverpod for dependency injection",
-          "Dio with interceptors for API calls"
+          "Riverpod for dependency injection and state management",
+          "Dio with interceptors for API calls",
+          "Environment-based configuration"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-platform-config",
         "title": "Platform Configuration - iOS and Android Native Setup",
-        "description": "Configure native platform settings including iOS Info.plist for HealthKit permissions and usage descriptions, iOS entitlements for health data, Android AndroidManifest.xml for Google Fit/Health Connect permissions, app icons, splash screens, and Gradle configurations",
+        "description": "Configure native platform settings including iOS Info.plist for HealthKit permissions with usage descriptions, iOS entitlements for health data access, Android AndroidManifest.xml for Google Fit/Health Connect permissions and activity recognition, Gradle configurations for health package dependencies, app icons and splash screen setup",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -70,6 +71,7 @@
           "ios/Runner/Info.plist",
           "ios/Runner/Runner.entitlements",
           "ios/Runner.xcodeproj/project.pbxproj",
+          "ios/Podfile",
           "android/app/src/main/AndroidManifest.xml",
           "android/app/build.gradle",
           "android/build.gradle",
@@ -79,16 +81,9 @@
           "android/app/src/main/res/values/styles.xml",
           "android/app/src/main/res/drawable/launch_background.xml",
           "ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
-          "ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
-          "android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
-          "android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
-          "android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
-          "android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
-          "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+          "ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json"
         ],
-        "filesToRead": [
-          "project-app-pasos-backend/package.json"
-        ],
+        "filesToRead": [],
         "estimatedComplexity": "moderate",
         "dependencies": [
           "epic-flutter-foundation"
@@ -97,14 +92,15 @@
         "followsPatterns": [
           "Standard Flutter platform configuration",
           "Health API permission declarations with usage descriptions",
-          "Gradle configuration for health package dependencies"
+          "Gradle configuration for health package dependencies",
+          "iOS entitlements for HealthKit access"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-ui-foundation",
         "title": "UI Foundation - Design System and Navigation",
-        "description": "Implement Material Design 3 theming with ColorScheme, dark/light mode toggle, typography system, spacing constants. Configure go_router with declarative routes, route guards for authentication. Create reusable widget library including AppButton, AppTextField, AppCard, LoadingIndicator, ErrorWidget, EmptyStateWidget, BottomNavBar, and AppSnackbar",
+        "description": "Implement Material Design 3 theming with ColorScheme.fromSeed, dark/light mode toggle with ThemeMode, typography system with GoogleFonts, spacing and shadow constants. Configure go_router with declarative routes, ShellRoute for bottom navigation, route guards for authentication. Create reusable widget library including AppButton, AppTextField, AppCard, LoadingIndicator, ErrorWidget, EmptyStateWidget, BottomNavBar, AppSnackbar, ShimmerLoading, and PullRefreshWrapper",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -145,14 +141,15 @@
         "followsPatterns": [
           "Material Design 3 guidelines with ColorScheme.fromSeed",
           "go_router declarative routing with ShellRoute for bottom nav",
-          "Reusable widget composition with consistent styling"
+          "Reusable widget composition with consistent styling",
+          "Theme extension for custom colors and text styles"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-auth-ui",
         "title": "Authentication UI - Login, Register, and Token Management",
-        "description": "Build authentication screens (LoginScreen, RegisterScreen, ForgotPasswordScreen) with form validation. Implement UserModel, AuthTokensModel matching backend User and JWT responses. Create AuthRepository with AuthRemoteDataSource for API calls and AuthLocalDataSource for flutter_secure_storage token persistence. Add AuthProvider with Riverpod for state management including auto-login on app start and token refresh interceptor integration",
+        "description": "Build authentication screens (LoginScreen, RegisterScreen, ForgotPasswordScreen, SplashScreen) with form validation matching backend validators. Implement UserModel and AuthTokensModel matching backend User schema and JWT response. Create AuthRepository with AuthRemoteDataSource for API calls (POST /auth/register, POST /auth/login, POST /auth/refresh, GET /auth/me) and AuthLocalDataSource for flutter_secure_storage token persistence. Add AuthNotifier with Riverpod for state management including auto-login on app start and token refresh interceptor integration",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -201,14 +198,15 @@
           "Clean architecture layers (data/domain/presentation)",
           "Secure storage for JWT tokens using flutter_secure_storage",
           "Token refresh interceptor pattern with Dio",
-          "Riverpod AsyncNotifier for auth state"
+          "Riverpod AsyncNotifier for auth state",
+          "Form validation matching backend requirements"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-dashboard",
         "title": "Dashboard - Step Counter and Activity History",
-        "description": "Build main dashboard screen with today's step count circular display, weekly trend line chart using fl_chart, hourly activity bar chart, statistics cards (total steps, daily average, best day). Implement StepModel matching backend Step schema. Create StepsRepository with StepsRemoteDataSource for API calls. Add pull-to-refresh for data sync and StepHistoryScreen for detailed history view",
+        "description": "Build main dashboard screen with today's step count circular progress display, weekly trend line chart using fl_chart, hourly activity bar chart, statistics cards (total steps, daily average, best day, current streak). Implement StepModel matching backend Step schema with source types (native, manual, web). Create StepsRepository with StepsRemoteDataSource for API calls (POST /steps, GET /steps/today, GET /steps/weekly, GET /steps/hourly-peaks, GET /steps/stats). Add pull-to-refresh with RefreshIndicator and StepHistoryScreen for detailed history view with date filtering",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -259,15 +257,15 @@
         "followsPatterns": [
           "fl_chart for LineChart and BarChart visualizations",
           "Pull-to-refresh with RefreshIndicator",
-          "Riverpod FutureProvider for async data",
-          "Local caching with steps_local_datasource"
+          "Riverpod FutureProvider for async data fetching",
+          "Local caching with steps_local_datasource using shared_preferences"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-sharing-ui",
         "title": "Sharing UI - Friends and Social Features",
-        "description": "Build friends management screens including FriendsScreen with list of accepted friends, FriendRequestsScreen with tabs for pending/sent requests, UserSearchScreen for finding users by username, FriendDetailScreen showing friend's step activity. Implement SharingRelationshipModel matching backend schema. Create SharingRepository with request/accept/reject/revoke actions. Display friend stats with shared step data",
+        "description": "Build friends management screens including FriendsScreen with list of accepted friends showing their step counts, FriendRequestsScreen with tabs for incoming pending and sent requests, UserSearchScreen with debounced search for finding users by username (GET /users/search), FriendDetailScreen showing friend's step activity and charts. Implement SharingRelationshipModel matching backend schema with status types (pending, accepted, bidirectional, rejected). Create SharingRepository with API calls for request/accept/reject/revoke actions. Display friend stats using GET /sharing/:userId/stats",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -305,8 +303,7 @@
           "project-app-pasos-backend/src/routes/sharing.routes.ts",
           "project-app-pasos-backend/src/routes/users.routes.ts",
           "project-app-pasos-backend/src/models/SharingRelationship.ts",
-          "project-app-pasos-backend/src/services/sharing.service.ts",
-          "project-app-pasos-backend/src/controllers/sharing.controller.ts"
+          "project-app-pasos-backend/src/services/sharing.service.ts"
         ],
         "estimatedComplexity": "complex",
         "dependencies": [
@@ -317,17 +314,18 @@
         ],
         "executionOrder": 3,
         "followsPatterns": [
-          "Search with debounce using Riverpod",
-          "Tab-based filtering for request status",
+          "Search with debounce using Timer or rxdart",
+          "Tab-based filtering for request status with TabBar",
           "Optimistic UI updates for accept/reject actions",
-          "Pull-to-refresh for relationship lists"
+          "Pull-to-refresh for relationship lists",
+          "Slidable list items for quick actions"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-goals-ui",
         "title": "Goals UI - Group Goals and Progress Tracking",
-        "description": "Build group goals management including GoalsScreen with list of active goals, CreateGoalScreen with form for title/description/targetSteps/dates, GoalDetailScreen showing goal info with member progress list, InviteUsersScreen for inviting friends to goals. Implement GroupGoalModel and GoalMembershipModel. Create GoalsRepository with full CRUD and invite/join/leave actions. Display progress bars and member rankings sorted by contribution",
+        "description": "Build group goals management including GoalsScreen with list of active goals showing progress percentage, CreateGoalScreen with form for title, description, targetSteps, startDate, endDate with validation, GoalDetailScreen showing goal info with member progress list and total contribution, InviteUsersScreen for inviting friends to goals filtered from sharing relationships. Implement GroupGoalModel and GoalMembershipModel matching backend schemas. Create GoalsRepository with full CRUD and invite/join/leave actions. Display progress bars, member rankings sorted by contribution, and goal completion status",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -367,8 +365,7 @@
           "project-app-pasos-backend/src/routes/goals.routes.ts",
           "project-app-pasos-backend/src/models/GroupGoal.ts",
           "project-app-pasos-backend/src/models/GroupGoalMembership.ts",
-          "project-app-pasos-backend/src/services/goals.service.ts",
-          "project-app-pasos-backend/src/controllers/goals.controller.ts"
+          "project-app-pasos-backend/src/services/goals.service.ts"
         ],
         "estimatedComplexity": "complex",
         "dependencies": [
@@ -381,16 +378,17 @@
         "executionOrder": 3,
         "followsPatterns": [
           "Form validation with real-time feedback",
-          "Progress visualization with LinearProgressIndicator",
+          "Progress visualization with LinearProgressIndicator and CircularProgressIndicator",
           "Member list sorted by contribution",
-          "Date picker for goal period selection"
+          "Date picker using showDateRangePicker",
+          "Goal status badges (active, completed, expired)"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-native-integration",
         "title": "Native Integration - Health APIs and Background Sync",
-        "description": "Integrate with native health APIs using health package for reading step data from HealthKit (iOS) and Google Fit/Health Connect (Android). Implement HealthService with platform-specific permission handling, PermissionService for requesting and checking health permissions, StepSyncService for syncing native steps to backend API. Create BackgroundSyncService for periodic data sync. Add HealthPermissionsScreen in settings for managing permissions",
+        "description": "Integrate with native health APIs using health package for reading step data from HealthKit (iOS) and Google Fit/Health Connect (Android). Implement HealthService with platform-specific permission handling and step data reading with date range filtering. Create PermissionService for requesting and checking health permissions with graceful degradation when denied. Build StepSyncService for syncing native steps to backend API with source='native'. Add SettingsScreen with HealthPermissionsScreen for managing permissions and viewing sync status. Implement background sync using workmanager package for periodic data synchronization",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -429,19 +427,20 @@
           "epic-platform-config",
           "epic-dashboard"
         ],
-        "executionOrder": 4,
+        "executionOrder": 5,
         "followsPatterns": [
           "Platform-specific permission handling with health package",
           "Background execution with workmanager package",
           "Health data privacy compliance with clear usage descriptions",
-          "Graceful degradation when permissions denied"
+          "Graceful degradation when permissions denied",
+          "Incremental sync to avoid duplicate step records"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-realtime-client",
         "title": "Real-time Client - WebSocket and Push Notifications",
-        "description": "Implement WebSocket client using web_socket_channel for real-time step updates and goal progress matching backend socket events. Create WebSocketService with automatic reconnection on connection loss, authentication via JWT token. Add FirebaseService and NotificationService for Firebase Cloud Messaging push notifications. Integrate real-time updates into StepsProvider, SharingProvider, and GoalsProvider for live data refresh",
+        "description": "Implement WebSocket client using socket_io_client package for real-time step updates and goal progress matching backend Socket.IO server events (steps-updated, sharing:joined, goal-progress, goal:joined, goal:member-joined). Create WebSocketService with automatic reconnection using exponential backoff, authentication via JWT token in handshake. Add FirebaseService for Firebase Cloud Messaging initialization and NotificationService for handling push notifications in foreground/background. Integrate real-time updates into StepsProvider, SharingProvider, and GoalsProvider using StreamProvider for live data refresh. Add ConnectionStatusBanner widget showing connection state",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -466,9 +465,6 @@
           "lib/core/providers/notification_provider.dart",
           "lib/core/models/socket_events.dart",
           "lib/core/models/socket_payloads.dart",
-          "android/app/google-services.json",
-          "ios/Runner/GoogleService-Info.plist",
-          "ios/firebase_app_id_file.json",
           "lib/core/services/connection_status_service.dart",
           "lib/shared/widgets/connection_status_banner.dart"
         ],
@@ -485,17 +481,17 @@
           "epic-dashboard",
           "epic-sharing-ui",
           "epic-goals-ui",
-          "epic-flutter-foundation",
+          "epic-platform-config",
           "epic-flutter-foundation",
           "epic-platform-config",
           "epic-dashboard",
           "epic-sharing-ui",
           "epic-goals-ui"
         ],
-        "executionOrder": 5,
+        "executionOrder": 6,
         "followsPatterns": [
+          "Socket.IO client compatible with backend server",
           "WebSocket with exponential backoff reconnection",
-          "Socket.IO compatible event handling matching backend",
           "Firebase messaging with foreground/background handlers",
           "Connection status banner for user feedback",
           "Event-driven state updates using Riverpod StreamProvider"
