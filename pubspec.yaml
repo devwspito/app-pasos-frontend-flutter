@@ -1,0 +1,65 @@
+name: app_pasos
+description: Mobile application for step tracking built with Flutter using Clean Architecture.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Dependency Injection
+  get_it: ^7.6.4
+  injectable: ^2.3.2
+
+  # Networking
+  dio: ^5.4.0
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+
+  # Utilities
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+
+  # Internationalization
+  intl: ^0.18.1
+
+  # Network Status
+  connectivity_plus: ^5.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Linting
+  flutter_lints: ^3.0.1
+
+  # Code Generation
+  injectable_generator: ^2.4.1
+  build_runner: ^2.4.8
+
+  # Testing
+  mocktail: ^1.0.1
+
+flutter:
+  uses-material-design: true
+
+  # Add assets directory (create when needed)
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+
+  # Add fonts directory (create when needed)
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: assets/fonts/CustomFont-Regular.ttf
