@@ -1,0 +1,161 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "09fb1502f00abc4638c73758",
+    "timestamp": "2026-01-23T15:53:42.371Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-23T15:53:42.371Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-foundation",
+    "storiesCount": 5,
+    "architecture": "## Flutter Foundation Architecture\n\n### Architecture Overview\nThis epic establishes the foundational architecture for the Flutter app following Clean Architecture principles with:\n\n1. **Dependency Injection Layer** (`lib/core/di/`)\n   - `injection_container.dart`: Main DI configuration using get_it\n   - `modules/`: Modular DI registration (NetworkModule, StorageModule, RouterModule, BlocModule)\n   - Pattern: `abstract final class` with `static void register(GetIt sl)`\n\n2. **Network Layer** (`lib/core/network/`)\n   - `ApiClient`: Type-safe HTTP client wrapper around Dio\n   - `AuthInterceptor`: JWT token management and refresh\n   - `ConnectivityInterceptor`: Network availability checks\n\n3. **Routing Layer** (`lib/core/router/`)\n   - `Routes`: Static route path constants\n   - `AppRouter`: GoRouter configuration with declarative routes\n\n4. **Configuration Layer** (`lib/core/config/`, `lib/core/constants/`)\n   - `Environment`: Environment variables from flutter_dotenv\n   - `ApiEndpoints`: API path constants\n   - `StorageKeys`: Secure storage key constants\n\n### Dependency Flow\n```\nmain.dart\n    └── configureDependencies()\n            ├── StorageModule (FlutterSecureStorage)\n            ├── NetworkModule (Dio, ApiClient, Interceptors)\n            ├── RouterModule (GoRouter)\n            └── BlocModule (future BLoCs)\n    └── App (MaterialApp.router with sl<GoRouter>())\n```\n\n### SOLID Compliance\n- **SRP**: Each module handles one concern (network, storage, routing)\n- **OCP**: New interceptors/modules can be added without modifying existing code\n- **LSP**: Interceptors extend Dio's Interceptor class properly\n- **ISP**: Small, focused interfaces (ApiClient methods, module registration)\n- **DIP**: All dependencies injected via get_it, no direct instantiation\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Typecheck/Analyze: `flutter analyze`\n- Test: `flutter test`\n- Build: `flutter build apk --debug`",
+    "stories": [
+      {
+        "id": "epic-flutter-foundation-story-1",
+        "title": "Create constants files and enhance Environment config in lib/core/",
+        "description": "Create API endpoints and storage keys constants, and enhance Environment to load values from flutter_dotenv.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class` pattern (see Environment class)\n- Use static const for constants\n- Use `flutter_dotenv` package already in pubspec.yaml\n- Follow naming: `Environment.apiBaseUrl`, `ApiEndpoints.auth`, `StorageKeys.token`\n\n📦 **FILES TO CREATE:**\n- `lib/core/constants/api_endpoints.dart`: Define API endpoint paths as static const strings\n- `lib/core/constants/storage_keys.dart`: Define secure storage keys as static const strings\n\n📦 **FILE TO MODIFY:**\n- `lib/core/config/environment.dart`: Add getters for API_BASE_URL, WS_URL, ENVIRONMENT from .env file using dotenv\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use regular classes - use `abstract final class`\n- DO NOT hardcode URLs - read from .env via flutter_dotenv\n- DO NOT create instance methods - use static only\n\n**IMPLEMENTATION DETAILS:**\n```dart\n// api_endpoints.dart\nabstract final class ApiEndpoints {\n  static const String baseAuth = '/auth';\n  static const String login = '$baseAuth/login';\n  static const String register = '$baseAuth/register';\n  static const String refreshToken = '$baseAuth/refresh';\n  // Add more endpoints\n}\n\n// storage_keys.dart\nabstract final class StorageKeys {\n  static const String accessToken = 'access_token';\n  static const String refreshToken = 'refresh_token';\n  static const String userId = 'user_id';\n}\n\n// environment.dart enhancement\nimport 'package:flutter_dotenv/flutter_dotenv.dart';\nabstract final class Environment {\n  static String get apiBaseUrl => dotenv.env['API_BASE_URL'] ?? 'http://localhost:3000/api';\n  static String get wsUrl => dotenv.env['WS_URL'] ?? 'ws://localhost:3000';\n  // Keep existing isDevelopment, isProduction, name getters\n}\n```\n\n**VERIFICATION:**\n1. `flutter analyze lib/core/constants/ lib/core/config/`\n2. `flutter test`\n3. Verify no linter errors",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/environment.dart"
+        ],
+        "filesToModify": [
+          "lib/core/config/environment.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/constants/api_endpoints.dart",
+          "lib/core/constants/storage_keys.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the app starts, When Environment.apiBaseUrl is accessed, Then it returns the value from .env or default",
+          "Given ApiEndpoints class exists, When accessing ApiEndpoints.login, Then it returns '/auth/login'",
+          "Given StorageKeys class exists, When accessing StorageKeys.accessToken, Then it returns 'access_token'",
+          "Given flutter analyze runs, When checking lib/core/constants and lib/core/config, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-2",
+        "title": "Create network layer with ApiClient and interceptors in lib/core/network/",
+        "description": "Create ApiClient wrapper, AuthInterceptor for JWT handling, and ConnectivityInterceptor for network checks. Update NetworkModule to register these.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class NetworkModule` pattern from `lib/core/di/modules/network_module.dart`\n- Use `sl.registerLazySingleton<Type>(() => ...)` for DI registration\n- Interceptors extend `Interceptor` from dio package\n- Use connectivity_plus package (already in pubspec.yaml)\n\n📦 **FILES TO CREATE:**\n- `lib/core/network/api_client.dart`: Wrapper around Dio with typed methods (get, post, put, delete)\n- `lib/core/network/auth_interceptor.dart`: Adds Authorization header, handles 401 refresh\n- `lib/core/network/connectivity_interceptor.dart`: Checks network before requests\n\n📦 **FILE TO MODIFY:**\n- `lib/core/di/modules/network_module.dart`: Register ApiClient, add interceptors to Dio\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create Dio instances outside NetworkModule\n- DO NOT use `sl<Dio>()` directly in widgets - use ApiClient\n- DO NOT hardcode base URLs - use Environment.apiBaseUrl\n\n**IMPLEMENTATION DETAILS:**\n```dart\n// api_client.dart\nclass ApiClient {\n  final Dio _dio;\n  ApiClient(this._dio);\n  \n  Future<Response<T>> get<T>(String path, {Map<String, dynamic>? queryParams});\n  Future<Response<T>> post<T>(String path, {dynamic data});\n  Future<Response<T>> put<T>(String path, {dynamic data});\n  Future<Response<T>> delete<T>(String path);\n}\n\n// auth_interceptor.dart\nclass AuthInterceptor extends Interceptor {\n  final FlutterSecureStorage _storage;\n  AuthInterceptor(this._storage);\n  \n  @override\n  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {\n    // Add Bearer token from storage\n  }\n  \n  @override\n  void onError(DioException err, ErrorInterceptorHandler handler) {\n    // Handle 401, attempt refresh\n  }\n}\n\n// connectivity_interceptor.dart\nclass ConnectivityInterceptor extends Interceptor {\n  @override\n  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {\n    // Check Connectivity.checkConnectivity()\n  }\n}\n\n// network_module.dart update\nstatic void register(GetIt sl) {\n  sl.registerLazySingleton<AuthInterceptor>(() => AuthInterceptor(sl()));\n  sl.registerLazySingleton<ConnectivityInterceptor>(() => ConnectivityInterceptor());\n  sl.registerLazySingleton<Dio>(() => _createDio(sl));\n  sl.registerLazySingleton<ApiClient>(() => ApiClient(sl()));\n}\n```\n\n**VERIFICATION:**\n1. `flutter analyze lib/core/network/ lib/core/di/modules/network_module.dart`\n2. `flutter test`\n3. Verify ApiClient is registered in DI container",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/modules/network_module.dart",
+          "lib/core/di/modules/storage_module.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/modules/network_module.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/network/api_client.dart",
+          "lib/core/network/auth_interceptor.dart",
+          "lib/core/network/connectivity_interceptor.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given ApiClient is registered, When sl<ApiClient>() is called, Then it returns a configured ApiClient instance",
+          "Given AuthInterceptor is added, When a request is made, Then Authorization header is added if token exists",
+          "Given ConnectivityInterceptor is added, When no network, Then request fails with appropriate error",
+          "Given flutter analyze runs, When checking lib/core/network, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-3",
+        "title": "Create routing setup with go_router in lib/core/router/",
+        "description": "Add go_router dependency, create AppRouter configuration, define route constants, and create RouterModule for DI.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class RouterModule` pattern with `static void register(GetIt sl)`\n- Use go_router package for declarative routing\n- Define routes as static const in Routes class\n- Use `sl.registerLazySingleton<GoRouter>(() => ...)` for registration\n\n📦 **FILES TO CREATE:**\n- `lib/core/router/routes.dart`: Route path constants (e.g., Routes.home = '/')\n- `lib/core/router/app_router.dart`: GoRouter configuration with all routes\n- `lib/core/di/modules/router_module.dart`: DI registration for GoRouter\n\n📦 **FILE TO MODIFY:**\n- `pubspec.yaml`: Add go_router dependency\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use Navigator.push directly - use GoRouter\n- DO NOT hardcode route strings in widgets - use Routes constants\n- DO NOT create GoRouter outside RouterModule\n\n**IMPLEMENTATION DETAILS:**\n```dart\n// routes.dart\nabstract final class Routes {\n  static const String splash = '/splash';\n  static const String home = '/';\n  static const String login = '/login';\n  static const String register = '/register';\n  static const String profile = '/profile';\n}\n\n// app_router.dart\nimport 'package:go_router/go_router.dart';\n\nGoRouter createAppRouter() {\n  return GoRouter(\n    initialLocation: Routes.splash,\n    debugLogDiagnostics: Environment.isDevelopment,\n    routes: [\n      GoRoute(path: Routes.splash, builder: (_, __) => const SplashScreen()),\n      GoRoute(path: Routes.home, builder: (_, __) => const HomeScreen()),\n      GoRoute(path: Routes.login, builder: (_, __) => const LoginScreen()),\n      // Placeholder screens for now\n    ],\n  );\n}\n\n// router_module.dart\nabstract final class RouterModule {\n  static void register(GetIt sl) {\n    sl.registerLazySingleton<GoRouter>(() => createAppRouter());\n  }\n}\n```\n\n**pubspec.yaml addition:**\n```yaml\ndependencies:\n  go_router: ^14.6.3\n```\n\n**VERIFICATION:**\n1. `flutter pub get`\n2. `flutter analyze lib/core/router/ lib/core/di/modules/router_module.dart`\n3. `flutter test`",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          "lib/core/di/modules/network_module.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/router/app_router.dart",
+          "lib/core/router/routes.dart",
+          "lib/core/di/modules/router_module.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml is updated, When flutter pub get runs, Then go_router is installed successfully",
+          "Given Routes class exists, When accessing Routes.home, Then it returns '/'",
+          "Given RouterModule.register is called, When sl<GoRouter>() is accessed, Then it returns configured GoRouter",
+          "Given flutter analyze runs, When checking lib/core/router, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-4",
+        "title": "Create BlocModule and update injection_container.dart with all modules",
+        "description": "Create BlocModule for future BLoC registration, update injection_container to register all modules in correct order, and add flutter_bloc linter rules.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class BlocModule` pattern with `static void register(GetIt sl)`\n- Call modules in dependency order: Storage → Network → Router → Bloc\n- Use existing `configureDependencies()` async function pattern\n- Add bloc-specific lint rules to analysis_options.yaml\n\n📦 **FILES TO CREATE:**\n- `lib/core/di/modules/bloc_module.dart`: Empty module ready for BLoC registration\n\n📦 **FILES TO MODIFY:**\n- `lib/core/di/injection_container.dart`: Import and register RouterModule, BlocModule\n- `analysis_options.yaml`: Add flutter_bloc recommended lints\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT register modules out of dependency order\n- DO NOT skip loading .env file before DI\n- DO NOT create BLoCs outside BlocModule\n\n**IMPLEMENTATION DETAILS:**\n```dart\n// bloc_module.dart\nimport 'package:get_it/get_it.dart';\n\nabstract final class BlocModule {\n  /// Registers BLoC dependencies with the provided service locator.\n  /// \n  /// Add BLoCs here as the application grows:\n  /// ```dart\n  /// sl.registerFactory<AuthBloc>(() => AuthBloc(sl()));\n  /// ```\n  static void register(GetIt sl) {\n    // BLoCs will be registered here\n    // Example: sl.registerFactory<AuthBloc>(() => AuthBloc(sl()));\n  }\n}\n\n// injection_container.dart update\nimport 'package:flutter_dotenv/flutter_dotenv.dart';\nimport 'modules/router_module.dart';\nimport 'modules/bloc_module.dart';\n\nFuture<void> configureDependencies() async {\n  // Load environment variables first\n  await dotenv.load(fileName: '.env');\n  \n  // Register modules in dependency order\n  StorageModule.register(sl);\n  NetworkModule.register(sl);\n  RouterModule.register(sl);\n  BlocModule.register(sl);\n}\n```\n\n**analysis_options.yaml addition:**\n```yaml\nanalyzer:\n  plugins:\n    - custom_lint\n  errors:\n    invalid_annotation_target: ignore\n\nlinter:\n  rules:\n    - prefer_const_constructors\n    - prefer_const_declarations\n    - prefer_final_locals\n```\n\n**VERIFICATION:**\n1. `flutter analyze lib/core/di/`\n2. `flutter analyze` (full project)\n3. `flutter test`",
+        "epicId": "epic-flutter-foundation",
+        "priority": 3,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-flutter-foundation-story-2",
+          "epic-flutter-foundation-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/injection_container.dart",
+          "analysis_options.yaml"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "analysis_options.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/di/modules/bloc_module.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given configureDependencies is called, When all modules register, Then no errors occur",
+          "Given dotenv.load is called first, When Environment.apiBaseUrl is accessed, Then it returns .env value",
+          "Given BlocModule exists, When BlocModule.register is called, Then it completes without error",
+          "Given analysis_options.yaml is updated, When flutter analyze runs, Then bloc-related lints are active"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-5",
+        "title": "Create App widget and refactor main.dart entry point",
+        "description": "Create App widget with MaterialApp.router configuration, refactor main.dart to initialize DI and use new App widget.\n\n🔧 **PATTERNS TO USE:**\n- Use `WidgetsFlutterBinding.ensureInitialized()` before async operations\n- Use `await configureDependencies()` before runApp\n- Use `MaterialApp.router()` constructor with GoRouter from DI\n- Use `sl<GoRouter>()` to get router instance\n\n📦 **FILES TO CREATE:**\n- `lib/app.dart`: App widget with MaterialApp.router configuration\n\n📦 **FILE TO MODIFY:**\n- `lib/main.dart`: Initialize DI, load .env, run App widget\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use MaterialApp() - use MaterialApp.router()\n- DO NOT create GoRouter in App - get from sl<GoRouter>()\n- DO NOT skip WidgetsFlutterBinding.ensureInitialized()\n- DO NOT use Navigator - use GoRouter via context.go(), context.push()\n\n**IMPLEMENTATION DETAILS:**\n```dart\n// app.dart\nimport 'package:flutter/material.dart';\nimport 'package:go_router/go_router.dart';\nimport 'core/di/injection_container.dart';\n\nclass App extends StatelessWidget {\n  const App({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    final router = sl<GoRouter>();\n    \n    return MaterialApp.router(\n      title: 'Pasos App',\n      debugShowCheckedModeBanner: false,\n      theme: ThemeData(\n        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),\n        useMaterial3: true,\n      ),\n      routerConfig: router,\n    );\n  }\n}\n\n// main.dart refactor\nimport 'package:flutter/material.dart';\nimport 'app.dart';\nimport 'core/di/injection_container.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await configureDependencies();\n  runApp(const App());\n}\n```\n\n**VERIFICATION:**\n1. `flutter analyze lib/main.dart lib/app.dart`\n2. `flutter build apk --debug` (verify compilation)\n3. `flutter test`",
+        "epicId": "epic-flutter-foundation",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-flutter-foundation-story-3",
+          "epic-flutter-foundation-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/main.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [
+          "lib/app.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given main() is called, When app starts, Then DI is configured before runApp",
+          "Given App widget builds, When MaterialApp.router is created, Then it uses sl<GoRouter>()",
+          "Given flutter build runs, When compiling, Then no errors occur",
+          "Given the app launches, When initial route loads, Then splash screen is displayed"
+        ]
+      }
+    ]
+  }
+}
