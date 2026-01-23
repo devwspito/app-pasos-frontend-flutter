@@ -1,0 +1,85 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1afec52ab9de7df94dd31a59",
+    "timestamp": "2026-01-23T01:27:06.548Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-platform-setup",
+    "savedAt": "2026-01-23T01:27:06.548Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-platform-setup",
+    "storiesCount": 2,
+    "architecture": "## Architecture Overview\n\nThis epic configures native platform folders for Flutter cross-platform development.\n\n### Platform Separation Strategy\n- **Story 1 (iOS)**: Owns all ios/* files - runs flutter create and configures iOS settings\n- **Story 2 (Android)**: Owns all android/* files - configures Android after ios story completes\n\nThis separation ensures ZERO file overlap between parallel developers.\n\n### iOS Configuration (Story 1)\n- Bundle ID: com.apppasos.frontend\n- Display Name: App Pasos\n- Deployment Target: iOS 14.0+\n- CocoaPods integration via Podfile\n\n### Android Configuration (Story 2)\n- Application ID: com.apppasos.frontend\n- Min SDK: 24 (Android 7.0 - required for Health Connect)\n- Target SDK: 34 (Android 14)\n- Kotlin-based MainActivity\n\n### SOLID Principles Applied\n- **SRP**: Each story has single platform responsibility\n- **OCP**: Platform configs can be extended without modifying each other\n- **DIP**: Flutter abstracts platform details from Dart code\n\n### Dependency Flow\n```\nStory 1 (flutter create + iOS) → Story 2 (Android config)\n```\nStory 2 depends on Story 1 because flutter create must generate android/ folder first.\n\n### Verification Commands\n- iOS: `flutter build ios --no-codesign`\n- Android: `flutter build apk --debug`\n- Full check: `flutter doctor && flutter analyze`",
+    "stories": [
+      {
+        "id": "epic-flutter-platform-setup-story-1",
+        "title": "Run flutter create and configure iOS platform in ios/ folder",
+        "description": "Run `flutter create .` to generate platform folders, then configure iOS-specific settings.\n\n🔧 **PATTERNS TO USE:**\n- Run `flutter create . --org com.apppasos` in project root to generate ios/ and android/ folders\n- Edit ios/Runner/Info.plist using standard plist XML format\n- Edit ios/Runner.xcodeproj/project.pbxproj for build settings\n- Edit ios/Podfile for CocoaPods configuration\n\n📦 **REQUIRED iOS CONFIGURATION:**\n- Bundle ID: com.apppasos.frontend\n- Display name: App Pasos\n- Deployment target: iOS 14.0 minimum\n- Info.plist permissions placeholders for future health/location features\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT manually create ios folder structure - use flutter create\n- DO NOT edit android files in this story - those belong to story-2\n- DO NOT skip running flutter create first\n\n**VERIFICATION:**\n```bash\nflutter create . --org com.apppasos\ncd ios && pod install --repo-update\nflutter build ios --no-codesign\n```",
+        "epicId": "epic-flutter-platform-setup",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          "lib/main.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "ios/Runner/Info.plist",
+          "ios/Runner/AppDelegate.swift",
+          "ios/Runner.xcodeproj/project.pbxproj",
+          "ios/Podfile",
+          "ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+          "ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+          "ios/Runner/Base.lproj/LaunchScreen.storyboard",
+          "ios/Runner/Base.lproj/Main.storyboard",
+          "ios/Runner/Runner-Bridging-Header.h",
+          "ios/.gitignore"
+        ],
+        "acceptanceCriteria": [
+          "Given Flutter project without ios folder, When running flutter create . --org com.apppasos, Then ios folder is generated with Xcode project structure",
+          "Given generated ios folder, When checking Info.plist, Then CFBundleIdentifier is com.apppasos.frontend and CFBundleDisplayName is App Pasos",
+          "Given iOS configuration, When checking project.pbxproj, Then IPHONEOS_DEPLOYMENT_TARGET is 14.0 or higher",
+          "Given Podfile, When checking iOS version, Then platform :ios is set to 14.0 minimum",
+          "Given complete iOS setup, When running flutter build ios --no-codesign, Then build completes successfully without errors"
+        ]
+      },
+      {
+        "id": "epic-flutter-platform-setup-story-2",
+        "title": "Configure Android platform settings in android/ folder",
+        "description": "Configure Android-specific settings after flutter create has generated the android/ folder.\n\n🔧 **PATTERNS TO USE:**\n- Edit android/app/build.gradle for app-level configuration\n- Edit android/build.gradle for project-level Gradle settings\n- Edit android/app/src/main/AndroidManifest.xml for app manifest\n- Edit android/app/src/main/res/values/strings.xml for app name\n- Edit android/gradle.properties for Gradle properties\n- Edit android/settings.gradle for project settings\n\n📦 **REQUIRED ANDROID CONFIGURATION:**\n- applicationId: com.apppasos.frontend\n- minSdk: 24 (Android 7.0+)\n- targetSdk: 34 (Android 14)\n- compileSdk: 34\n- App name in strings.xml: App Pasos\n- Enable R8 code shrinking for release builds\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT modify any ios/ files - those belong to story-1\n- DO NOT lower minSdk below 24 (breaks health APIs)\n- DO NOT forget to update strings.xml with app name\n\n**VERIFICATION:**\n```bash\nflutter build apk --debug\nflutter build appbundle --debug\n```",
+        "epicId": "epic-flutter-platform-setup",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-platform-setup-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "android/app/build.gradle",
+          "android/build.gradle",
+          "android/app/src/main/AndroidManifest.xml",
+          "android/gradle.properties",
+          "android/settings.gradle"
+        ],
+        "filesToCreate": [
+          "android/app/src/main/res/values/strings.xml",
+          "android/app/src/main/kotlin/com/apppasos/frontend/MainActivity.kt"
+        ],
+        "acceptanceCriteria": [
+          "Given android folder from flutter create, When checking app/build.gradle, Then applicationId is com.apppasos.frontend",
+          "Given build.gradle configuration, When checking SDK versions, Then minSdk is 24, targetSdk is 34, and compileSdk is 34",
+          "Given strings.xml, When checking app_name, Then value is App Pasos",
+          "Given AndroidManifest.xml, When checking configuration, Then android:label references @string/app_name",
+          "Given complete Android setup, When running flutter build apk --debug, Then APK builds successfully without errors"
+        ]
+      }
+    ]
+  }
+}
