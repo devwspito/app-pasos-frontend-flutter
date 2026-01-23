@@ -1,0 +1,139 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "2ff781736c9f12b7376700e2",
+    "timestamp": "2026-01-23T14:39:17.027Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-23T14:39:17.028Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-foundation",
+    "storiesCount": 4,
+    "architecture": "## Flutter Foundation Architecture\n\n### Layer Structure (Clean Architecture)\n```\nlib/\n├── main.dart                    # Entry point\n├── app.dart                     # Root App widget\n├── core/                        # Shared infrastructure\n│   ├── config/                  # Environment config (existing)\n│   ├── constants/               # App-wide constants (NEW)\n│   │   ├── app_constants.dart\n│   │   └── storage_keys.dart\n│   ├── di/                      # Dependency Injection (NEW)\n│   │   ├── injection_container.dart\n│   │   └── modules/\n│   │       ├── network_module.dart\n│   │       └── storage_module.dart\n│   ├── errors/                  # Error handling (existing)\n│   ├── extensions/              # Dart extensions (existing)\n│   ├── network/                 # HTTP client (NEW)\n│   │   ├── api_client.dart\n│   │   ├── api_endpoints.dart\n│   │   └── interceptors/\n│   │       ├── auth_interceptor.dart\n│   │       ├── error_interceptor.dart\n│   │       └── logging_interceptor.dart\n│   ├── storage/                 # Persistence (NEW)\n│   │   ├── secure_storage_service.dart\n│   │   └── local_storage_service.dart\n│   └── utils/                   # Utilities (existing)\n└── features/                    # Feature modules (NEW)\n    └── shared/\n        └── data/\n            └── models/\n                ├── api_response.dart\n                └── pagination.dart\n```\n\n### Dependency Flow (SOLID Compliant)\n```\nmain.dart\n    └── configureDependencies() → injection_container.dart\n                                      ├── NetworkModule (registers ApiClient, Interceptors)\n                                      └── StorageModule (registers Storage Services)\n\nApiClient (uses Dio)\n    ├── AuthInterceptor → SecureStorageService (gets token)\n    ├── ErrorInterceptor → AppException (converts errors)\n    └── LoggingInterceptor → AppLogger (logs requests)\n```\n\n### Key Design Decisions\n\n1. **DI with get_it**: Lazy singleton registration for services, enabling easy testing via mocking\n2. **Interceptor Chain**: Auth → Error → Logging order ensures tokens are added before logging\n3. **Sealed Classes**: Using Dart 3 sealed classes for exhaustive error handling (existing pattern)\n4. **Result Pattern**: Using existing Result<T> type for functional error handling\n5. **Storage Separation**: SecureStorage for sensitive data, SharedPreferences for settings\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n```bash\nflutter analyze           # Lint check\nflutter test              # Run tests\nflutter build apk --debug # Verify compilation\n```",
+    "stories": [
+      {
+        "id": "epic-flutter-foundation-story-1",
+        "title": "Create dependency injection container with get_it in lib/core/di/injection_container.dart",
+        "description": "Setup the dependency injection container using get_it package (already in pubspec.yaml). Create a modular DI structure with separate modules for network and storage dependencies.\n\n🔧 **PATTERNS TO USE:**\n- Use `GetIt.instance` singleton pattern (standard get_it usage)\n- Use `abstract final class` pattern like [environment.dart](lib/core/config/environment.dart) for DI modules\n- Follow lazy registration pattern: `sl.registerLazySingleton<T>(() => impl)`\n- Use `sl.registerFactory<T>(() => impl)` for non-singleton instances\n\n📦 **REQUIRED STRUCTURE:**\n- `injection_container.dart`: Main entry point with `configureDependencies()` async function\n- `network_module.dart`: Registers Dio, ApiClient, all interceptors\n- `storage_module.dart`: Registers SecureStorageService, LocalStorageService\n- Export `sl` as the service locator getter: `final sl = GetIt.instance`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- `GetIt()` constructor call ← WRONG (use `GetIt.instance`)\n- Registering concrete classes without interface ← OK for now but note for future\n- Circular dependency in registrations ← Will cause runtime crash\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/di/\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/environment.dart",
+          "lib/core/errors/app_exception.dart",
+          "pubspec.yaml"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/di/modules/network_module.dart",
+          "lib/core/di/modules/storage_module.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the app starts, When configureDependencies() is called, Then all dependencies are registered without errors",
+          "Given DI is configured, When sl<ApiClient>() is called, Then a singleton ApiClient instance is returned",
+          "Given DI is configured, When sl<SecureStorageService>() is called, Then a singleton SecureStorageService instance is returned",
+          "Given the DI modules exist, When flutter analyze runs, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-2",
+        "title": "Create API client with Dio interceptors in lib/core/network/",
+        "description": "Setup Dio HTTP client with base URL configuration, authentication interceptor for token injection, error interceptor using existing AppException patterns, and logging interceptor for debugging.\n\n🔧 **PATTERNS TO USE:**\n- Use `AppException.fromDioException(e)` from [app_exception.dart](lib/core/errors/app_exception.dart) in error interceptor\n- Use `AppLogger.d()`, `AppLogger.e()` from [logger.dart](lib/core/utils/logger.dart) in logging interceptor\n- Use `Environment.isDevelopment` from [environment.dart](lib/core/config/environment.dart) to enable/disable logging\n- Follow existing sealed class pattern for type-safe error handling\n\n📦 **REQUIRED STRUCTURE:**\n- `api_client.dart`: Wrapper around Dio with typed request methods (get, post, put, delete)\n- `api_endpoints.dart`: Constants class with all API endpoint paths\n- `auth_interceptor.dart`: Injects Bearer token from SecureStorageService into headers\n- `error_interceptor.dart`: Converts DioException to AppException using existing factory\n- `logging_interceptor.dart`: Logs requests/responses using AppLogger (dev only)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Creating new exception types ← WRONG (use existing AppException hierarchy)\n- Direct print() statements ← WRONG (use AppLogger)\n- Hardcoded base URLs ← WRONG (use Environment config or constants)\n- Catching generic Exception ← Use DioException and AppException specifically\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/network/\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/errors/app_exception.dart",
+          "lib/core/errors/failure.dart",
+          "lib/core/utils/logger.dart",
+          "lib/core/config/environment.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/network/api_client.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/network/interceptors/auth_interceptor.dart",
+          "lib/core/network/interceptors/logging_interceptor.dart",
+          "lib/core/network/interceptors/error_interceptor.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given an API request is made, When the user is authenticated, Then the auth interceptor adds Bearer token to headers",
+          "Given a network error occurs, When the error interceptor catches it, Then it converts to AppException using fromDioException()",
+          "Given Environment.isDevelopment is true, When API calls are made, Then logging interceptor logs request/response details",
+          "Given the network module exists, When flutter analyze runs, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-3",
+        "title": "Implement secure and local storage services in lib/core/storage/",
+        "description": "Create storage services using flutter_secure_storage for sensitive data (tokens, credentials) and shared_preferences for non-sensitive settings. Define storage keys as constants.\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class` pattern like [validators.dart](lib/core/utils/validators.dart) for StorageKeys constants\n- Use async/await pattern consistently for all storage operations\n- Follow existing code style with documentation comments\n- Services should be singletons registered in DI (Story 1 will register them)\n\n📦 **REQUIRED STRUCTURE:**\n- `secure_storage_service.dart`: Wrapper for flutter_secure_storage with typed methods for tokens\n  - `Future<void> saveAccessToken(String token)`\n  - `Future<String?> getAccessToken()`\n  - `Future<void> deleteAccessToken()`\n  - `Future<void> clearAll()`\n- `local_storage_service.dart`: Wrapper for shared_preferences with typed methods\n  - `Future<void> setBool(String key, bool value)`\n  - `Future<bool?> getBool(String key)`\n  - `Future<void> setString(String key, String value)`\n  - `Future<String?> getString(String key)`\n  - `Future<void> remove(String key)`\n- `storage_keys.dart`: Constants class with all storage key names\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Storing tokens in SharedPreferences ← WRONG (use SecureStorage for sensitive data)\n- Hardcoded string keys scattered in code ← WRONG (use StorageKeys constants)\n- Synchronous storage access ← WRONG (all storage ops are async)\n- Missing null safety handling ← Always handle nullable returns\n\n🧪 **VERIFICATION:**\n```bash\nflutter pub get\nflutter analyze lib/core/storage/\nflutter analyze lib/core/constants/storage_keys.dart\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/utils/validators.dart",
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/storage/local_storage_service.dart",
+          "lib/core/constants/storage_keys.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml, When checked, Then shared_preferences dependency is added",
+          "Given SecureStorageService, When saveAccessToken() is called, Then token is stored securely using flutter_secure_storage",
+          "Given LocalStorageService, When setBool/getString() is called, Then value is stored using shared_preferences",
+          "Given StorageKeys class, When referenced, Then all keys are defined as static const strings",
+          "Given the storage module exists, When flutter analyze runs, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-4",
+        "title": "Create main app entry point with providers in lib/app.dart and lib/main.dart",
+        "description": "Setup the main App widget with MaterialApp configuration, initialize DI container, create shared data models for API responses, and configure analysis options for strict linting.\n\n🔧 **PATTERNS TO USE:**\n- Use `configureDependencies()` from injection_container.dart (Story 1) in main()\n- Use `Environment.isDevelopment` from [environment.dart](lib/core/config/environment.dart) for debug flags\n- Use `Equatable` for data models like existing [app_exception.dart](lib/core/errors/app_exception.dart)\n- Follow existing sealed/final class patterns for immutable models\n\n📦 **REQUIRED STRUCTURE:**\n- `main.dart`: Entry point that initializes Flutter bindings, DI, and runs App\n  - `WidgetsFlutterBinding.ensureInitialized()`\n  - `await configureDependencies()`\n  - `runApp(const App())`\n- `app.dart`: Root App widget with MaterialApp and theme configuration\n- `app_constants.dart`: Application-wide constants (app name, version, etc.)\n- `api_response.dart`: Generic API response wrapper model with Equatable\n- `pagination.dart`: Pagination model for list endpoints with Equatable\n- `analysis_options.yaml`: Add strict linting rules (prefer_const_constructors, etc.)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Calling configureDependencies() without await ← WRONG (async registration may fail)\n- Missing WidgetsFlutterBinding.ensureInitialized() ← WRONG (required before async main)\n- Keeping demo MyHomePage in main.dart ← WRONG (remove boilerplate, use App)\n- Mutable data models ← WRONG (use final fields + Equatable)\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze\nflutter test\nflutter build apk --debug  # Verify app compiles\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/environment.dart",
+          "lib/core/errors/app_exception.dart",
+          "analysis_options.yaml"
+        ],
+        "filesToModify": [
+          "lib/main.dart",
+          "analysis_options.yaml"
+        ],
+        "filesToCreate": [
+          "lib/app.dart",
+          "lib/core/constants/app_constants.dart",
+          "lib/features/shared/data/models/api_response.dart",
+          "lib/features/shared/data/models/pagination.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given main.dart, When app starts, Then WidgetsFlutterBinding.ensureInitialized() is called first",
+          "Given main.dart, When app starts, Then configureDependencies() is awaited before runApp()",
+          "Given App widget, When built, Then MaterialApp is configured with theme and debug settings",
+          "Given ApiResponse model, When created, Then it extends Equatable with proper props",
+          "Given Pagination model, When created, Then it includes page, limit, total, hasMore fields",
+          "Given analysis_options.yaml, When flutter analyze runs, Then strict linting rules are enforced"
+        ]
+      }
+    ]
+  }
+}
