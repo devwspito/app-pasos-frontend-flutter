@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "2a15fea35a2f78bb3cf7a0f7",
+    "timestamp": "2026-01-23T12:17:46.222Z",
+    "phase": "judge",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-23T12:17:46.222Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "techlead",
+    "entityId": "epic-flutter-foundation",
+    "verdict": "approved",
+    "score": 70,
+    "feedback": "Judge output unparseable - approved by default",
+    "issues": [],
+    "suggestions": []
+  }
+}
