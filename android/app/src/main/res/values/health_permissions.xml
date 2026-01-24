@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Health Connect permissions array for step tracking app -->
+    <string-array name="health_permissions">
+        <!-- Step count data - primary metric for the app -->
+        <item>android.permission.health.READ_STEPS</item>
+        <!-- Distance traveled - complementary metric -->
+        <item>android.permission.health.READ_DISTANCE</item>
+        <!-- Calories burned - total calories -->
+        <item>android.permission.health.READ_TOTAL_CALORIES_BURNED</item>
+        <!-- Active calories - calories from activity -->
+        <item>android.permission.health.READ_ACTIVE_CALORIES_BURNED</item>
+        <!-- Exercise sessions - workout data -->
+        <item>android.permission.health.READ_EXERCISE</item>
+    </string-array>
+</resources>
