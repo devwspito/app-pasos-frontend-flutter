@@ -1,0 +1,108 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "ccc4c2f459c00b6163173b6c",
+    "timestamp": "2026-01-24T14:50:57.505Z",
+    "phase": "techlead",
+    "epicId": "epic-platform-config",
+    "savedAt": "2026-01-24T14:50:57.505Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-platform-config",
+    "storiesCount": 3,
+    "architecture": "## Platform Configuration Architecture\n\n### Overview\nThis epic configures native platform support for health data access in the App Pasos Flutter application. The architecture follows a layered approach with platform-specific native code and a cross-platform Dart abstraction layer.\n\n### Technology Stack\n- **Android**: Health Connect API (androidx.health.connect:connect-client)\n- **iOS**: HealthKit framework\n- **Dart**: health package (^10.2.0) for unified API\n\n### Architecture Layers\n\n```\n┌─────────────────────────────────────────────┐\n│           Dart Application Layer            │\n│  lib/core/platform/health_permissions.dart  │\n│  lib/core/platform/platform_config.dart     │\n└─────────────────────┬───────────────────────┘\n                      │\n┌─────────────────────▼───────────────────────┐\n│           health package (pub.dev)          │\n│     Cross-platform health data bridge       │\n└──────────┬────────────────────┬─────────────┘\n           │                    │\n┌──────────▼──────────┐ ┌───────▼─────────────┐\n│   Android Native    │ │     iOS Native      │\n│   Health Connect    │ │     HealthKit       │\n│   (SDK 26+)         │ │     (iOS 13+)       │\n└─────────────────────┘ └─────────────────────┘\n```\n\n### Design Patterns\n\n1. **Abstract Final Class Pattern** (from EnvConfig):\n   - Used for utility classes that only contain static members\n   - Prevents instantiation and inheritance\n   - Clean, stateless configuration access\n\n2. **Platform Abstraction Pattern**:\n   - PlatformConfig handles platform detection\n   - HealthPermissions provides unified permission API\n   - Native complexity hidden behind simple Dart interface\n\n3. **Dependency Inversion**:\n   - Dart code depends on abstract health package\n   - Native implementations injected at runtime by Flutter\n\n### Security Considerations\n- Health data is sensitive (HIPAA, GDPR considerations)\n- Permissions must be explicitly requested with clear user-facing descriptions\n- No health data should be logged in production\n\n### Verification Commands\n```bash\n# Install dependencies\nflutter pub get\n\n# Analyze code\ndart analyze\n\n# Run tests\nflutter test\n\n# Build Android\ncd android && ./gradlew assembleDebug\n\n# Build iOS (macOS only)\ncd ios && pod install && xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug\n```",
+    "stories": [
+      {
+        "id": "epic-platform-config-story-1",
+        "title": "Generate platform folders and configure Android Health Connect permissions",
+        "description": "Generate Flutter Android platform folder and configure ALL Android files for Health Connect integration.\n\n🔒 **SCOPE BOUNDARY:**\n- This story owns ALL Android platform files\n- Run `flutter create .` to generate android/ folder first\n- Then modify generated files for Health Connect\n\n📁 **FILES:**\n- Read: pubspec.yaml, lib/env/env_config.dart\n- Create: android/app/build.gradle, android/build.gradle, android/settings.gradle, android/gradle.properties, android/app/src/main/AndroidManifest.xml, android/app/src/main/kotlin/com/example/app_pasos/MainActivity.kt\n\n🔧 **PATTERNS TO USE:**\n- Follow EnvConfig pattern from lib/env/env_config.dart for configuration structure\n- Use Kotlin for MainActivity (Flutter default)\n- Health Connect requires minSdk 26 and compileSdk 34+\n\n📦 **REQUIRED CONFIGURATION:**\n- android/app/build.gradle: Set minSdk=26, compileSdk=34, add Health Connect dependency\n- AndroidManifest.xml: Add permissions for ACTIVITY_RECOGNITION, BODY_SENSORS, and Health Connect intent filter\n- MainActivity.kt: Standard Flutter Activity class\n- android/build.gradle: Configure Kotlin and Gradle versions\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Java for MainActivity (use Kotlin)\n- Do NOT set minSdk below 26 (Health Connect requirement)\n- Do NOT forget intent-filter for Health Connect\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Run `flutter create . --platforms=android` to generate Android folder\n2. Modify android/app/build.gradle:\n   - Set compileSdk = 34\n   - Set minSdk = 26\n   - Add Health Connect dependency: `implementation 'androidx.health.connect:connect-client:1.1.0-alpha07'`\n3. Modify android/app/src/main/AndroidManifest.xml:\n   - Add permission: `<uses-permission android:name=\"android.permission.ACTIVITY_RECOGNITION\"/>`\n   - Add permission: `<uses-permission android:name=\"android.permission.BODY_SENSORS\"/>`\n   - Add Health Connect intent filter in <activity>:\n     ```xml\n     <intent-filter>\n       <action android:name=\"androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE\" />\n     </intent-filter>\n     <meta-data\n       android:name=\"health_permissions\"\n       android:resource=\"@array/health_permissions\" />\n     ```\n4. Create android/app/src/main/res/values/health_permissions.xml with permissions array\n5. Ensure MainActivity.kt uses FlutterActivity\n\n🧪 **VERIFICATION:**\n- `cd android && ./gradlew assembleDebug` compiles without errors\n- AndroidManifest.xml contains Health Connect permissions\n- build.gradle has correct SDK versions",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          "lib/env/env_config.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "android/app/build.gradle",
+          "android/build.gradle",
+          "android/settings.gradle",
+          "android/gradle.properties",
+          "android/app/src/main/AndroidManifest.xml",
+          "android/app/src/main/kotlin/com/example/app_pasos/MainActivity.kt",
+          "android/app/src/main/res/values/health_permissions.xml"
+        ],
+        "acceptanceCriteria": [
+          "Given a Flutter project without Android folder, when developer runs flutter create . --platforms=android, then Android folder structure is generated",
+          "Given the generated Android project, when build.gradle is configured, then compileSdk is 34 and minSdk is 26",
+          "Given the AndroidManifest.xml, when Health Connect permissions are added, then ACTIVITY_RECOGNITION, BODY_SENSORS permissions and Health Connect intent-filter are present",
+          "Given the configured Android project, when running ./gradlew assembleDebug, then the build completes successfully"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-2",
+        "title": "Generate and configure iOS HealthKit permissions and capabilities",
+        "description": "Generate Flutter iOS platform folder and configure ALL iOS files for HealthKit integration.\n\n🔒 **SCOPE BOUNDARY:**\n- This story owns ALL iOS platform files\n- Run `flutter create .` to generate ios/ folder first (if not done in story-1)\n- Then modify generated files for HealthKit\n\n📁 **FILES:**\n- Read: pubspec.yaml, lib/env/env_config.dart\n- Create: ios/Runner/Info.plist, ios/Runner/AppDelegate.swift, ios/Runner.xcodeproj/project.pbxproj, ios/Podfile\n\n🔧 **PATTERNS TO USE:**\n- Follow EnvConfig pattern from lib/env/env_config.dart for consistent configuration approach\n- Use Swift for AppDelegate (Flutter default)\n- HealthKit requires iOS 13.0+ minimum deployment target\n\n📦 **REQUIRED CONFIGURATION:**\n- Info.plist: Add NSHealthShareUsageDescription and NSHealthUpdateUsageDescription keys with user-facing descriptions\n- Podfile: Set platform :ios, '13.0' minimum and add HealthKit pod configuration\n- project.pbxproj: Enable HealthKit capability\n- AppDelegate.swift: Standard Flutter App Delegate\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Objective-C for AppDelegate (use Swift)\n- Do NOT forget usage description strings (Apple rejects apps without them)\n- Do NOT set iOS deployment target below 13.0 (HealthKit limitation)\n- Do NOT leave placeholder text in usage descriptions\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Run `flutter create . --platforms=ios` to generate iOS folder\n2. Modify ios/Runner/Info.plist to add:\n   ```xml\n   <key>NSHealthShareUsageDescription</key>\n   <string>App Pasos needs access to your health data to track your daily steps and activity.</string>\n   <key>NSHealthUpdateUsageDescription</key>\n   <string>App Pasos needs permission to save your activity data to Apple Health.</string>\n   <key>UIBackgroundModes</key>\n   <array>\n     <string>processing</string>\n   </array>\n   ```\n3. Modify ios/Podfile:\n   - Set `platform :ios, '13.0'`\n   - Add post_install hook for HealthKit capability\n4. Enable HealthKit entitlement in project.pbxproj\n5. Ensure AppDelegate.swift uses @UIApplicationMain and FlutterAppDelegate\n\n🧪 **VERIFICATION:**\n- `cd ios && pod install` completes without errors\n- Info.plist contains both NSHealthShareUsageDescription and NSHealthUpdateUsageDescription\n- HealthKit capability is enabled in Xcode project",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          "lib/env/env_config.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "ios/Runner/Info.plist",
+          "ios/Runner/AppDelegate.swift",
+          "ios/Runner.xcodeproj/project.pbxproj",
+          "ios/Podfile",
+          "ios/Runner/Runner.entitlements"
+        ],
+        "acceptanceCriteria": [
+          "Given a Flutter project without iOS folder, when developer runs flutter create . --platforms=ios, then iOS folder structure is generated",
+          "Given the generated iOS project, when Info.plist is configured, then NSHealthShareUsageDescription and NSHealthUpdateUsageDescription are present with meaningful text",
+          "Given the Podfile, when configured for HealthKit, then platform is set to iOS 13.0 minimum",
+          "Given the configured iOS project, when running pod install, then dependencies install successfully"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-3",
+        "title": "Create cross-platform health permissions utility in lib/core/platform/health_permissions.dart",
+        "description": "Create Dart utility classes for requesting and checking health permissions on both Android and iOS platforms.\n\n🔒 **SCOPE BOUNDARY:**\n- This story owns ONLY Dart files in lib/core/platform/\n- No native platform files (those belong to stories 1 and 2)\n\n📁 **FILES:**\n- Read: pubspec.yaml, lib/env/env_config.dart, lib/core/constants/app_constants.dart\n- Modify: pubspec.yaml (add health package dependency)\n- Create: lib/core/platform/health_permissions.dart, lib/core/platform/platform_config.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow EnvConfig pattern from lib/env/env_config.dart: use `abstract final class` for utility classes\n- Follow AppConstants pattern from lib/core/constants/app_constants.dart for constant definitions\n- Use `health` package from pub.dev for cross-platform health data access\n- Use conditional imports for platform-specific code if needed\n\n📦 **REQUIRED STRUCTURE:**\n- HealthPermissions class with static methods:\n  - `Future<bool> requestPermissions()` - Request health data permissions\n  - `Future<bool> hasPermissions()` - Check current permission status\n  - `Future<List<HealthDataType>> getGrantedPermissions()` - List granted permissions\n- PlatformConfig class with:\n  - `static bool get isAndroid` - Check if running on Android\n  - `static bool get isIOS` - Check if running on iOS\n  - `static bool get supportsHealthData` - Check if platform supports health APIs\n  - `static int get minAndroidSdk` - Minimum Android SDK for Health Connect (26)\n  - `static double get minIOSVersion` - Minimum iOS version for HealthKit (13.0)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use `new` keyword (Dart style guide)\n- Do NOT create instance classes when static utility classes are appropriate\n- Do NOT hardcode permission strings - use health package enums\n- Do NOT catch all exceptions - handle specific HealthException types\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Add to pubspec.yaml dependencies:\n   ```yaml\n   health: ^10.2.0\n   permission_handler: ^11.3.0\n   ```\n2. Create lib/core/platform/platform_config.dart:\n   - Abstract final class with platform detection utilities\n   - Constants for minimum SDK/iOS versions\n3. Create lib/core/platform/health_permissions.dart:\n   - Import health package\n   - Define HealthPermissions class with permission request/check methods\n   - Handle platform-specific permission flows\n   - Return meaningful error messages on failure\n4. Export from a barrel file if lib/core/core.dart exists\n\n🧪 **VERIFICATION:**\n- `flutter pub get` completes successfully\n- `dart analyze lib/core/platform/` shows no errors\n- `flutter test` passes (unit tests can mock Health API)",
+        "epicId": "epic-platform-config",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-platform-config-story-1",
+          "epic-platform-config-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          "lib/env/env_config.dart",
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/platform/health_permissions.dart",
+          "lib/core/platform/platform_config.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the pubspec.yaml, when health and permission_handler packages are added, then flutter pub get completes successfully",
+          "Given the HealthPermissions class, when requestPermissions() is called, then it returns a Future<bool> indicating success/failure",
+          "Given the HealthPermissions class, when hasPermissions() is called, then it returns the current permission status",
+          "Given the PlatformConfig class, when platform checks are called, then correct platform is detected",
+          "Given all Dart files, when running dart analyze, then no errors are reported"
+        ]
+      }
+    ]
+  }
+}
