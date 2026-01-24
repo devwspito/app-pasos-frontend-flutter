@@ -1,0 +1,14 @@
+# This file should NOT be checked into version control.
+# It contains machine-specific paths.
+
+# Copy this file to local.properties and update the paths for your system.
+
+# Path to your Flutter SDK
+flutter.sdk=/path/to/flutter
+
+# Path to your Android SDK
+sdk.dir=/path/to/android/sdk
+
+# Optional: Version information
+flutter.versionName=1.0.0
+flutter.versionCode=1
