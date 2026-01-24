@@ -44,6 +44,10 @@ dependencies:
   dartz: ^0.10.1              # Functional programming (Either type)
   logger: ^2.0.2+1            # Logging utility
 
+  # Health data and permissions
+  health: ^10.2.0             # Cross-platform health data access
+  permission_handler: ^11.3.0 # Runtime permission handling
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
