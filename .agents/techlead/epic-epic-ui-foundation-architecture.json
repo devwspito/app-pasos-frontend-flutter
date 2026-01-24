@@ -1,0 +1,238 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "ccc4c2f459c00b6163173b6c",
+    "timestamp": "2026-01-24T15:11:24.633Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-24T15:11:24.634Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 7,
+    "architecture": "## UI Foundation Architecture\n\n### Technology Stack\n- **State Management**: Riverpod (flutter_riverpod) for reactive state\n- **Dependency Injection**: get_it for service locator pattern\n- **Routing**: go_router for declarative navigation with deep linking\n- **HTTP Client**: Dio with interceptors for API communication\n- **Storage**: flutter_secure_storage for sensitive data persistence\n- **Charts**: fl_chart for step visualization (future use)\n\n### Architecture Pattern\n- **Pattern**: Clean Architecture with Feature-First organization\n- **DI Container**: Centralized in lib/core/di/injection_container.dart\n- **Constants**: Abstract final classes following existing EnvConfig pattern\n- **Widgets**: Stateless where possible, using Theme.of(context) for styling\n\n### Directory Structure\n```\nlib/\n├── core/\n│   ├── constants/       # App constants, API endpoints (existing)\n│   ├── di/              # Dependency injection container\n│   ├── router/          # GoRouter configuration and routes\n│   └── theme/           # Material Design 3 theming\n├── env/                 # Environment configuration (existing)\n├── shared/\n│   └── widgets/         # Reusable widget library\n└── main.dart            # App entry point with Riverpod/DI setup\n```\n\n### Theme System\n- Material Design 3 with ColorScheme.fromSeed()\n- Light and dark mode support\n- Persistent theme preference via flutter_secure_storage\n- Riverpod StateNotifierProvider for reactive theme switching\n\n### Widget Library\n- AppButton: 4 variants (primary/secondary/outline/text), loading state\n- AppTextField: Validation support, password obscuring\n- AppCard: 4 elevation levels with tap support\n- LoadingIndicator: Configurable size with optional message\n- AppErrorWidget: Error display with retry action\n- AppScaffold: Consistent page structure\n- StepCounterDisplay: Animated counter with progress visualization\n- AvatarWidget: Image with initials fallback\n\n### SOLID Compliance\n- **SRP**: Each widget/class has single responsibility\n- **OCP**: Widgets extensible via parameters without modification\n- **LSP**: All widgets substitute cleanly for Widget base\n- **ISP**: Small, focused widget APIs\n- **DIP**: Widgets depend on Theme abstractions, not concrete colors",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Add go_router, flutter_riverpod, fl_chart, flutter_secure_storage to pubspec.yaml",
+        "description": "Add UI dependencies required for routing, state management, charts, and secure storage.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify pubspec.yaml\n- DO NOT create any Dart files in this story\n\n📁 **FILES:**\n- Read: lib/core/constants/app_constants.dart (understand existing patterns)\n- Modify: pubspec.yaml\n- Create: NONE\n\n🔧 **PATTERNS TO USE:**\n- Follow existing dependency format in pubspec.yaml\n- Use caret version syntax (^x.x.x) for version constraints\n- Group dependencies logically with comments\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use exact versions (use ^ prefix)\n- Do NOT add dependencies that conflict with existing ones\n- Do NOT modify any Dart code in this story\n\n🎯 **DEPENDENCIES TO ADD:**\n```yaml\n# Routing\ngo_router: ^14.2.0\n\n# State Management\nflutter_riverpod: ^2.5.1\n\n# Charts\nfl_chart: ^0.68.0\n\n# Secure Storage\nflutter_secure_storage: ^9.2.2\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter pub get\n2. Verify no version conflicts in console output\n3. Run: flutter analyze (should pass with no errors)",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "go_router ^14.2.0 added to dependencies",
+          "flutter_riverpod ^2.5.1 added to dependencies",
+          "fl_chart ^0.68.0 added to dependencies",
+          "flutter_secure_storage ^9.2.2 added to dependencies",
+          "flutter pub get succeeds without errors",
+          "flutter analyze passes"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Create AppColors, AppTypography, and AppTheme in lib/core/theme/",
+        "description": "Implement Material Design 3 theme system with light and dark mode support.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the 3 theme files listed below\n- DO NOT modify main.dart or any other existing files\n\n📁 **FILES:**\n- Read: lib/core/constants/app_constants.dart (follow abstract final class pattern)\n- Modify: NONE\n- Create: lib/core/theme/app_colors.dart, lib/core/theme/app_typography.dart, lib/core/theme/app_theme.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class` pattern (see AppConstants for example)\n- Use Material Design 3 ColorScheme.fromSeed() for color generation\n- Define semantic color getters (primary, secondary, error, surface, etc.)\n- Use Google Fonts or system fonts with proper TextTheme\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use regular class with constructors (use abstract final class)\n- Do NOT hardcode hex colors without semantic naming\n- Do NOT create a singleton ThemeData instance\n- Do NOT use deprecated typography methods\n\n🎯 **IMPLEMENTATION REQUIREMENTS:**\n\n**app_colors.dart:**\n```dart\nabstract final class AppColors {\n  // Primary brand colors\n  static const Color primarySeed = Color(0xFF2196F3);\n  \n  // Light theme colors\n  static const Color lightBackground = Color(0xFFFAFAFA);\n  static const Color lightSurface = Color(0xFFFFFFFF);\n  \n  // Dark theme colors  \n  static const Color darkBackground = Color(0xFF121212);\n  static const Color darkSurface = Color(0xFF1E1E1E);\n  \n  // Semantic colors\n  static const Color success = Color(0xFF4CAF50);\n  static const Color warning = Color(0xFFFF9800);\n  static const Color error = Color(0xFFF44336);\n  static const Color info = Color(0xFF2196F3);\n  \n  // Step-specific colors\n  static const Color stepsLow = Color(0xFFFF5722);\n  static const Color stepsMedium = Color(0xFFFF9800);\n  static const Color stepsHigh = Color(0xFF4CAF50);\n}\n```\n\n**app_typography.dart:**\n```dart\nabstract final class AppTypography {\n  static TextTheme get textTheme => const TextTheme(\n    displayLarge: TextStyle(fontSize: 57, fontWeight: FontWeight.w400),\n    displayMedium: TextStyle(fontSize: 45, fontWeight: FontWeight.w400),\n    // ... complete MD3 type scale\n  );\n}\n```\n\n**app_theme.dart:**\n```dart\nabstract final class AppTheme {\n  static ThemeData get lightTheme => ThemeData(\n    useMaterial3: true,\n    brightness: Brightness.light,\n    colorScheme: ColorScheme.fromSeed(\n      seedColor: AppColors.primarySeed,\n      brightness: Brightness.light,\n    ),\n    textTheme: AppTypography.textTheme,\n  );\n  \n  static ThemeData get darkTheme => ThemeData(\n    useMaterial3: true,\n    brightness: Brightness.dark,\n    colorScheme: ColorScheme.fromSeed(\n      seedColor: AppColors.primarySeed,\n      brightness: Brightness.dark,\n    ),\n    textTheme: AppTypography.textTheme,\n  );\n}\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter analyze lib/core/theme/\n2. Verify all 3 files compile without errors\n3. Verify AppTheme.lightTheme and AppTheme.darkTheme are accessible",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_typography.dart",
+          "lib/core/theme/app_theme.dart"
+        ],
+        "acceptanceCriteria": [
+          "AppColors defines primarySeed, light/dark backgrounds, semantic colors, step colors",
+          "AppTypography defines complete MD3 TextTheme with all text styles",
+          "AppTheme.lightTheme returns ThemeData with Material3 and light ColorScheme",
+          "AppTheme.darkTheme returns ThemeData with Material3 and dark ColorScheme",
+          "All files use abstract final class pattern",
+          "flutter analyze passes with no errors"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create ThemeProvider with Riverpod in lib/core/theme/theme_provider.dart",
+        "description": "Implement Riverpod provider for theme state management with persistence.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create theme_provider.dart\n- DO NOT modify main.dart or other files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart (to reference AppTheme)\n- Modify: NONE\n- Create: lib/core/theme/theme_provider.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Riverpod StateNotifierProvider for theme mode state\n- Use flutter_secure_storage for persisting theme preference\n- Create ThemeModeNotifier class extending StateNotifier<ThemeMode>\n- Export a single themeModeProvider\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use ChangeNotifier (use StateNotifier)\n- Do NOT use Provider package (use Riverpod)\n- Do NOT store ThemeData in state (store ThemeMode only)\n- Do NOT block UI while loading saved preference\n\n🎯 **IMPLEMENTATION:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:flutter_riverpod/flutter_riverpod.dart';\nimport 'package:flutter_secure_storage/flutter_secure_storage.dart';\n\nconst _themeKey = 'theme_mode';\n\nclass ThemeModeNotifier extends StateNotifier<ThemeMode> {\n  final FlutterSecureStorage _storage;\n  \n  ThemeModeNotifier(this._storage) : super(ThemeMode.system) {\n    _loadSavedTheme();\n  }\n  \n  Future<void> _loadSavedTheme() async {\n    final saved = await _storage.read(key: _themeKey);\n    if (saved != null) {\n      state = ThemeMode.values.firstWhere(\n        (mode) => mode.name == saved,\n        orElse: () => ThemeMode.system,\n      );\n    }\n  }\n  \n  Future<void> setThemeMode(ThemeMode mode) async {\n    state = mode;\n    await _storage.write(key: _themeKey, value: mode.name);\n  }\n  \n  Future<void> toggleTheme() async {\n    final newMode = state == ThemeMode.light \n        ? ThemeMode.dark \n        : ThemeMode.light;\n    await setThemeMode(newMode);\n  }\n}\n\nfinal themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>(\n  (ref) => ThemeModeNotifier(const FlutterSecureStorage()),\n);\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter analyze lib/core/theme/theme_provider.dart\n2. Verify themeModeProvider can be imported\n3. Verify ThemeModeNotifier has setThemeMode() and toggleTheme() methods",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/theme_provider.dart"
+        ],
+        "acceptanceCriteria": [
+          "ThemeModeNotifier extends StateNotifier<ThemeMode>",
+          "themeModeProvider is a StateNotifierProvider",
+          "Theme mode persists using flutter_secure_storage",
+          "toggleTheme() switches between light and dark",
+          "setThemeMode() accepts ThemeMode parameter",
+          "_loadSavedTheme() loads persisted theme on init",
+          "flutter analyze passes"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Create AppRouter with go_router in lib/core/router/",
+        "description": "Set up go_router with all application routes, guards, and deep linking.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the 2 router files listed below\n- DO NOT modify main.dart\n\n📁 **FILES:**\n- Read: lib/core/constants/api_endpoints.dart (understand route naming patterns)\n- Modify: NONE\n- Create: lib/core/router/routes.dart, lib/core/router/app_router.dart\n\n🔧 **PATTERNS TO USE:**\n- Use abstract final class for Routes constants\n- Use GoRouter with typed routes\n- Implement redirect logic for auth guards (stub for now)\n- Support deep linking with path parameters\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Navigator 1.0 (use GoRouter)\n- Do NOT hardcode route strings (use Routes constants)\n- Do NOT create screens in this story (use Placeholder widgets)\n- Do NOT implement actual auth logic (use stub that always allows)\n\n🎯 **IMPLEMENTATION:**\n\n**routes.dart:**\n```dart\nabstract final class Routes {\n  // Auth routes\n  static const String splash = '/';\n  static const String login = '/login';\n  static const String register = '/register';\n  static const String forgotPassword = '/forgot-password';\n  \n  // Main routes\n  static const String home = '/home';\n  static const String dashboard = '/dashboard';\n  static const String profile = '/profile';\n  static const String settings = '/settings';\n  \n  // Steps routes\n  static const String steps = '/steps';\n  static const String stepHistory = '/steps/history';\n  static const String logSteps = '/steps/log';\n  \n  // Groups routes\n  static const String groups = '/groups';\n  static const String groupDetail = '/groups/:groupId';\n  \n  // Leaderboard routes\n  static const String leaderboard = '/leaderboard';\n}\n```\n\n**app_router.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:go_router/go_router.dart';\nimport 'routes.dart';\n\nfinal appRouter = GoRouter(\n  initialLocation: Routes.splash,\n  debugLogDiagnostics: true,\n  redirect: _guardRedirect,\n  routes: [\n    GoRoute(\n      path: Routes.splash,\n      name: 'splash',\n      builder: (context, state) => const _PlaceholderScreen(name: 'Splash'),\n    ),\n    GoRoute(\n      path: Routes.login,\n      name: 'login',\n      builder: (context, state) => const _PlaceholderScreen(name: 'Login'),\n    ),\n    // ... all routes with _PlaceholderScreen\n    GoRoute(\n      path: Routes.groupDetail,\n      name: 'groupDetail',\n      builder: (context, state) {\n        final groupId = state.pathParameters['groupId']!;\n        return _PlaceholderScreen(name: 'Group $groupId');\n      },\n    ),\n  ],\n);\n\n// Stub auth guard - always allows access for now\nFuture<String?> _guardRedirect(BuildContext context, GoRouterState state) async {\n  // TODO: Implement actual auth check when auth epic is complete\n  // final isLoggedIn = await authService.isLoggedIn();\n  // if (!isLoggedIn && !_publicRoutes.contains(state.matchedLocation)) {\n  //   return Routes.login;\n  // }\n  return null; // Allow all routes\n}\n\nconst _publicRoutes = [\n  Routes.splash,\n  Routes.login,\n  Routes.register,\n  Routes.forgotPassword,\n];\n\n// Temporary placeholder until actual screens are implemented\nclass _PlaceholderScreen extends StatelessWidget {\n  final String name;\n  const _PlaceholderScreen({required this.name});\n  \n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: Text(name)),\n      body: Center(\n        child: Column(\n          mainAxisAlignment: MainAxisAlignment.center,\n          children: [\n            Icon(Icons.construction, size: 64, color: Theme.of(context).colorScheme.primary),\n            const SizedBox(height: 16),\n            Text('$name Screen', style: Theme.of(context).textTheme.headlineSmall),\n            const SizedBox(height: 8),\n            Text('Route: ${GoRouterState.of(context).matchedLocation}'),\n          ],\n        ),\n      ),\n    );\n  }\n}\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter analyze lib/core/router/\n2. Verify appRouter can be imported\n3. Verify Routes constants are accessible",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/constants/api_endpoints.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/router/routes.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "acceptanceCriteria": [
+          "Routes class defines all auth routes (splash, login, register, forgotPassword)",
+          "Routes class defines all main routes (home, dashboard, profile, settings)",
+          "Routes class defines steps routes with history and log",
+          "Routes class defines groups routes with :groupId parameter",
+          "appRouter is a GoRouter instance with all routes configured",
+          "Route guard stub implemented (returns null for now)",
+          "Deep linking support with path parameters for groupDetail",
+          "flutter analyze passes"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-5",
+        "title": "Create AppButton, AppTextField, AppCard, LoadingIndicator, ErrorWidget, AppScaffold in lib/shared/widgets/",
+        "description": "Build reusable widget library with consistent styling and variants.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the 6 widget files listed below\n- DO NOT modify any existing files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_theme.dart\n- Modify: NONE\n- Create: lib/shared/widgets/app_button.dart, lib/shared/widgets/app_text_field.dart, lib/shared/widgets/app_card.dart, lib/shared/widgets/loading_indicator.dart, lib/shared/widgets/error_widget.dart, lib/shared/widgets/app_scaffold.dart\n\n🔧 **PATTERNS TO USE:**\n- Use const constructors where possible\n- Use named parameters with defaults\n- Use enums for variants (ButtonVariant, CardElevation)\n- Inherit from Theme for colors/typography\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT hardcode colors (use Theme.of(context))\n- Do NOT use magic numbers for spacing (use constants)\n- Do NOT create stateful widgets unless necessary\n- Do NOT use onPressed: null (use isEnabled parameter)\n\n🎯 **IMPLEMENTATIONS:**\n\n**app_button.dart:**\n```dart\nenum AppButtonVariant { primary, secondary, outline, text }\nenum AppButtonSize { small, medium, large }\n\nclass AppButton extends StatelessWidget {\n  final String label;\n  final VoidCallback? onPressed;\n  final AppButtonVariant variant;\n  final AppButtonSize size;\n  final bool isLoading;\n  final bool isEnabled;\n  final IconData? icon;\n\n  const AppButton({\n    super.key,\n    required this.label,\n    this.onPressed,\n    this.variant = AppButtonVariant.primary,\n    this.size = AppButtonSize.medium,\n    this.isLoading = false,\n    this.isEnabled = true,\n    this.icon,\n  });\n\n  @override\n  Widget build(BuildContext context) {\n    // Implement based on variant with proper sizing\n    // Show CircularProgressIndicator when isLoading\n    // Disable interaction when !isEnabled || isLoading\n  }\n}\n```\n\n**app_text_field.dart:**\n```dart\nclass AppTextField extends StatelessWidget {\n  final String? label;\n  final String? hint;\n  final TextEditingController? controller;\n  final String? Function(String?)? validator;\n  final bool obscureText;\n  final TextInputType keyboardType;\n  final IconData? prefixIcon;\n  final Widget? suffixIcon;\n  final bool enabled;\n  final int maxLines;\n  final ValueChanged<String>? onChanged;\n\n  const AppTextField({...});\n  // Implement with proper decoration, validation display\n}\n```\n\n**app_card.dart:**\n```dart\nenum AppCardElevation { none, low, medium, high }\n\nclass AppCard extends StatelessWidget {\n  final Widget child;\n  final AppCardElevation elevation;\n  final EdgeInsetsGeometry? padding;\n  final VoidCallback? onTap;\n  final Color? backgroundColor;\n  final BorderRadius? borderRadius;\n\n  const AppCard({...});\n  // Implement with Material card, InkWell for tap\n}\n```\n\n**loading_indicator.dart:**\n```dart\nenum LoadingSize { small, medium, large }\n\nclass LoadingIndicator extends StatelessWidget {\n  final LoadingSize size;\n  final Color? color;\n  final String? message;\n\n  const LoadingIndicator({...});\n  // CircularProgressIndicator with optional message below\n}\n```\n\n**error_widget.dart:**\n```dart\nclass AppErrorWidget extends StatelessWidget {\n  final String message;\n  final String? details;\n  final VoidCallback? onRetry;\n  final IconData icon;\n\n  const AppErrorWidget({...});\n  // Error icon, message, optional details, retry button\n}\n```\n\n**app_scaffold.dart:**\n```dart\nclass AppScaffold extends StatelessWidget {\n  final String? title;\n  final Widget body;\n  final List<Widget>? actions;\n  final Widget? floatingActionButton;\n  final Widget? bottomNavigationBar;\n  final bool showBackButton;\n  final VoidCallback? onBackPressed;\n\n  const AppScaffold({...});\n  // Wrapper around Scaffold with consistent AppBar styling\n}\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter analyze lib/shared/widgets/\n2. Verify all widgets can be instantiated with required params\n3. Test: AppButton(label: 'Test', onPressed: () {})",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_theme.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/error_widget.dart",
+          "lib/shared/widgets/app_scaffold.dart"
+        ],
+        "acceptanceCriteria": [
+          "AppButton supports primary/secondary/outline/text variants",
+          "AppButton shows loading indicator when isLoading=true",
+          "AppButton disables interaction when isEnabled=false",
+          "AppTextField supports validation with error display",
+          "AppTextField supports obscureText for passwords",
+          "AppCard supports 4 elevation levels with tap callback",
+          "LoadingIndicator shows spinner with optional message",
+          "AppErrorWidget shows error with retry button",
+          "AppScaffold wraps Scaffold with consistent styling",
+          "All widgets use Theme colors (no hardcoded values)",
+          "flutter analyze passes"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-6",
+        "title": "Create StepCounterDisplay and AvatarWidget in lib/shared/widgets/",
+        "description": "Build step-specific widgets for animated step counter and user avatar.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the 2 widget files listed below\n- DO NOT modify any existing files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart (for step color thresholds)\n- Modify: NONE\n- Create: lib/shared/widgets/step_counter_display.dart, lib/shared/widgets/avatar_widget.dart\n\n🔧 **PATTERNS TO USE:**\n- Use AnimatedSwitcher for step count transitions\n- Use implicit animations (AnimatedContainer, TweenAnimationBuilder)\n- Use ColorTween for smooth color transitions based on step count\n- Use CircleAvatar with fallback to initials\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use explicit AnimationController unless necessary\n- Do NOT hardcode step thresholds (use parameters or constants)\n- Do NOT block rendering while loading avatar image\n- Do NOT use placeholder images from network\n\n🎯 **IMPLEMENTATIONS:**\n\n**step_counter_display.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport '../../core/theme/app_colors.dart';\n\nclass StepCounterDisplay extends StatelessWidget {\n  final int stepCount;\n  final int? goalSteps;\n  final bool showProgress;\n  final bool animate;\n  \n  const StepCounterDisplay({\n    super.key,\n    required this.stepCount,\n    this.goalSteps,\n    this.showProgress = true,\n    this.animate = true,\n  });\n\n  Color _getStepColor() {\n    if (goalSteps == null) return AppColors.info;\n    final percentage = stepCount / goalSteps!;\n    if (percentage >= 1.0) return AppColors.stepsHigh;\n    if (percentage >= 0.5) return AppColors.stepsMedium;\n    return AppColors.stepsLow;\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    final theme = Theme.of(context);\n    final color = _getStepColor();\n    \n    return Column(\n      mainAxisSize: MainAxisSize.min,\n      children: [\n        TweenAnimationBuilder<int>(\n          tween: IntTween(begin: 0, end: stepCount),\n          duration: animate ? const Duration(milliseconds: 800) : Duration.zero,\n          curve: Curves.easeOutCubic,\n          builder: (context, value, child) {\n            return Text(\n              value.toString().replaceAllMapped(\n                RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'),\n                (match) => '${match[1]},',\n              ),\n              style: theme.textTheme.displayMedium?.copyWith(\n                color: color,\n                fontWeight: FontWeight.bold,\n              ),\n            );\n          },\n        ),\n        Text(\n          'steps',\n          style: theme.textTheme.titleMedium?.copyWith(\n            color: theme.colorScheme.onSurfaceVariant,\n          ),\n        ),\n        if (showProgress && goalSteps != null) ...[\n          const SizedBox(height: 16),\n          TweenAnimationBuilder<double>(\n            tween: Tween(begin: 0, end: (stepCount / goalSteps!).clamp(0.0, 1.0)),\n            duration: animate ? const Duration(milliseconds: 800) : Duration.zero,\n            curve: Curves.easeOutCubic,\n            builder: (context, value, child) {\n              return Column(\n                children: [\n                  ClipRRect(\n                    borderRadius: BorderRadius.circular(8),\n                    child: LinearProgressIndicator(\n                      value: value,\n                      minHeight: 12,\n                      backgroundColor: theme.colorScheme.surfaceContainerHighest,\n                      valueColor: AlwaysStoppedAnimation(color),\n                    ),\n                  ),\n                  const SizedBox(height: 8),\n                  Text(\n                    '${(value * 100).toInt()}% of ${goalSteps!.toString().replaceAllMapped(\n                      RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'),\n                      (match) => '${match[1]},',\n                    )} goal',\n                    style: theme.textTheme.bodySmall,\n                  ),\n                ],\n              );\n            },\n          ),\n        ],\n      ],\n    );\n  }\n}\n```\n\n**avatar_widget.dart:**\n```dart\nimport 'package:flutter/material.dart';\n\nenum AvatarSize { small, medium, large, xlarge }\n\nclass AvatarWidget extends StatelessWidget {\n  final String? imageUrl;\n  final String? name;\n  final AvatarSize size;\n  final VoidCallback? onTap;\n  final Color? backgroundColor;\n  final bool showBorder;\n\n  const AvatarWidget({\n    super.key,\n    this.imageUrl,\n    this.name,\n    this.size = AvatarSize.medium,\n    this.onTap,\n    this.backgroundColor,\n    this.showBorder = false,\n  });\n\n  double get _radius => switch (size) {\n    AvatarSize.small => 16,\n    AvatarSize.medium => 24,\n    AvatarSize.large => 36,\n    AvatarSize.xlarge => 48,\n  };\n\n  String get _initials {\n    if (name == null || name!.isEmpty) return '?';\n    final parts = name!.trim().split(' ');\n    if (parts.length >= 2) {\n      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();\n    }\n    return name![0].toUpperCase();\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    final theme = Theme.of(context);\n    final bgColor = backgroundColor ?? theme.colorScheme.primaryContainer;\n    \n    Widget avatar = CircleAvatar(\n      radius: _radius,\n      backgroundColor: bgColor,\n      backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,\n      onBackgroundImageError: imageUrl != null \n          ? (_, __) {} // Silently fail, show initials\n          : null,\n      child: imageUrl == null\n          ? Text(\n              _initials,\n              style: TextStyle(\n                fontSize: _radius * 0.7,\n                fontWeight: FontWeight.w600,\n                color: theme.colorScheme.onPrimaryContainer,\n              ),\n            )\n          : null,\n    );\n\n    if (showBorder) {\n      avatar = Container(\n        decoration: BoxDecoration(\n          shape: BoxShape.circle,\n          border: Border.all(\n            color: theme.colorScheme.primary,\n            width: 2,\n          ),\n        ),\n        child: Padding(\n          padding: const EdgeInsets.all(2),\n          child: avatar,\n        ),\n      );\n    }\n\n    if (onTap != null) {\n      return GestureDetector(\n        onTap: onTap,\n        child: avatar,\n      );\n    }\n\n    return avatar;\n  }\n}\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter analyze lib/shared/widgets/step_counter_display.dart lib/shared/widgets/avatar_widget.dart\n2. Verify StepCounterDisplay shows animated number\n3. Verify AvatarWidget shows initials when no image",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/step_counter_display.dart",
+          "lib/shared/widgets/avatar_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "StepCounterDisplay shows animated step count with TweenAnimationBuilder",
+          "StepCounterDisplay changes color based on goal progress (red/orange/green)",
+          "StepCounterDisplay shows optional progress bar when goalSteps provided",
+          "StepCounterDisplay formats numbers with commas (1,234)",
+          "AvatarWidget supports 4 sizes (small/medium/large/xlarge)",
+          "AvatarWidget shows initials when imageUrl is null",
+          "AvatarWidget handles image load errors gracefully",
+          "AvatarWidget supports optional border and onTap",
+          "flutter analyze passes"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-7",
+        "title": "Create injection_container.dart and integrate all UI foundation in main.dart",
+        "description": "Set up get_it dependency injection and integrate theme, router, and Riverpod in main.dart.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create injection_container.dart and modify main.dart\n- DO NOT modify any other files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, lib/core/theme/theme_provider.dart, lib/core/router/app_router.dart, lib/env/env_config.dart\n- Modify: lib/main.dart\n- Create: lib/core/di/injection_container.dart\n\n🔧 **PATTERNS TO USE:**\n- Use get_it GetIt.instance (sl) for service locator\n- Register Dio with interceptors for API calls\n- Use lazy singletons for services\n- Wrap app with ProviderScope for Riverpod\n- Use flutter_dotenv to load .env before runApp\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use static instances (use get_it registration)\n- Do NOT initialize DI in build methods (do in main)\n- Do NOT forget to await dotenv.load()\n- Do NOT use MaterialApp (use MaterialApp.router for go_router)\n\n🎯 **IMPLEMENTATIONS:**\n\n**injection_container.dart:**\n```dart\nimport 'package:dio/dio.dart';\nimport 'package:get_it/get_it.dart';\nimport 'package:connectivity_plus/connectivity_plus.dart';\nimport 'package:flutter_secure_storage/flutter_secure_storage.dart';\nimport 'package:logger/logger.dart';\nimport '../constants/app_constants.dart';\nimport '../../env/env_config.dart';\n\nfinal sl = GetIt.instance;\n\nFuture<void> initializeDependencies() async {\n  // Core\n  sl.registerLazySingleton<Logger>(() => Logger(\n    printer: PrettyPrinter(\n      methodCount: 0,\n      errorMethodCount: 5,\n      lineLength: 50,\n      colors: true,\n      printEmojis: true,\n    ),\n  ));\n  \n  sl.registerLazySingleton<FlutterSecureStorage>(\n    () => const FlutterSecureStorage(),\n  );\n  \n  sl.registerLazySingleton<Connectivity>(() => Connectivity());\n  \n  // Network\n  sl.registerLazySingleton<Dio>(() {\n    final dio = Dio(BaseOptions(\n      baseUrl: EnvConfig.apiUrl,\n      connectTimeout: AppConstants.connectionTimeout,\n      receiveTimeout: AppConstants.receiveTimeout,\n      headers: {\n        'Content-Type': 'application/json',\n        'Accept': 'application/json',\n      },\n    ));\n    \n    if (EnvConfig.enableLogging) {\n      dio.interceptors.add(LogInterceptor(\n        requestBody: true,\n        responseBody: true,\n        logPrint: (obj) => sl<Logger>().d(obj),\n      ));\n    }\n    \n    return dio;\n  });\n  \n  // TODO: Register repositories when implemented\n  // sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));\n  \n  // TODO: Register services when implemented\n  // sl.registerLazySingleton<AuthService>(() => AuthServiceImpl(sl()));\n}\n```\n\n**main.dart (complete replacement):**\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:flutter_dotenv/flutter_dotenv.dart';\nimport 'package:flutter_riverpod/flutter_riverpod.dart';\n\nimport 'core/di/injection_container.dart';\nimport 'core/router/app_router.dart';\nimport 'core/theme/app_theme.dart';\nimport 'core/theme/theme_provider.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  \n  // Load environment variables\n  await dotenv.load(fileName: '.env');\n  \n  // Initialize dependency injection\n  await initializeDependencies();\n  \n  runApp(const ProviderScope(child: AppPasos()));\n}\n\nclass AppPasos extends ConsumerWidget {\n  const AppPasos({super.key});\n\n  @override\n  Widget build(BuildContext context, WidgetRef ref) {\n    final themeMode = ref.watch(themeModeProvider);\n    \n    return MaterialApp.router(\n      title: 'App Pasos',\n      debugShowCheckedModeBanner: false,\n      theme: AppTheme.lightTheme,\n      darkTheme: AppTheme.darkTheme,\n      themeMode: themeMode,\n      routerConfig: appRouter,\n    );\n  }\n}\n```\n\n🧪 **VERIFICATION:**\n1. Run: flutter analyze\n2. Run: flutter build web (or flutter build apk)\n3. Verify app launches without errors\n4. Verify theme toggle works via Riverpod\n5. Verify routes navigate correctly",
+        "epicId": "epic-ui-foundation",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-2",
+          "epic-ui-foundation-story-3",
+          "epic-ui-foundation-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/theme/theme_provider.dart",
+          "lib/core/router/app_router.dart",
+          "lib/env/env_config.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/di/injection_container.dart"
+        ],
+        "acceptanceCriteria": [
+          "injection_container.dart exports sl (GetIt instance) and initializeDependencies()",
+          "Dio registered with baseUrl from EnvConfig and proper timeouts",
+          "Logger registered with PrettyPrinter configuration",
+          "FlutterSecureStorage and Connectivity registered",
+          "main.dart loads .env with dotenv.load()",
+          "main.dart calls initializeDependencies() before runApp",
+          "App wrapped with ProviderScope for Riverpod",
+          "AppPasos uses ConsumerWidget to watch themeModeProvider",
+          "MaterialApp.router used with appRouter configuration",
+          "flutter analyze passes",
+          "flutter build web succeeds"
+        ]
+      }
+    ]
+  }
+}
