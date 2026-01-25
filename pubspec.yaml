@@ -38,6 +38,12 @@ dependencies:
   # Logger for application logging
   logger: ^2.5.0
 
+  # HTTP client for API requests
+  dio: ^5.4.0
+
+  # Network connectivity detection
+  connectivity_plus: ^6.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
