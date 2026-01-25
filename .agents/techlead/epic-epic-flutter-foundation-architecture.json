@@ -1,0 +1,155 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "32721b0d92fb433cc0727e19",
+    "timestamp": "2026-01-25T23:33:51.453Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-25T23:33:51.454Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-foundation",
+    "storiesCount": 5,
+    "architecture": "## Flutter Foundation Architecture\n\n### Overview\nThis epic establishes the foundational architecture for App Pasos Flutter frontend following SOLID principles and clean architecture patterns.\n\n### Architecture Decisions\n\n**1. Dependency Injection (ServiceLocator)**\n- Simple singleton-based service locator without external dependencies\n- Follows existing AppConfig.initialize() pattern\n- Registers core services: DioClient, NetworkInfo\n- Extensible for future services\n\n**2. Theming System**\n- Material 3 design guidelines\n- Centralized color palette in AppColors\n- Consistent typography in AppTypography\n- Light/Dark mode support via AppTheme\n- WCAG AA compliant contrast ratios\n\n**3. Navigation (go_router)**\n- Declarative routing with GoRouter\n- Centralized route definitions in AppRoutes\n- Auth redirect support (prepared for future auth epic)\n- Deep linking ready\n\n**4. Extensions**\n- BuildContext extensions for cleaner widget code\n- String extensions for validation and formatting\n- Reduces boilerplate across features\n\n**5. App Initialization**\n- Ordered initialization: AppConfig → AppLogger → ServiceLocator → AppRouter\n- Provider-based state management ready\n- Clean separation: main.dart (bootstrap) vs app.dart (widget tree)\n\n### File Structure\n```\nlib/\n├── main.dart                 # Entry point with initialization\n├── app.dart                  # Root App widget\n├── core/\n│   ├── config/               # [EXISTING] Environment config\n│   ├── constants/            # [EXISTING] App constants\n│   ├── di/\n│   │   └── service_locator.dart  # [NEW] Dependency injection\n│   ├── extensions/\n│   │   ├── context_extensions.dart  # [NEW] BuildContext helpers\n│   │   └── string_extensions.dart   # [NEW] String helpers\n│   ├── network/              # [EXISTING] Dio client\n│   ├── router/\n│   │   ├── app_router.dart   # [NEW] GoRouter config\n│   │   └── routes.dart       # [NEW] Route definitions\n│   ├── theme/\n│   │   ├── app_colors.dart   # [NEW] Color palette\n│   │   ├── app_theme.dart    # [NEW] ThemeData\n│   │   └── app_typography.dart  # [NEW] Text styles\n│   └── utils/                # [EXISTING] Logger, validators\n└── features/\n    └── README.md             # [NEW] Feature structure guide\n```\n\n### Patterns Used\n- **Singleton Pattern**: ServiceLocator, DioClient, AppRouter\n- **Static Initialization**: AppConfig.initialize(), AppRouter.initialize()\n- **Extension Methods**: Context and String utilities\n- **Provider Pattern**: State management foundation\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Analyze: `flutter analyze`\n- Test: `flutter test`\n- Build: `flutter build apk --debug`",
+    "stories": [
+      {
+        "id": "epic-flutter-foundation-story-1",
+        "title": "Create ServiceLocator in lib/core/di/service_locator.dart",
+        "description": "Create a singleton service locator for dependency injection following the existing AppConfig.initialize() pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/config/app_config.dart, lib/core/network/dio_client.dart, lib/core/utils/logger.dart\n- Modify: NONE\n- Create: lib/core/di/service_locator.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow AppConfig.initialize() pattern from lib/core/config/app_config.dart\n- Follow singleton pattern from DioClient in lib/core/network/dio_client.dart\n- Use `ServiceLocator.initialize()` static method for setup\n- Register services: DioClient, NetworkInfo\n- Use `ServiceLocator.get<T>()` for service retrieval\n\n📦 **REQUIRED IMPLEMENTATION:**\n- Class `ServiceLocator` with private constructor\n- Static `Map<Type, dynamic> _services` for storage\n- Static `void initialize()` to register all services\n- Static `T get<T>()` method to retrieve services\n- Static `void register<T>(T instance)` to add services\n- Static `bool get isInitialized` getter\n- Register DioClient instance during initialization\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use external packages like get_it (use simple pattern)\n- DO NOT create global variables outside the class\n- DO NOT skip null safety checks\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- ServiceLocator.initialize() must be callable before runApp()\n- ServiceLocator.get<DioClient>() must return the singleton DioClient\n- Must throw clear errors if service not registered\n- Must integrate with existing AppConfig pattern\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/di/\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/app_config.dart",
+          "lib/core/network/dio_client.dart",
+          "lib/core/utils/logger.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/di/service_locator.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given ServiceLocator is not initialized, When ServiceLocator.initialize() is called, Then services are registered and isInitialized returns true",
+          "Given ServiceLocator is initialized with DioClient, When ServiceLocator.get<DioClient>() is called, Then the DioClient singleton instance is returned",
+          "Given ServiceLocator is initialized, When ServiceLocator.get<UnregisteredService>() is called, Then a descriptive exception is thrown"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-2",
+        "title": "Create Theme System in lib/core/theme/ (app_colors.dart, app_typography.dart, app_theme.dart)",
+        "description": "Create the complete theme system with colors, typography, and theme configuration for light/dark mode support.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/config/app_config.dart, lib/core/constants/app_constants.dart\n- Modify: NONE\n- Create: lib/core/theme/app_colors.dart, lib/core/theme/app_typography.dart, lib/core/theme/app_theme.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow static constants pattern from AppConstants in lib/core/constants/app_constants.dart\n- Use abstract class with static constants for AppColors\n- Use Google Fonts-compatible typography (Roboto as fallback)\n- Follow Material 3 design guidelines\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**app_colors.dart:**\n- Abstract class `AppColors` with private constructor\n- Primary color palette: primary, primaryLight, primaryDark\n- Secondary color palette: secondary, secondaryLight, secondaryDark\n- Semantic colors: error, warning, success, info\n- Background colors: background, surface, card\n- Text colors: textPrimary, textSecondary, textDisabled\n- Both light and dark variants\n\n**app_typography.dart:**\n- Abstract class `AppTypography` with private constructor\n- Text styles: displayLarge, displayMedium, displaySmall\n- Headline styles: headlineLarge, headlineMedium, headlineSmall\n- Body styles: bodyLarge, bodyMedium, bodySmall\n- Label styles: labelLarge, labelMedium, labelSmall\n\n**app_theme.dart:**\n- Class `AppTheme` with private constructor\n- Static `ThemeData get lightTheme` getter\n- Static `ThemeData get darkTheme` getter\n- Use AppColors and AppTypography internally\n- Configure ColorScheme, AppBarTheme, ButtonTheme, InputDecorationTheme\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use hardcoded color values outside AppColors\n- DO NOT use hardcoded TextStyles outside AppTypography\n- DO NOT forget dark mode support\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- AppTheme.lightTheme must return complete ThemeData for light mode\n- AppTheme.darkTheme must return complete ThemeData for dark mode\n- All colors must pass WCAG AA contrast requirements\n- Typography must be consistent across app\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/theme/\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/app_config.dart",
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_typography.dart",
+          "lib/core/theme/app_theme.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppTheme is imported, When AppTheme.lightTheme is accessed, Then a complete ThemeData with light color scheme is returned",
+          "Given AppTheme is imported, When AppTheme.darkTheme is accessed, Then a complete ThemeData with dark color scheme is returned",
+          "Given AppColors is imported, When any color constant is accessed, Then a valid Color object is returned"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-3",
+        "title": "Create Router Setup in lib/core/router/ (routes.dart, app_router.dart)",
+        "description": "Configure go_router with route definitions and navigation utilities.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/config/app_config.dart, pubspec.yaml\n- Modify: NONE\n- Create: lib/core/router/routes.dart, lib/core/router/app_router.dart\n\n🔧 **PATTERNS TO USE:**\n- Use go_router package (already in pubspec.yaml: go_router: ^14.2.0)\n- Follow AppConfig pattern for static access\n- Use abstract class with static constants for route names\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**routes.dart:**\n- Abstract class `AppRoutes` with private constructor\n- Static const String for each route path:\n  - `home = '/'`\n  - `login = '/login'`\n  - `register = '/register'`\n  - `profile = '/profile'`\n  - `settings = '/settings'`\n  - `onboarding = '/onboarding'`\n- Static route name constants for named navigation\n\n**app_router.dart:**\n- Import 'package:go_router/go_router.dart'\n- Class `AppRouter` with private constructor\n- Static late `GoRouter _router` field\n- Static `void initialize()` method that creates GoRouter\n- Static `GoRouter get router` getter\n- Configure routes with GoRoute for each path\n- Use placeholder widgets (Container with route name Text) for screens\n- Add redirect logic stub for auth (check if logged in)\n- Enable debug logging in development via AppConfig.enableLogging\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create actual screen widgets (use placeholder Container with Text showing route name)\n- DO NOT hardcode route strings - use AppRoutes constants\n- DO NOT forget to handle unknown routes (404)\n- DO NOT use Navigator.push - use go_router methods\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- AppRouter.initialize() must create valid GoRouter instance\n- AppRouter.router must return the GoRouter for MaterialApp.router\n- All routes defined in AppRoutes must have corresponding GoRoute\n- Unknown routes must redirect to home or show error page\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/router/\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/app_config.dart",
+          "pubspec.yaml"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/router/routes.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppRouter is not initialized, When AppRouter.initialize() is called, Then GoRouter instance is created with all routes from AppRoutes",
+          "Given AppRouter is initialized, When AppRouter.router is accessed, Then the GoRouter instance is returned for use in MaterialApp.router",
+          "Given a user navigates to undefined route, When the route is resolved, Then user is redirected to home or error page"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-4",
+        "title": "Create Extensions in lib/core/extensions/ (context_extensions.dart, string_extensions.dart)",
+        "description": "Create Dart extension methods for BuildContext and String to simplify common operations.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, lib/core/theme/app_colors.dart, lib/core/theme/app_typography.dart\n- Modify: NONE\n- Create: lib/core/extensions/context_extensions.dart, lib/core/extensions/string_extensions.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Dart extension methods syntax: `extension ExtensionName on TargetType`\n- Import theme files for context extensions\n- Follow Flutter naming conventions\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**context_extensions.dart:**\n```dart\nimport 'package:flutter/material.dart';\n```\n- Extension `BuildContextX` on BuildContext:\n  - `ThemeData get theme => Theme.of(this)`\n  - `TextTheme get textTheme => Theme.of(this).textTheme`\n  - `ColorScheme get colorScheme => Theme.of(this).colorScheme`\n  - `MediaQueryData get mediaQuery => MediaQuery.of(this)`\n  - `double get screenWidth => mediaQuery.size.width`\n  - `double get screenHeight => mediaQuery.size.height`\n  - `bool get isDarkMode => theme.brightness == Brightness.dark`\n  - `EdgeInsets get padding => mediaQuery.padding`\n  - `void showSnackBar(String message)` method\n  - `Future<T?> showAppDialog<T>(Widget dialog)` method\n\n**string_extensions.dart:**\n- Extension `StringX` on String:\n  - `bool get isEmail` (regex validation)\n  - `bool get isPhone` (basic phone validation)\n  - `bool get isNumeric`\n  - `bool get isAlphanumeric`\n  - `String get capitalize` (first letter uppercase)\n  - `String get capitalizeWords` (each word capitalized)\n  - `String truncate(int maxLength)` (with ellipsis)\n  - `bool get isValidPassword` (min 8 chars, letter + number)\n\n- Extension `NullableStringX` on String?:\n  - `bool get isNullOrEmpty`\n  - `String get orEmpty => this ?? ''`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create extension methods that duplicate existing Dart/Flutter methods\n- DO NOT use overly complex regex that may fail on edge cases\n- DO NOT forget null safety for nullable string extension\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- context.theme must return current ThemeData\n- context.screenWidth must return device width\n- 'test@email.com'.isEmail must return true\n- 'hello world'.capitalizeWords must return 'Hello World'\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/extensions/\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_typography.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/extensions/context_extensions.dart",
+          "lib/core/extensions/string_extensions.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given a BuildContext, When context.theme is accessed, Then the current ThemeData is returned",
+          "Given a string 'test@email.com', When .isEmail is accessed, Then true is returned",
+          "Given a string 'hello world', When .capitalizeWords is accessed, Then 'Hello World' is returned",
+          "Given a null String?, When .isNullOrEmpty is accessed, Then true is returned"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-5",
+        "title": "Create App Widget in lib/app.dart and update lib/main.dart with initialization",
+        "description": "Create the main App widget and update main.dart to initialize all services following existing patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/config/app_config.dart, lib/core/config/environment.dart, lib/core/di/service_locator.dart, lib/core/router/app_router.dart, lib/core/theme/app_theme.dart, lib/core/utils/logger.dart\n- Modify: lib/main.dart\n- Create: lib/app.dart, lib/features/README.md\n\n🔧 **PATTERNS TO USE:**\n- Follow AppConfig.initialize() pattern from lib/core/config/app_config.dart\n- Follow AppLogger.initialize() pattern from lib/core/utils/logger.dart\n- Use Provider for state management (already in pubspec.yaml)\n- Use go_router's MaterialApp.router constructor\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**lib/app.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:provider/provider.dart';\nimport 'core/router/app_router.dart';\nimport 'core/theme/app_theme.dart';\n```\n- Class `App` extends StatelessWidget\n- Use MultiProvider at root (prepare for future providers)\n- Use MaterialApp.router with:\n  - `title: 'App Pasos'`\n  - `theme: AppTheme.lightTheme`\n  - `darkTheme: AppTheme.darkTheme`\n  - `themeMode: ThemeMode.system`\n  - `routerConfig: AppRouter.router`\n  - `debugShowCheckedModeBanner: false`\n\n**lib/main.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'core/config/app_config.dart';\nimport 'core/config/environment.dart';\nimport 'core/di/service_locator.dart';\nimport 'core/router/app_router.dart';\nimport 'core/utils/logger.dart';\nimport 'app.dart';\n```\n- Remove existing MyApp and MyHomePage classes\n- Create async `void main()` function:\n  1. `WidgetsFlutterBinding.ensureInitialized()`\n  2. `AppConfig.initialize(EnvironmentConfig.development)`\n  3. `AppLogger.initialize()`\n  4. `ServiceLocator.initialize()`\n  5. `AppRouter.initialize()`\n  6. `runApp(const App())`\n\n**lib/features/README.md:**\n```markdown\n# Features Directory\n\nThis directory contains feature modules for the App Pasos application.\n\n## Structure\n\nEach feature should follow this structure:\n```\nfeatures/\n  feature_name/\n    data/\n      repositories/\n      datasources/\n      models/\n    domain/\n      entities/\n      usecases/\n    presentation/\n      screens/\n      widgets/\n      providers/\n```\n\n## Guidelines\n\n- Each feature is self-contained\n- Use Provider for state management\n- Follow clean architecture principles\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT keep old MyApp/MyHomePage code - remove completely\n- DO NOT skip WidgetsFlutterBinding.ensureInitialized()\n- DO NOT initialize services in wrong order (AppConfig must be first)\n- DO NOT use MaterialApp instead of MaterialApp.router\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- App must launch without errors\n- App must display home route (/) placeholder\n- App must support light/dark theme switching\n- All initializations must complete before runApp()\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/\nflutter build apk --debug\nflutter test\n```",
+        "epicId": "epic-flutter-foundation",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-1",
+          "epic-flutter-foundation-story-2",
+          "epic-flutter-foundation-story-3",
+          "epic-flutter-foundation-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/app_config.dart",
+          "lib/core/config/environment.dart",
+          "lib/core/di/service_locator.dart",
+          "lib/core/router/app_router.dart",
+          "lib/core/theme/app_theme.dart",
+          "lib/core/utils/logger.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [
+          "lib/app.dart",
+          "lib/features/README.md"
+        ],
+        "acceptanceCriteria": [
+          "Given the app starts, When main() executes, Then all services initialize in correct order (AppConfig → AppLogger → ServiceLocator → AppRouter)",
+          "Given the app is running, When home route is loaded, Then the placeholder screen displays without errors",
+          "Given the device uses dark mode, When the app launches, Then darkTheme from AppTheme is applied",
+          "Given lib/features/README.md exists, When developer reads it, Then they understand the feature module structure"
+        ]
+      }
+    ]
+  }
+}
