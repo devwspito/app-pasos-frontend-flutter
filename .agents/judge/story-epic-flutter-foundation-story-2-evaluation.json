@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "439c1f89078ffbdbf91e379f",
+    "timestamp": "2026-01-25T22:58:53.886Z",
+    "phase": "judge",
+    "storyId": "epic-flutter-foundation-story-2",
+    "savedAt": "2026-01-25T22:58:53.886Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-flutter-foundation-story-2",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
