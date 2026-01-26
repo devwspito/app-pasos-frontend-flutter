@@ -1,0 +1,214 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T02:59:35.370Z",
+    "phase": "techlead",
+    "epicId": "epic-dashboard",
+    "savedAt": "2026-01-26T02:59:35.370Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-dashboard",
+    "storiesCount": 7,
+    "architecture": "## Architecture: Clean Architecture with Provider State Management\n\n### Layer Overview:\n1. **Presentation Layer** (UI + State)\n   - Pages: DashboardPage - main dashboard view\n   - Widgets: StepCounterCard, WeeklyChart, HourlyChart, StatsSummary\n   - Providers: StepsProvider extends ChangeNotifier\n\n2. **Domain Layer** (Business Logic)\n   - Entities: StepRecord, StepStats (immutable with Equatable)\n   - Repository Interface: StepsRepository (abstract)\n   - Use Cases: GetTodayStepsUseCase, GetWeeklyTrendUseCase, RecordStepsUseCase\n\n3. **Data Layer** (API + Cache)\n   - Models: StepModel, StepStatsModel (JSON serialization)\n   - DataSources: StepsRemoteDataSource (Dio), StepsLocalDataSource (SharedPreferences)\n   - Repository Impl: StepsRepositoryImpl (cache-first strategy)\n\n### Data Flow:\n```\nUI → Provider → UseCase → Repository → DataSource → API/Cache\n```\n\n### Key Patterns:\n- **Provider Pattern**: ChangeNotifier with status enum (initial/loading/loaded/error)\n- **Repository Pattern**: Abstract interface in domain, implementation in data layer\n- **Cache-First Strategy**: Check network, fetch remote, cache, fallback to cache on error\n- **Entity/Model Separation**: Models for JSON, Entities for business logic\n\n### Dependencies:\n- provider: ^6.1.2 (state management)\n- dio: ^5.4.0 (HTTP client)\n- fl_chart: ^0.68.0 (charts - NEW)\n- equatable: ^2.0.5 (value equality)\n- shared_preferences: ^2.2.3 (local caching)\n\n### Setup Commands:\n```bash\nflutter pub get\n```\n\n### Verification Commands:\n```bash\nflutter analyze\nflutter test\nflutter build apk --debug\n```",
+    "stories": [
+      {
+        "id": "epic-dashboard-story-1",
+        "title": "Create StepModel and StepStatsModel in lib/features/steps/data/models/",
+        "description": "Create data layer models for step records and statistics.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/data/models/user_model.dart (understand model pattern with Equatable)\n- Create: lib/features/steps/data/models/step_model.dart\n- Create: lib/features/steps/data/models/step_stats_model.dart\n\n🔧 **PATTERNS TO USE:**\n- MUST extend `Equatable` from package:equatable/equatable.dart\n- MUST implement `fromJson(Map<String, dynamic>)` factory constructor\n- MUST implement `toJson()` method returning Map<String, dynamic>\n- MUST implement `copyWith()` method for immutability\n- MUST override `props` getter for Equatable\n- Follow exact pattern from UserModel\n\n📦 **STEP MODEL FIELDS:**\n- id: String (unique identifier)\n- userId: String (owner)\n- stepCount: int (number of steps)\n- date: DateTime (when recorded)\n- source: String (e.g., 'healthkit', 'manual', 'health_connect')\n- createdAt: DateTime\n\n📦 **STEP STATS MODEL FIELDS:**\n- totalSteps: int\n- averageSteps: double\n- goalSteps: int\n- goalProgress: double (0.0 to 1.0)\n- streak: int (consecutive days meeting goal)\n- bestDay: DateTime?\n- bestDaySteps: int\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create plain classes without Equatable\n- DO NOT use dynamic types - always specify types\n- DO NOT forget null safety with required/optional parameters\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/features/steps/data/models/\n- Ensure both models compile without errors",
+        "epicId": "epic-dashboard",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/data/models/user_model.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/data/models/step_model.dart",
+          "lib/features/steps/data/models/step_stats_model.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the StepModel class, When fromJson is called with valid JSON, Then a valid StepModel instance is created",
+          "Given a StepModel instance, When toJson is called, Then a valid Map<String,dynamic> is returned",
+          "Given StepStatsModel with goalSteps 10000 and totalSteps 7500, When goalProgress is calculated, Then it returns 0.75",
+          "Given two StepModel instances with same id, When compared with ==, Then they are equal (Equatable)"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-2",
+        "title": "Create StepRecord and StepStats entities in lib/features/steps/domain/entities/",
+        "description": "Create domain layer entities for step data with business logic.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the files listed below\n\n📁 **FILES:**\n- Read: lib/features/steps/data/models/step_model.dart (understand field structure)\n- Create: lib/features/steps/domain/entities/step_record.dart\n- Create: lib/features/steps/domain/entities/step_stats.dart\n\n🔧 **PATTERNS TO USE:**\n- MUST extend `Equatable` from package:equatable/equatable.dart\n- Entities are IMMUTABLE - use final fields only\n- Entities contain BUSINESS LOGIC methods\n- NO JSON serialization in entities (that's for models)\n\n📦 **STEP RECORD ENTITY:**\n```dart\nclass StepRecord extends Equatable {\n  final String id;\n  final String userId;\n  final int stepCount;\n  final DateTime date;\n  final String source;\n  final DateTime createdAt;\n  \n  // Business logic methods:\n  bool get isFromHealthKit => source == 'healthkit';\n  bool get isToday => isSameDay(date, DateTime.now());\n  double get percentOfGoal(int goal) => (stepCount / goal).clamp(0.0, 1.0);\n}\n```\n\n📦 **STEP STATS ENTITY:**\n```dart\nclass StepStats extends Equatable {\n  final int totalSteps;\n  final double averageSteps;\n  final int goalSteps;\n  final int streak;\n  final DateTime? bestDay;\n  final int bestDaySteps;\n  \n  // Business logic:\n  double get goalProgress => (totalSteps / goalSteps).clamp(0.0, 1.0);\n  bool get goalReached => totalSteps >= goalSteps;\n  int get stepsToGoal => (goalSteps - totalSteps).clamp(0, goalSteps);\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT add fromJson/toJson to entities (use models for that)\n- DO NOT make fields mutable\n- DO NOT skip Equatable extension\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/features/steps/domain/entities/",
+        "epicId": "epic-dashboard",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/models/step_model.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/domain/entities/step_stats.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepRecord with stepCount 8000 and goal 10000, When percentOfGoal is called, Then it returns 0.8",
+          "Given StepStats with totalSteps 12000 and goalSteps 10000, When goalReached is checked, Then it returns true",
+          "Given StepStats with totalSteps 7000 and goalSteps 10000, When stepsToGoal is called, Then it returns 3000",
+          "Given StepRecord with source 'healthkit', When isFromHealthKit is checked, Then it returns true"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-3",
+        "title": "Create StepsRepository interface and usecases in lib/features/steps/domain/",
+        "description": "Create repository interface and use cases for step data operations.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the files listed below\n\n📁 **FILES:**\n- Read: lib/features/steps/domain/entities/step_record.dart\n- Read: lib/features/steps/domain/entities/step_stats.dart\n- Create: lib/features/steps/domain/repositories/steps_repository.dart\n- Create: lib/features/steps/domain/usecases/get_today_steps_usecase.dart\n- Create: lib/features/steps/domain/usecases/get_weekly_trend_usecase.dart\n- Create: lib/features/steps/domain/usecases/record_steps_usecase.dart\n\n🔧 **PATTERNS TO USE:**\n- Repository is an ABSTRACT class (interface)\n- Use cases are single-responsibility classes with call() method\n- Return types use Future for async operations\n\n📦 **REPOSITORY INTERFACE:**\n```dart\nabstract class StepsRepository {\n  Future<StepRecord?> getTodaySteps();\n  Future<List<StepRecord>> getWeeklyTrend();\n  Future<List<StepRecord>> getHourlySteps(DateTime date);\n  Future<StepStats> getStats();\n  Future<void> recordSteps(int steps, String source);\n  Future<void> syncFromHealthKit();\n}\n```\n\n📦 **USE CASE PATTERN:**\n```dart\nclass GetTodayStepsUseCase {\n  final StepsRepository _repository;\n  GetTodayStepsUseCase(this._repository);\n  \n  Future<StepRecord?> call() => _repository.getTodaySteps();\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT implement repository here (that's data layer)\n- DO NOT add any API or database code in domain layer\n- DO NOT skip the abstract keyword on repository\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/features/steps/domain/",
+        "epicId": "epic-dashboard",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/domain/entities/step_stats.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/features/steps/domain/usecases/get_today_steps_usecase.dart",
+          "lib/features/steps/domain/usecases/get_weekly_trend_usecase.dart",
+          "lib/features/steps/domain/usecases/record_steps_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepsRepository interface, When defined, Then it contains all required method signatures",
+          "Given GetTodayStepsUseCase, When call() is invoked, Then it delegates to repository.getTodaySteps()",
+          "Given GetWeeklyTrendUseCase, When call() is invoked, Then it returns Future<List<StepRecord>>",
+          "Given RecordStepsUseCase, When call(steps, source) is invoked, Then it delegates to repository.recordSteps()"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-4",
+        "title": "Create StepsRemoteDataSource and StepsLocalDataSource in lib/features/steps/data/datasources/",
+        "description": "Create data sources for remote API and local caching of step data.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify the files listed below\n\n📁 **FILES:**\n- Read: lib/core/network/dio_client.dart (understand API pattern)\n- Read: lib/core/constants/api_endpoints.dart (endpoint pattern)\n- Modify: lib/core/constants/api_endpoints.dart (add steps endpoints)\n- Create: lib/features/steps/data/datasources/steps_remote_datasource.dart\n- Create: lib/features/steps/data/datasources/steps_local_datasource.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `DioClient()` singleton for HTTP requests (from lib/core/network/dio_client.dart)\n- Use SharedPreferences for local caching\n- Define datasource as abstract class + implementation\n\n📦 **ADD TO API_ENDPOINTS.dart:**\n```dart\n// Steps endpoints\nstatic const String steps = '/steps';\nstatic const String stepsToday = '/steps/today';\nstatic const String stepsWeekly = '/steps/weekly';\nstatic const String stepsStats = '/steps/stats';\nstatic const String stepsHourly = '/steps/hourly';\n```\n\n📦 **REMOTE DATASOURCE:**\n```dart\nabstract class StepsRemoteDataSource {\n  Future<StepModel?> getTodaySteps();\n  Future<List<StepModel>> getWeeklyTrend();\n  Future<List<StepModel>> getHourlySteps(DateTime date);\n  Future<StepStatsModel> getStats();\n  Future<void> recordSteps(int steps, String source);\n}\n\nclass StepsRemoteDataSourceImpl implements StepsRemoteDataSource {\n  final DioClient _dioClient;\n  StepsRemoteDataSourceImpl({DioClient? dioClient}) : _dioClient = dioClient ?? DioClient();\n  // Implement methods using _dioClient.get/post\n}\n```\n\n📦 **LOCAL DATASOURCE:**\n```dart\nabstract class StepsLocalDataSource {\n  Future<StepModel?> getCachedTodaySteps();\n  Future<void> cacheTodaySteps(StepModel steps);\n  Future<List<StepModel>?> getCachedWeeklyTrend();\n  Future<void> cacheWeeklyTrend(List<StepModel> steps);\n  Future<void> clearCache();\n}\n\nclass StepsLocalDataSourceImpl implements StepsLocalDataSource {\n  final SharedPreferences _prefs;\n  static const String _todayKey = 'cached_today_steps';\n  static const String _weeklyKey = 'cached_weekly_steps';\n  // Use JSON encoding/decoding with SharedPreferences\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create new DioClient instance - use singleton\n- DO NOT hardcode API URLs - use ApiEndpoints constants\n- DO NOT skip null safety handling in JSON parsing\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/features/steps/data/datasources/\n- flutter analyze lib/core/constants/api_endpoints.dart",
+        "epicId": "epic-dashboard",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/dio_client.dart",
+          "lib/core/constants/api_endpoints.dart"
+        ],
+        "filesToModify": [
+          "lib/core/constants/api_endpoints.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/data/datasources/steps_remote_datasource.dart",
+          "lib/features/steps/data/datasources/steps_local_datasource.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepsRemoteDataSourceImpl, When getTodaySteps is called, Then it makes GET request to ApiEndpoints.stepsToday",
+          "Given StepsLocalDataSourceImpl, When cacheTodaySteps is called with StepModel, Then data is persisted via SharedPreferences",
+          "Given ApiEndpoints, When steps constants are accessed, Then they return correct endpoint paths",
+          "Given StepsRemoteDataSourceImpl, When recordSteps is called, Then it makes POST request to ApiEndpoints.steps"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-5",
+        "title": "Create StepsRepositoryImpl in lib/features/steps/data/repositories/",
+        "description": "Implement the StepsRepository with API integration, caching, and error handling.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the files listed below\n\n📁 **FILES:**\n- Read: lib/features/steps/domain/repositories/steps_repository.dart\n- Read: lib/features/steps/data/datasources/steps_remote_datasource.dart\n- Read: lib/features/steps/data/datasources/steps_local_datasource.dart\n- Read: lib/features/steps/data/models/step_model.dart\n- Read: lib/features/steps/domain/entities/step_record.dart\n- Create: lib/features/steps/data/repositories/steps_repository_impl.dart\n\n🔧 **PATTERNS TO USE:**\n- Repository implements abstract StepsRepository interface\n- Use both remote and local datasources\n- Convert Models to Entities using toEntity() method\n- Implement cache-first strategy with network fallback\n\n📦 **REPOSITORY IMPLEMENTATION:**\n```dart\nclass StepsRepositoryImpl implements StepsRepository {\n  final StepsRemoteDataSource _remoteDataSource;\n  final StepsLocalDataSource _localDataSource;\n  final NetworkInfo _networkInfo;\n  \n  StepsRepositoryImpl({\n    required StepsRemoteDataSource remoteDataSource,\n    required StepsLocalDataSource localDataSource,\n    required NetworkInfo networkInfo,\n  }) : _remoteDataSource = remoteDataSource,\n       _localDataSource = localDataSource,\n       _networkInfo = networkInfo;\n  \n  @override\n  Future<StepRecord?> getTodaySteps() async {\n    try {\n      if (await _networkInfo.isConnected) {\n        final model = await _remoteDataSource.getTodaySteps();\n        if (model != null) {\n          await _localDataSource.cacheTodaySteps(model);\n          return model.toEntity();\n        }\n      }\n      // Fallback to cache\n      final cached = await _localDataSource.getCachedTodaySteps();\n      return cached?.toEntity();\n    } catch (e) {\n      // Return cached on error\n      final cached = await _localDataSource.getCachedTodaySteps();\n      return cached?.toEntity();\n    }\n  }\n}\n```\n\n📦 **ADD toEntity() TO MODELS:**\nEnsure step_model.dart and step_stats_model.dart have:\n```dart\nStepRecord toEntity() => StepRecord(\n  id: id,\n  userId: userId,\n  stepCount: stepCount,\n  date: date,\n  source: source,\n  createdAt: createdAt,\n);\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT skip network check before API calls\n- DO NOT ignore caching - always cache successful responses\n- DO NOT return Models from repository - convert to Entities\n- DO NOT crash on network errors - fallback to cache\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/features/steps/data/repositories/",
+        "epicId": "epic-dashboard",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-3",
+          "epic-dashboard-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/repositories/steps_repository.dart",
+          "lib/features/steps/data/datasources/steps_remote_datasource.dart",
+          "lib/features/steps/data/datasources/steps_local_datasource.dart",
+          "lib/features/steps/data/models/step_model.dart",
+          "lib/features/steps/domain/entities/step_record.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/data/repositories/steps_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepsRepositoryImpl and network is connected, When getTodaySteps is called, Then it fetches from remote and caches result",
+          "Given StepsRepositoryImpl and network is disconnected, When getTodaySteps is called, Then it returns cached data",
+          "Given StepsRepositoryImpl, When remote call fails, Then it falls back to cached data without throwing",
+          "Given StepsRepositoryImpl, When data is fetched, Then Models are converted to Entities before returning"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-6",
+        "title": "Create StepsProvider in lib/features/steps/presentation/providers/",
+        "description": "Create Provider state management for steps dashboard with today's steps, weekly data, and refresh logic.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the files listed below\n\n📁 **FILES:**\n- Read: lib/features/auth/presentation/providers/auth_provider.dart (Provider pattern)\n- Read: lib/features/steps/domain/usecases/get_today_steps_usecase.dart\n- Read: lib/features/steps/domain/usecases/get_weekly_trend_usecase.dart\n- Create: lib/features/steps/presentation/providers/steps_provider.dart\n\n🔧 **PATTERNS TO USE:**\n- MUST extend `ChangeNotifier` (from flutter/foundation.dart)\n- Use enum for status states: initial, loading, loaded, error\n- Use _updateState() helper method for state changes\n- Follow exact pattern from AuthProvider\n\n📦 **STEPS PROVIDER:**\n```dart\nenum StepsStatus { initial, loading, loaded, error }\n\nclass StepsProvider extends ChangeNotifier {\n  final GetTodayStepsUseCase _getTodaySteps;\n  final GetWeeklyTrendUseCase _getWeeklyTrend;\n  final RecordStepsUseCase _recordSteps;\n  \n  StepsStatus _status = StepsStatus.initial;\n  StepRecord? _todaySteps;\n  List<StepRecord> _weeklyTrend = [];\n  StepStats? _stats;\n  String? _errorMessage;\n  int _goalSteps = 10000; // Default goal\n  \n  // Getters\n  StepsStatus get status => _status;\n  StepRecord? get todaySteps => _todaySteps;\n  List<StepRecord> get weeklyTrend => _weeklyTrend;\n  StepStats? get stats => _stats;\n  String? get errorMessage => _errorMessage;\n  int get goalSteps => _goalSteps;\n  bool get isLoading => _status == StepsStatus.loading;\n  int get todayStepCount => _todaySteps?.stepCount ?? 0;\n  double get goalProgress => (todayStepCount / _goalSteps).clamp(0.0, 1.0);\n  \n  // Methods\n  Future<void> loadDashboardData() async { ... }\n  Future<void> refreshData() async { ... }\n  Future<void> recordManualSteps(int steps) async { ... }\n  void setGoal(int steps) { ... }\n  void clearError() { ... }\n}\n```\n\n📦 **LOAD DASHBOARD DATA:**\n```dart\nFuture<void> loadDashboardData() async {\n  _updateState(status: StepsStatus.loading);\n  try {\n    final results = await Future.wait([\n      _getTodaySteps.call(),\n      _getWeeklyTrend.call(),\n    ]);\n    _todaySteps = results[0] as StepRecord?;\n    _weeklyTrend = results[1] as List<StepRecord>;\n    _updateState(status: StepsStatus.loaded);\n  } catch (e) {\n    _updateState(status: StepsStatus.error, error: e.toString());\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT call notifyListeners() multiple times - use _updateState()\n- DO NOT forget to handle loading/error states\n- DO NOT skip null checks on optional data\n- DO NOT block UI during data loading\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/features/steps/presentation/providers/",
+        "epicId": "epic-dashboard",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/providers/auth_provider.dart",
+          "lib/features/steps/domain/usecases/get_today_steps_usecase.dart",
+          "lib/features/steps/domain/usecases/get_weekly_trend_usecase.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/steps/presentation/providers/steps_provider.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepsProvider, When loadDashboardData is called, Then status transitions from loading to loaded",
+          "Given StepsProvider with todaySteps at 5000 and goal 10000, When goalProgress is accessed, Then it returns 0.5",
+          "Given StepsProvider, When refreshData is called, Then both today steps and weekly trend are reloaded",
+          "Given StepsProvider with error, When clearError is called, Then errorMessage becomes null"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-7",
+        "title": "Create DashboardPage and StepCounterCard widget in lib/features/steps/presentation/",
+        "description": "Create main dashboard page with step counter card and pull-to-refresh.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify the files listed below\n\n📁 **FILES:**\n- Read: lib/core/widgets/app_card.dart (card pattern)\n- Read: lib/core/widgets/app_loading.dart (loading pattern)\n- Read: lib/core/theme/app_spacing.dart (spacing constants)\n- Read: lib/core/router/app_router.dart (routing pattern)\n- Modify: lib/core/router/app_router.dart (add dashboard route)\n- Modify: pubspec.yaml (add fl_chart dependency)\n- Create: lib/features/steps/presentation/pages/dashboard_page.dart\n- Create: lib/features/steps/presentation/widgets/step_counter_card.dart\n\n🔧 **PATTERNS TO USE:**\n- Use AppCard for card containers\n- Use AppLoading for loading states\n- Use AppSpacing for consistent spacing\n- Use Provider.of<StepsProvider>(context) or context.watch<StepsProvider>()\n- Add RefreshIndicator for pull-to-refresh\n\n📦 **ADD TO pubspec.yaml dependencies:**\n```yaml\n  # Charts\n  fl_chart: ^0.68.0\n```\n\n📦 **ADD TO app_router.dart:**\n```dart\n// In AppRoutes class:\nstatic const String dashboard = '/dashboard';\n\n// In GoRouter routes:\nGoRoute(\n  path: AppRoutes.dashboard,\n  name: 'dashboard',\n  builder: (context, state) => const DashboardPage(),\n),\n```\n\n📦 **DASHBOARD PAGE:**\n```dart\nclass DashboardPage extends StatefulWidget {\n  const DashboardPage({super.key});\n  @override\n  State<DashboardPage> createState() => _DashboardPageState();\n}\n\nclass _DashboardPageState extends State<DashboardPage> {\n  @override\n  void initState() {\n    super.initState();\n    // Load data on init\n    WidgetsBinding.instance.addPostFrameCallback((_) {\n      context.read<StepsProvider>().loadDashboardData();\n    });\n  }\n  \n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Dashboard')),\n      body: Consumer<StepsProvider>(\n        builder: (context, provider, _) {\n          if (provider.isLoading && provider.todaySteps == null) {\n            return const AppLoading(message: 'Loading steps...');\n          }\n          return RefreshIndicator(\n            onRefresh: () => provider.refreshData(),\n            child: ListView(\n              padding: EdgeInsets.all(AppSpacing.paddingPage),\n              children: [\n                StepCounterCard(\n                  stepCount: provider.todayStepCount,\n                  goalSteps: provider.goalSteps,\n                  goalProgress: provider.goalProgress,\n                ),\n                // Placeholders for other widgets (added in next stories)\n              ],\n            ),\n          );\n        },\n      ),\n    );\n  }\n}\n```\n\n📦 **STEP COUNTER CARD:**\n```dart\nclass StepCounterCard extends StatelessWidget {\n  final int stepCount;\n  final int goalSteps;\n  final double goalProgress;\n  \n  const StepCounterCard({\n    super.key,\n    required this.stepCount,\n    required this.goalSteps,\n    required this.goalProgress,\n  });\n  \n  @override\n  Widget build(BuildContext context) {\n    final theme = Theme.of(context);\n    return AppCard(\n      child: Column(\n        children: [\n          Text('Today\\'s Steps', style: theme.textTheme.titleMedium),\n          SizedBox(height: AppSpacing.md),\n          Stack(\n            alignment: Alignment.center,\n            children: [\n              SizedBox(\n                width: 150,\n                height: 150,\n                child: CircularProgressIndicator(\n                  value: goalProgress,\n                  strokeWidth: 12,\n                  backgroundColor: theme.colorScheme.surfaceContainerHighest,\n                ),\n              ),\n              Column(\n                mainAxisSize: MainAxisSize.min,\n                children: [\n                  Text(\n                    stepCount.toString(),\n                    style: theme.textTheme.headlineLarge?.copyWith(\n                      fontWeight: FontWeight.bold,\n                    ),\n                  ),\n                  Text(\n                    'of $goalSteps',\n                    style: theme.textTheme.bodySmall,\n                  ),\n                ],\n              ),\n            ],\n          ),\n          SizedBox(height: AppSpacing.md),\n          LinearProgressIndicator(value: goalProgress),\n          SizedBox(height: AppSpacing.sm),\n          Text(\n            '${(goalProgress * 100).toInt()}% of daily goal',\n            style: theme.textTheme.bodyMedium,\n          ),\n        ],\n      ),\n    );\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use hardcoded strings - use theme text styles\n- DO NOT skip loading state handling\n- DO NOT forget to register route in app_router.dart\n- DO NOT use magic numbers - use AppSpacing constants\n- DO NOT forget to add fl_chart to pubspec.yaml\n\n🧪 **VERIFICATION:**\n- flutter pub get (verify fl_chart installs)\n- flutter analyze lib/features/steps/presentation/\n- flutter build apk --debug (verify app builds)",
+        "epicId": "epic-dashboard",
+        "priority": 5,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-dashboard-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/widgets/app_card.dart",
+          "lib/core/widgets/app_loading.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart",
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/steps/presentation/pages/dashboard_page.dart",
+          "lib/features/steps/presentation/widgets/step_counter_card.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given DashboardPage, When opened, Then StepsProvider.loadDashboardData() is called automatically",
+          "Given DashboardPage with loading state, When rendered, Then AppLoading widget is displayed",
+          "Given DashboardPage with data, When pulled down, Then RefreshIndicator triggers refreshData()",
+          "Given StepCounterCard with 7500 steps and 10000 goal, When rendered, Then circular progress shows 75%",
+          "Given app_router.dart, When AppRoutes.dashboard is navigated to, Then DashboardPage is displayed"
+        ]
+      }
+    ]
+  }
+}
