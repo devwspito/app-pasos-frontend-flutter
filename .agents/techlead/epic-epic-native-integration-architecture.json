@@ -1,0 +1,175 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T05:56:12.740Z",
+    "phase": "techlead",
+    "epicId": "epic-native-integration",
+    "savedAt": "2026-01-26T05:56:12.740Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-native-integration",
+    "storiesCount": 6,
+    "architecture": "## Architecture Overview\n\nThis epic implements native health data integration following Clean Architecture principles with a layered approach:\n\n### Layer Structure\n```\nlib/features/health/\n├── domain/           (Business Logic - Pure Dart)\n│   ├── entities/     HealthData entity with Equatable\n│   ├── repositories/ HealthRepository interface\n│   └── usecases/     GetStepsFromHealthUseCase, RequestHealthPermissionsUseCase\n├── data/             (Data Access - External Dependencies)\n│   ├── datasources/  HealthDataSource (health package integration)\n│   └── repositories/ HealthRepositoryImpl\n└── presentation/     (UI Layer - Flutter)\n    ├── providers/    HealthProvider (ChangeNotifier)\n    └── widgets/      HealthPermissionDialog, HealthSyncStatus\n\nlib/core/services/\n├── workmanager_service.dart    (Background task scheduling)\n└── background_sync_service.dart (Step sync logic)\n```\n\n### Key Design Decisions\n\n1. **Separation of Concerns**: Domain layer has no Flutter/external dependencies\n2. **Dependency Injection**: Use cases receive repository via constructor\n3. **Existing Permission Service**: Reuse HealthPermissionServiceImpl from core/platform\n4. **Background Sync**: workmanager for periodic health data synchronization\n5. **State Management**: ChangeNotifier pattern consistent with existing providers\n\n### Data Flow\n```\nUI Widget → HealthProvider → UseCase → HealthRepository → HealthDataSource → health package → HealthKit/Health Connect\n```\n\n### Background Sync Flow\n```\nWorkmanager → callbackDispatcher → BackgroundSyncService → HealthDataSource → SharedPreferences\n```\n\n### Verification Commands\n- Typecheck: `dart analyze lib/`\n- Build: `flutter build apk --debug` (Android) or `flutter build ios --debug --no-codesign` (iOS)\n- Test: `flutter test`",
+    "stories": [
+      {
+        "id": "epic-native-integration-story-1",
+        "title": "Add workmanager dependency to pubspec.yaml",
+        "description": "Add the workmanager package dependency to pubspec.yaml for background task scheduling.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/platform/health_permissions.dart` (understand existing health package usage)\n- Modify: `pubspec.yaml`\n- Create: none\n\n🔧 **PATTERNS TO USE:**\n- Follow existing dependency format in pubspec.yaml\n- Add `workmanager: ^0.5.2` under dependencies section\n- Place after the `health` dependency for logical grouping\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT modify any other files\n- Do NOT add dev_dependencies for workmanager\n- Do NOT change SDK version constraints\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Add `workmanager: ^0.5.2` to dependencies section\n- Maintain alphabetical or logical ordering with health-related packages\n\n🧪 **VERIFICATION:**\n- Run `flutter pub get` to verify dependency resolves correctly\n- No version conflicts should occur",
+        "epicId": "epic-native-integration",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/platform/health_permissions.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml exists, When developer adds workmanager dependency, Then flutter pub get succeeds without errors",
+          "Given workmanager is added, When checking pubspec.yaml, Then version ^0.5.2 is specified under dependencies"
+        ]
+      },
+      {
+        "id": "epic-native-integration-story-2",
+        "title": "Create HealthData entity in lib/features/health/domain/entities/health_data.dart",
+        "description": "Create the HealthData domain entity representing health step data retrieved from native health APIs.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/steps/domain/entities/step_record.dart` (follow entity pattern with Equatable)\n- Read: `lib/features/goals/domain/entities/goal.dart` (follow entity pattern)\n- Modify: none\n- Create: `lib/features/health/domain/entities/health_data.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `Equatable` package for value equality (import 'package:equatable/equatable.dart')\n- Create immutable class with const constructor\n- Implement `props` getter for Equatable\n- Add `copyWith` method for immutability\n- Add helper getters for computed properties\n- Follow `StepRecord` entity pattern exactly\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT add JSON serialization methods (toJson/fromJson) - entities are pure domain objects\n- Do NOT use mutable fields\n- Do NOT create additional files\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Create `HealthData` class extending `Equatable`\n- Fields: `stepCount` (int), `dateFrom` (DateTime), `dateTo` (DateTime), `source` (String), `syncedAt` (DateTime?)\n- Add `isFromHealthKit` getter returning true if source contains 'healthkit'\n- Add `isFromHealthConnect` getter returning true if source contains 'health_connect'\n- Add `copyWith` method for all fields\n- Add `toString` override for debugging\n\n🧪 **VERIFICATION:**\n- Run `dart analyze lib/features/health/domain/entities/` to verify no analysis errors\n- Code compiles without errors",
+        "epicId": "epic-native-integration",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/goals/domain/entities/goal.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/domain/entities/health_data.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthData entity created, When importing and instantiating, Then all fields are accessible and immutable",
+          "Given HealthData with source 'healthkit', When checking isFromHealthKit, Then returns true",
+          "Given two HealthData with same values, When comparing equality, Then they are equal (Equatable)"
+        ]
+      },
+      {
+        "id": "epic-native-integration-story-3",
+        "title": "Create health repository interface and usecases in lib/features/health/domain/",
+        "description": "Create the HealthRepository interface and use cases for getting steps and requesting permissions.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/goals/domain/repositories/goals_repository.dart` (follow repository pattern)\n- Read: `lib/features/goals/domain/usecases/get_user_goals_usecase.dart` (follow usecase pattern)\n- Read: `lib/core/platform/health_permissions.dart` (understand permission types)\n- Modify: none\n- Create: \n  - `lib/features/health/domain/repositories/health_repository.dart`\n  - `lib/features/health/domain/usecases/get_steps_from_health_usecase.dart`\n  - `lib/features/health/domain/usecases/request_health_permissions_usecase.dart`\n\n🔧 **PATTERNS TO USE:**\n- Repository: Abstract class with Future-returning methods\n- Use Case: Single responsibility class with `call()` method\n- Import HealthData entity from `../entities/health_data.dart`\n- Import health permission types from `../../../../core/platform/health_permissions.dart`\n- Use `AppHealthDataType` enum from health_permissions.dart for permission requests\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT implement repository (implementation goes in data layer)\n- Do NOT add any external package imports in use cases\n- Do NOT create concrete implementations here\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**HealthRepository** interface:\n- `Future<List<HealthData>> getStepsForDateRange(DateTime start, DateTime end)`\n- `Future<HealthData?> getTodaySteps()`\n- `Future<bool> requestPermissions()`\n- `Future<bool> hasPermissions()`\n\n**GetStepsFromHealthUseCase**:\n- Constructor takes `HealthRepository`\n- `call(DateTime start, DateTime end)` returns `Future<List<HealthData>>`\n\n**RequestHealthPermissionsUseCase**:\n- Constructor takes `HealthRepository`\n- `call()` returns `Future<bool>`\n\n🧪 **VERIFICATION:**\n- Run `dart analyze lib/features/health/domain/` to verify no analysis errors\n- All files compile without errors",
+        "epicId": "epic-native-integration",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-integration-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/goals/domain/repositories/goals_repository.dart",
+          "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
+          "lib/core/platform/health_permissions.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/domain/repositories/health_repository.dart",
+          "lib/features/health/domain/usecases/get_steps_from_health_usecase.dart",
+          "lib/features/health/domain/usecases/request_health_permissions_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthRepository interface, When reviewing methods, Then it defines getStepsForDateRange, getTodaySteps, requestPermissions, hasPermissions",
+          "Given GetStepsFromHealthUseCase, When calling with date range, Then it delegates to repository.getStepsForDateRange",
+          "Given RequestHealthPermissionsUseCase, When calling, Then it delegates to repository.requestPermissions"
+        ]
+      },
+      {
+        "id": "epic-native-integration-story-4",
+        "title": "Create HealthDataSource and HealthRepositoryImpl in lib/features/health/data/",
+        "description": "Create the health data layer with datasource for native health API access and repository implementation.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/steps/data/datasources/steps_local_datasource.dart` (follow datasource pattern)\n- Read: `lib/features/goals/data/repositories/goals_repository_impl.dart` (follow repository impl pattern)\n- Read: `lib/core/platform/health_permissions.dart` (use HealthPermissionServiceImpl)\n- Modify: none\n- Create:\n  - `lib/features/health/data/datasources/health_datasource.dart`\n  - `lib/features/health/data/repositories/health_repository_impl.dart`\n\n🔧 **PATTERNS TO USE:**\n- DataSource: Abstract interface + concrete implementation\n- Use `health` package: `import 'package:health/health.dart' as health_pkg`\n- Use existing `HealthPermissionServiceImpl` from `lib/core/platform/health_permissions.dart`\n- Use `AppLogger` from `lib/core/utils/logger.dart` for logging\n- Repository implementation delegates to datasource\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT duplicate permission logic (reuse HealthPermissionServiceImpl)\n- Do NOT use `new Health()` directly in repository (inject datasource)\n- Do NOT catch and swallow errors silently\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**HealthDataSource** (abstract + impl):\n- `Future<List<HealthData>> fetchSteps(DateTime start, DateTime end)` - reads STEPS from health package\n- `Future<bool> requestAuthorization()` - requests STEPS read permission\n- `Future<bool> hasAuthorization()` - checks STEPS read permission\n- Implementation uses `health_pkg.Health()` singleton\n- Convert `health_pkg.HealthDataPoint` to `HealthData` entity\n\n**HealthRepositoryImpl**:\n- Implements `HealthRepository` interface\n- Constructor takes `HealthDataSource`\n- Delegates all calls to datasource\n- `getTodaySteps()` uses `fetchSteps` with today's date range\n\n🧪 **VERIFICATION:**\n- Run `dart analyze lib/features/health/data/` to verify no analysis errors\n- All files compile without errors",
+        "epicId": "epic-native-integration",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-integration-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/datasources/steps_local_datasource.dart",
+          "lib/features/goals/data/repositories/goals_repository_impl.dart",
+          "lib/core/platform/health_permissions.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/data/datasources/health_datasource.dart",
+          "lib/features/health/data/repositories/health_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthDataSourceImpl, When calling fetchSteps with date range, Then it uses health package to read STEPS data type",
+          "Given HealthRepositoryImpl, When calling getTodaySteps, Then it fetches steps for current day (midnight to now)",
+          "Given health package returns HealthDataPoints, When converting to HealthData, Then stepCount, dateFrom, dateTo, source are correctly mapped"
+        ]
+      },
+      {
+        "id": "epic-native-integration-story-5",
+        "title": "Create HealthProvider and UI widgets in lib/features/health/presentation/",
+        "description": "Create the health presentation layer with HealthProvider for state management and UI widgets for permission dialog and sync status.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/steps/presentation/providers/steps_provider.dart` (follow provider pattern with status enum)\n- Read: `lib/features/sharing/presentation/providers/sharing_provider.dart` (follow optimistic update pattern)\n- Read: `lib/core/widgets/app_button.dart` (use existing button widget)\n- Read: `lib/core/widgets/app_card.dart` (use existing card widget)\n- Modify: none\n- Create:\n  - `lib/features/health/presentation/providers/health_provider.dart`\n  - `lib/features/health/presentation/widgets/health_permission_dialog.dart`\n  - `lib/features/health/presentation/widgets/health_sync_status.dart`\n\n🔧 **PATTERNS TO USE:**\n- Provider: Use `ChangeNotifier` with status enum (initial, loading, syncing, synced, error)\n- Use `_updateState` helper method pattern from StepsProvider\n- Dialog: Use `showDialog` with `AlertDialog`\n- Use `AppLogger` for logging\n- Use `AppButton` and `AppCard` from core/widgets/\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use placeholder text like \"Coming Soon\" or \"TODO\"\n- Do NOT create empty onPressed handlers\n- Do NOT hardcode strings (use descriptive variable names)\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**HealthProvider**:\n- Status enum: `HealthStatus { initial, loading, syncing, synced, permissionDenied, error }`\n- Fields: `_permissionGranted` (bool), `_lastSyncTime` (DateTime?), `_syncedSteps` (int), `_errorMessage` (String?)\n- Inject use cases: `GetStepsFromHealthUseCase`, `RequestHealthPermissionsUseCase`\n- Methods:\n  - `checkPermissions()` - checks if health permissions are granted\n  - `requestPermissions()` - requests permissions and updates state\n  - `syncTodaySteps()` - fetches today's steps from health and updates state\n  - `clearError()` - clears error message\n\n**HealthPermissionDialog**:\n- Shows explanation of why health access is needed\n- \"Allow Access\" button calls `HealthProvider.requestPermissions()`\n- \"Not Now\" button dismisses dialog\n- Shows loading indicator while requesting\n- Handles success/failure with appropriate UI feedback\n\n**HealthSyncStatus**:\n- Shows last sync time (e.g., \"Last synced: 5 minutes ago\")\n- Shows synced step count\n- Shows sync button to trigger manual sync\n- Shows loading indicator during sync\n- Shows error state with retry button\n\n🧪 **VERIFICATION:**\n- Run `dart analyze lib/features/health/presentation/` to verify no analysis errors\n- All widgets have real handlers, no placeholder code",
+        "epicId": "epic-native-integration",
+        "priority": 5,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-integration-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/sharing/presentation/providers/sharing_provider.dart",
+          "lib/core/widgets/app_button.dart",
+          "lib/core/widgets/app_card.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/presentation/providers/health_provider.dart",
+          "lib/features/health/presentation/widgets/health_permission_dialog.dart",
+          "lib/features/health/presentation/widgets/health_sync_status.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthProvider, When calling requestPermissions, Then status transitions from loading to synced or permissionDenied",
+          "Given HealthPermissionDialog, When user taps Allow Access, Then provider.requestPermissions is called and dialog shows result",
+          "Given HealthSyncStatus widget, When lastSyncTime is set, Then displays relative time (e.g., '5 minutes ago')"
+        ]
+      },
+      {
+        "id": "epic-native-integration-story-6",
+        "title": "Create background sync services in lib/core/services/",
+        "description": "Create background sync service using workmanager for periodic step synchronization.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/main.dart` (understand app initialization pattern)\n- Read: `lib/features/health/data/datasources/health_datasource.dart` (use for background sync)\n- Modify: `lib/features/steps/presentation/providers/steps_provider.dart` (add method to receive synced steps)\n- Create:\n  - `lib/core/services/background_sync_service.dart`\n  - `lib/core/services/workmanager_service.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `workmanager` package: `import 'package:workmanager/workmanager.dart'`\n- Use singleton pattern for services\n- Use `SharedPreferences` for storing sync state\n- Use `AppLogger` for logging background task execution\n- Background task must be a top-level function (not a class method)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use class methods as workmanager callbacks (must be top-level or static)\n- Do NOT run heavy computations on main isolate\n- Do NOT store sensitive data in shared preferences without encryption\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**WorkmanagerService**:\n- `initialize()` - initializes workmanager with callback dispatcher\n- `registerPeriodicSync(Duration frequency)` - registers periodic background task\n- `cancelAllTasks()` - cancels all scheduled tasks\n- Task name constant: `healthSyncTask`\n\n**BackgroundSyncService**:\n- `performSync()` - reads steps from health API and stores last sync time\n- Uses `HealthDataSourceImpl` internally (created fresh for background context)\n- Stores synced steps count in SharedPreferences\n- Stores last sync timestamp in SharedPreferences\n- Static method `callbackDispatcher()` as workmanager entry point\n\n**StepsProvider modification**:\n- Add `updateFromHealthSync(int steps, DateTime syncTime)` method\n- This method updates `_todaySteps` with health-synced data\n- Logs the sync event\n\n🧪 **VERIFICATION:**\n- Run `dart analyze lib/core/services/` to verify no analysis errors\n- Run `dart analyze lib/features/steps/presentation/providers/` to verify modifications compile",
+        "epicId": "epic-native-integration",
+        "priority": 6,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-integration-story-1",
+          "epic-native-integration-story-5"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/main.dart",
+          "lib/features/health/data/datasources/health_datasource.dart"
+        ],
+        "filesToModify": [
+          "lib/features/steps/presentation/providers/steps_provider.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/services/workmanager_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given WorkmanagerService.initialize called, When app starts, Then workmanager is configured with callbackDispatcher",
+          "Given periodic sync registered, When background task executes, Then HealthDataSourceImpl fetches steps and stores in SharedPreferences",
+          "Given StepsProvider.updateFromHealthSync called with new steps, Then todaySteps is updated and listeners are notified"
+        ]
+      }
+    ]
+  }
+}
