@@ -1,0 +1,180 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "77ff242d9e9736e416d9620c",
+    "timestamp": "2026-01-26T17:45:28.706Z",
+    "phase": "techlead",
+    "epicId": "epic-flutter-foundation",
+    "savedAt": "2026-01-26T17:45:28.707Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-flutter-foundation",
+    "storiesCount": 6,
+    "architecture": "## Flutter Clean Architecture Foundation\n\n### Architecture Overview\nThis epic establishes a clean architecture foundation for the App Pasos Flutter application with clear separation of concerns:\n\n```\nlib/\n├── core/                    # Application-wide utilities\n│   ├── config/              # Environment & app configuration\n│   ├── constants/           # Static values & API endpoints\n│   ├── di/                  # Dependency injection (get_it)\n│   ├── network/             # HTTP client (Dio) & interceptors\n│   ├── storage/             # Secure token storage\n│   └── utils/               # Logging, validation helpers\n├── data/                    # Data layer\n│   ├── models/              # JSON-serializable data models\n│   └── repositories/        # Data access abstraction\n├── domain/                  # Business logic (future epic)\n└── presentation/            # UI layer (future epic)\n```\n\n### Key Design Decisions\n\n**1. Dependency Injection with GetIt**\n- Lazy singleton registration for expensive resources (ApiClient, Storage)\n- Easy mocking for unit tests\n- No code generation required (unlike injectable)\n\n**2. Network Layer with Dio**\n- Interceptor pattern for auth token injection\n- Centralized error handling with custom exceptions\n- Response wrapper matching backend ApiResponse contract\n\n**3. State Management with flutter_bloc**\n- Predictable state changes\n- Easy testing with bloc_test\n- Separation of UI and business logic\n\n**4. Data Models with Equatable**\n- Immutable models with copyWith\n- Value equality for state comparison\n- JSON serialization with json_serializable\n\n### Backend API Contract Alignment\n\nAll Flutter models mirror backend MongoDB schemas:\n- UserModel ↔ User (mongoose)\n- StepModel ↔ Step (mongoose)\n- GoalModel ↔ GroupGoal (mongoose)\n- SharingModel ↔ SharingRelationship (mongoose)\n\nField mapping: MongoDB `_id` → Flutter `id` via @JsonKey\n\n### Security Considerations\n- Tokens stored in FlutterSecureStorage (platform encryption)\n- Auth interceptor handles token refresh\n- Sensitive data never logged\n\n### Setup Commands\n```bash\nflutter pub get\nflutter pub run build_runner build --delete-conflicting-outputs\n```\n\n### Verification Commands\n- Typecheck: `flutter analyze`\n- Test: `flutter test`\n- Lint: `flutter analyze` (with strict rules)",
+    "stories": [
+      {
+        "id": "epic-flutter-foundation-story-1",
+        "title": "Create lib/core/constants/ and lib/core/config/ with app configuration classes",
+        "description": "Create the core constants and configuration files that will be used across the application.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: [pubspec.yaml](pubspec.yaml) for app name reference\n- Modify: NONE\n- Create:\n  - lib/core/constants/app_constants.dart\n  - lib/core/constants/api_endpoints.dart\n  - lib/core/config/app_config.dart\n  - lib/core/config/environment.dart\n\n🔧 **IMPLEMENTATION REQUIREMENTS:**\n\n**app_constants.dart:**\n- Class `AppConstants` with static const values\n- App name: 'App Pasos'\n- App version: '1.0.0'\n- Default page size: 20\n- Step source enum values reference\n\n**api_endpoints.dart:**\n- Class `ApiEndpoints` with static const String paths\n- Base paths: '/api/auth', '/api/users', '/api/steps', '/api/goals', '/api/sharing'\n- Auth: register, login, logout, refresh\n- Users: me, profile\n- Steps: list, create, daily, weekly\n- Goals: list, create, join, leave\n- Sharing: list, request, accept, reject\n\n**environment.dart:**\n- Enum `Environment { development, staging, production }`\n- Class `EnvironmentConfig` with baseUrl, socketUrl for each environment\n- Development: 'http://10.0.2.2:3000' (Android emulator localhost)\n- Production: To be configured\n\n**app_config.dart:**\n- Class `AppConfig` singleton pattern\n- Properties: environment, baseUrl, socketUrl, connectTimeout, receiveTimeout\n- Method: init(Environment env)\n- Default timeouts: connect 30s, receive 30s\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoding URLs directly in files that use them\n- Using environment variables without fallbacks\n- Non-const values where const is possible\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All classes must be properly typed\n- Use const constructors where possible\n- Export all classes from a barrel file\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/constants/ lib/core/config/\n- Ensure no linter warnings\n- All files compile without errors",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/constants/app_constants.dart",
+          "lib/core/constants/api_endpoints.dart",
+          "lib/core/config/app_config.dart",
+          "lib/core/config/environment.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the app starts, When AppConfig.init() is called with development, Then baseUrl equals 'http://10.0.2.2:3000'",
+          "Given ApiEndpoints class, When accessing auth.login path, Then returns '/api/auth/login'",
+          "Given Environment enum, When iterating values, Then contains development, staging, production",
+          "Given all config files, When running flutter analyze, Then no errors or warnings"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-2",
+        "title": "Add core dependencies to pubspec.yaml and create lib/core/di/service_locator.dart",
+        "description": "Add all required dependencies to pubspec.yaml and set up dependency injection using get_it.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify/create files listed below\n\n📁 **FILES:**\n- Read: [pubspec.yaml](pubspec.yaml) for current dependencies\n- Modify: pubspec.yaml\n- Create: lib/core/di/service_locator.dart\n\n🔧 **IMPLEMENTATION REQUIREMENTS:**\n\n**pubspec.yaml dependencies to ADD:**\n```yaml\ndependencies:\n  # HTTP & Networking\n  dio: ^5.4.0\n  \n  # State Management\n  flutter_bloc: ^8.1.3\n  equatable: ^2.0.5\n  \n  # Dependency Injection\n  get_it: ^7.6.7\n  injectable: ^2.3.2\n  \n  # Storage\n  flutter_secure_storage: ^9.0.0\n  shared_preferences: ^2.2.2\n  \n  # Utilities\n  logger: ^2.0.2+1\n  intl: ^0.19.0\n  json_annotation: ^4.8.1\n\ndev_dependencies:\n  build_runner: ^2.4.8\n  json_serializable: ^6.7.1\n  injectable_generator: ^2.4.1\n```\n\n**service_locator.dart:**\n- Import get_it\n- Create GetIt instance: `final getIt = GetIt.instance`\n- Create setupServiceLocator() async function\n- Register lazy singletons for:\n  - AppConfig\n  - Logger (from logger package)\n- Add placeholder comments for future registrations (ApiClient, SecureStorage, Repositories)\n- Return Future<void>\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Registering services that don't exist yet (will be added in later stories)\n- Using factory when singleton is appropriate\n- Not using async registration for async dependencies\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Dependencies must be compatible with Dart SDK ^3.5.0\n- service_locator must compile without importing non-existent files\n- Use lazy singleton pattern for expensive resources\n\n🧪 **VERIFICATION:**\n- Run: flutter pub get\n- Run: flutter analyze lib/core/di/\n- Ensure all dependencies resolve without conflicts",
+        "epicId": "epic-flutter-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/di/service_locator.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml, When running flutter pub get, Then all dependencies install without errors",
+          "Given service_locator.dart, When calling setupServiceLocator(), Then GetIt instance is configured",
+          "Given dio dependency, When checking version, Then version is ^5.4.0 or compatible",
+          "Given flutter_bloc dependency, When checking version, Then version is ^8.1.3 or compatible"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-3",
+        "title": "Create lib/core/network/ with ApiClient, interceptors, response wrapper and exceptions",
+        "description": "Create the network layer using Dio with interceptors for auth tokens and error handling.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Assumes dio is already in pubspec.yaml (from story-2)\n\n📁 **FILES:**\n- Read: [project-app-pasos-backend/src/types/index.ts](project-app-pasos-backend/src/types/index.ts) for API response structure\n- Modify: NONE\n- Create:\n  - lib/core/network/api_client.dart\n  - lib/core/network/api_interceptor.dart\n  - lib/core/network/api_response.dart\n  - lib/core/network/api_exceptions.dart\n\n🔧 **IMPLEMENTATION REQUIREMENTS:**\n\n**api_exceptions.dart:**\n- Base class `ApiException` extends Exception with message, statusCode\n- `NetworkException` - for connection issues\n- `ServerException` - for 5xx errors\n- `UnauthorizedException` - for 401 errors\n- `ValidationException` - for 400 errors with field errors list\n- `NotFoundException` - for 404 errors\n\n**api_response.dart:**\n- Generic class `ApiResponse<T>` matching backend contract:\n  - bool success\n  - String? message\n  - T? data\n  - ApiMeta? meta\n- Class `ApiMeta` with: int? total, int? page, int? limit\n- Factory `ApiResponse.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT)`\n\n**api_interceptor.dart:**\n- `AuthInterceptor` extends Interceptor:\n  - onRequest: Add Authorization header with Bearer token from secure storage\n  - onError: Handle 401 by attempting token refresh or logging out\n- `LoggingInterceptor` extends Interceptor:\n  - onRequest: Log method, path, headers (mask auth)\n  - onResponse: Log status code, duration\n  - onError: Log error details\n\n**api_client.dart:**\n- Class `ApiClient` wrapping Dio instance\n- Constructor takes baseUrl, optional interceptors\n- Methods: get<T>, post<T>, put<T>, delete<T>, patch<T>\n- Each method returns Future<ApiResponse<T>>\n- Handle Dio exceptions and convert to ApiException types\n- Configure timeouts from AppConfig\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Throwing raw DioException to UI layer\n- Not handling all HTTP error codes\n- Logging sensitive data (tokens, passwords)\n- Hardcoding URLs in ApiClient\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- ApiResponse must match backend ApiResponse interface exactly\n- All exceptions must have meaningful error messages\n- Interceptors must be composable (can add/remove)\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/network/\n- All files compile without errors\n- No linter warnings",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "project-app-pasos-backend/src/types/index.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/network/api_client.dart",
+          "lib/core/network/api_interceptor.dart",
+          "lib/core/network/api_response.dart",
+          "lib/core/network/api_exceptions.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given ApiResponse class, When parsing backend JSON with success:true, Then data is extracted correctly",
+          "Given ApiClient.get(), When server returns 401, Then UnauthorizedException is thrown",
+          "Given AuthInterceptor, When token exists in storage, Then Authorization header is added to request",
+          "Given LoggingInterceptor, When request completes, Then method, path, status, and duration are logged"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-4",
+        "title": "Create lib/core/storage/secure_storage_service.dart and lib/core/utils/ helper classes",
+        "description": "Create secure storage service for tokens and utility classes for logging and validation.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Assumes flutter_secure_storage and logger are in pubspec.yaml (from story-2)\n\n📁 **FILES:**\n- Read: [project-app-pasos-backend/src/validators/auth.validator.ts](project-app-pasos-backend/src/validators/auth.validator.ts) for validation rules reference\n- Modify: NONE\n- Create:\n  - lib/core/storage/secure_storage_service.dart\n  - lib/core/utils/logger.dart\n  - lib/core/utils/validators.dart\n\n🔧 **IMPLEMENTATION REQUIREMENTS:**\n\n**secure_storage_service.dart:**\n- Class `SecureStorageService` wrapping FlutterSecureStorage\n- Keys as static const: 'access_token', 'refresh_token', 'user_id'\n- Methods:\n  - Future<void> saveAccessToken(String token)\n  - Future<String?> getAccessToken()\n  - Future<void> saveRefreshToken(String token)\n  - Future<String?> getRefreshToken()\n  - Future<void> saveUserId(String userId)\n  - Future<String?> getUserId()\n  - Future<void> clearAll() - removes all stored data\n  - Future<bool> hasToken() - checks if access token exists\n\n**logger.dart:**\n- Class `AppLogger` wrapping Logger package\n- Singleton pattern\n- Methods: debug, info, warning, error, wtf\n- Each accepts (String message, [dynamic error, StackTrace? stackTrace])\n- Configure log level based on environment (verbose in dev, warning in prod)\n\n**validators.dart:**\n- Class `Validators` with static methods\n- `String? validateEmail(String? value)` - returns error message or null\n  - Required, valid email format (matches backend regex: /^\\S+@\\S+\\.\\S+$/)\n- `String? validatePassword(String? value)` - returns error message or null\n  - Required, minimum 6 characters (matches backend)\n- `String? validateUsername(String? value)` - returns error message or null\n  - Required, 3-30 characters (matches backend)\n- `String? validateStepCount(String? value)` - returns error message or null\n  - Required, must be positive integer\n- `String? validateRequired(String? value, String fieldName)` - generic required check\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Storing sensitive data in SharedPreferences instead of SecureStorage\n- Exposing raw storage keys outside the service\n- Validation rules that don't match backend\n- Logging sensitive data\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All validation rules must match backend validation exactly\n- SecureStorage must use platform-specific encryption\n- Logger must be easily mockable for tests\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/storage/ lib/core/utils/\n- All files compile without errors\n- No linter warnings",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/utils/logger.dart",
+          "lib/core/utils/validators.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SecureStorageService.saveAccessToken('abc'), When getAccessToken() called, Then returns 'abc'",
+          "Given Validators.validateEmail('invalid'), When called, Then returns error message",
+          "Given Validators.validateEmail('valid@email.com'), When called, Then returns null",
+          "Given Validators.validatePassword('12345'), When called, Then returns error (too short)",
+          "Given AppLogger.error('msg', error), When called, Then logs error with stack trace"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-5",
+        "title": "Create lib/data/models/ with UserModel, StepModel, GoalModel, SharingModel and base repository",
+        "description": "Create data models that exactly match backend API contracts with JSON serialization.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Assumes json_annotation is in pubspec.yaml (from story-2)\n\n📁 **FILES:**\n- Read:\n  - [project-app-pasos-backend/src/models/User.ts](project-app-pasos-backend/src/models/User.ts)\n  - [project-app-pasos-backend/src/models/Step.ts](project-app-pasos-backend/src/models/Step.ts)\n  - [project-app-pasos-backend/src/models/GroupGoal.ts](project-app-pasos-backend/src/models/GroupGoal.ts)\n  - [project-app-pasos-backend/src/models/SharingRelationship.ts](project-app-pasos-backend/src/models/SharingRelationship.ts)\n- Modify: NONE\n- Create:\n  - lib/data/models/user_model.dart\n  - lib/data/models/step_model.dart\n  - lib/data/models/goal_model.dart\n  - lib/data/models/sharing_model.dart\n  - lib/data/repositories/base_repository.dart\n\n🔧 **IMPLEMENTATION REQUIREMENTS:**\n\n**user_model.dart:**\n```dart\n@JsonSerializable()\nclass UserModel extends Equatable {\n  final String id;  // Maps from _id\n  final String username;\n  final String email;\n  final DateTime createdAt;\n  final DateTime updatedAt;\n  // Factory fromJson, toJson\n  // copyWith method\n}\n```\n\n**step_model.dart:**\n```dart\nenum StepSource { native, manual, web }  // Matches backend\n\n@JsonSerializable()\nclass StepModel extends Equatable {\n  final String id;  // Maps from _id\n  final String userId;\n  final int count;\n  final DateTime timestamp;\n  final StepSource source;\n  final int hour;  // 0-23\n  final String date;  // YYYY-MM-DD format\n  final DateTime createdAt;\n  final DateTime updatedAt;\n}\n```\n\n**goal_model.dart:**\n```dart\n@JsonSerializable()\nclass GoalModel extends Equatable {\n  final String id;  // Maps from _id\n  final String title;\n  final String? description;\n  final int targetSteps;\n  final DateTime startDate;\n  final DateTime endDate;\n  final String creatorId;\n  final DateTime createdAt;\n  final DateTime updatedAt;\n}\n```\n\n**sharing_model.dart:**\n```dart\nenum SharingStatus { pending, accepted, bidirectional, rejected }\n\n@JsonSerializable()\nclass SharingModel extends Equatable {\n  final String id;  // Maps from _id\n  final String requesterId;\n  final String targetId;\n  final SharingStatus status;\n  final DateTime createdAt;\n  final DateTime? acceptedAt;\n}\n```\n\n**base_repository.dart:**\n```dart\nabstract class BaseRepository<T> {\n  Future<List<T>> getAll();\n  Future<T?> getById(String id);\n  Future<T> create(T entity);\n  Future<T> update(String id, T entity);\n  Future<bool> delete(String id);\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Field names that don't match backend JSON keys\n- Missing @JsonKey for _id to id mapping\n- Mutable models (use final fields)\n- Missing Equatable for proper equality\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All field names must match backend API exactly (with @JsonKey for _id)\n- Use Equatable for value equality\n- Include copyWith for immutable updates\n- Enums must match backend enum values exactly\n\n🧪 **VERIFICATION:**\n- Run: flutter pub run build_runner build --delete-conflicting-outputs\n- Run: flutter analyze lib/data/\n- Generated .g.dart files must compile without errors",
+        "epicId": "epic-flutter-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "project-app-pasos-backend/src/models/User.ts",
+          "project-app-pasos-backend/src/models/Step.ts",
+          "project-app-pasos-backend/src/models/GroupGoal.ts",
+          "project-app-pasos-backend/src/models/SharingRelationship.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/data/models/user_model.dart",
+          "lib/data/models/step_model.dart",
+          "lib/data/models/goal_model.dart",
+          "lib/data/models/sharing_model.dart",
+          "lib/data/repositories/base_repository.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given JSON {\"_id\": \"123\", \"username\": \"test\"}, When UserModel.fromJson() called, Then model.id equals '123'",
+          "Given StepModel with source='native', When toJson() called, Then source field equals 'native'",
+          "Given SharingModel, When comparing two with same fields, Then equals returns true (Equatable)",
+          "Given GoalModel, When copyWith(title: 'new'), Then returns new instance with updated title"
+        ]
+      },
+      {
+        "id": "epic-flutter-foundation-story-6",
+        "title": "Update lib/main.dart with DI initialization and configure analysis_options.yaml",
+        "description": "Update main.dart to initialize dependency injection and configure strict analysis options.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Depends on story-1 (AppConfig) and story-2 (service_locator)\n\n📁 **FILES:**\n- Read:\n  - [lib/core/config/app_config.dart](lib/core/config/app_config.dart) (from story-1)\n  - [lib/core/di/service_locator.dart](lib/core/di/service_locator.dart) (from story-2)\n- Modify:\n  - lib/main.dart\n  - analysis_options.yaml\n\n🔧 **IMPLEMENTATION REQUIREMENTS:**\n\n**main.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'core/config/environment.dart';\nimport 'core/config/app_config.dart';\nimport 'core/di/service_locator.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  \n  // Initialize app configuration\n  AppConfig.init(Environment.development);\n  \n  // Setup dependency injection\n  await setupServiceLocator();\n  \n  runApp(const AppPasosApp());\n}\n\nclass AppPasosApp extends StatelessWidget {\n  const AppPasosApp({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      title: 'App Pasos',\n      debugShowCheckedModeBanner: false,\n      theme: ThemeData(\n        colorScheme: ColorScheme.fromSeed(\n          seedColor: Colors.blue,\n          brightness: Brightness.light,\n        ),\n        useMaterial3: true,\n      ),\n      home: const _PlaceholderHomeScreen(),\n    );\n  }\n}\n\n// Temporary home screen - will be replaced by routing epic\nclass _PlaceholderHomeScreen extends StatelessWidget {\n  const _PlaceholderHomeScreen();\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(\n        title: const Text('App Pasos'),\n        backgroundColor: Theme.of(context).colorScheme.inversePrimary,\n      ),\n      body: const Center(\n        child: Column(\n          mainAxisAlignment: MainAxisAlignment.center,\n          children: [\n            Icon(Icons.directions_walk, size: 64),\n            SizedBox(height: 16),\n            Text(\n              'Foundation Setup Complete',\n              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),\n            ),\n            SizedBox(height: 8),\n            Text('Core dependencies initialized'),\n          ],\n        ),\n      ),\n    );\n  }\n}\n```\n\n**analysis_options.yaml:**\n```yaml\ninclude: package:flutter_lints/flutter.yaml\n\nanalyzer:\n  errors:\n    missing_return: error\n    missing_required_param: error\n  language:\n    strict-casts: true\n    strict-raw-types: true\n\nlinter:\n  rules:\n    - always_declare_return_types\n    - always_use_package_imports\n    - avoid_print\n    - avoid_relative_lib_imports\n    - prefer_const_constructors\n    - prefer_const_declarations\n    - prefer_final_fields\n    - prefer_final_locals\n    - require_trailing_commas\n    - sort_constructors_first\n    - unawaited_futures\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Calling runApp before WidgetsFlutterBinding.ensureInitialized()\n- Not awaiting async setup before runApp\n- Overly permissive lint rules\n- Missing const constructors where possible\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- App must start without errors\n- DI must be initialized before widgets build\n- Theme must use Material 3\n- Analysis must be strict to catch issues early\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze\n- Run: flutter run (should display placeholder screen)\n- No lint errors or warnings\n- App starts and shows 'Foundation Setup Complete' message",
+        "epicId": "epic-flutter-foundation",
+        "priority": 3,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-flutter-foundation-story-1",
+          "epic-flutter-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [
+          "lib/main.dart",
+          "analysis_options.yaml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given app launch, When main() executes, Then AppConfig and ServiceLocator are initialized before runApp",
+          "Given analysis_options.yaml, When running flutter analyze, Then strict-casts is enabled",
+          "Given app running, When viewing home screen, Then shows 'Foundation Setup Complete' message",
+          "Given linter rules, When code has avoid_print violations, Then analyzer reports errors"
+        ]
+      }
+    ]
+  }
+}
