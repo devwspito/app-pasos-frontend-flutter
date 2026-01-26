@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T06:36:30.990Z",
+    "phase": "judge",
+    "storyId": "epic-native-integration-story-6",
+    "savedAt": "2026-01-26T06:36:30.990Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-native-integration-story-6",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
