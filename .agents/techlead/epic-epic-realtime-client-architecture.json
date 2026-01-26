@@ -1,0 +1,190 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T06:40:51.581Z",
+    "phase": "techlead",
+    "epicId": "epic-realtime-client",
+    "savedAt": "2026-01-26T06:40:51.581Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-realtime-client",
+    "storiesCount": 6,
+    "architecture": "## Real-Time Client Architecture\n\n### Overview\nThis epic implements a complete real-time communication layer using WebSocket for bidirectional messaging and Firebase Cloud Messaging (FCM) for push notifications.\n\n### Architecture Pattern\n- **WebSocket Layer**: Singleton service with connection state management, exponential backoff reconnection, and event streaming\n- **Push Notification Layer**: FCM integration with foreground/background message handling\n- **State Management**: Provider pattern with dedicated NotificationProvider\n- **Event Routing**: Central event dispatcher in main.dart routes WebSocket events to appropriate providers\n\n### Data Flow\n```\n[Backend WebSocket] → WebSocketService → eventStream → main.dart → [StepsProvider, SharingProvider, GoalsProvider]\n                                                     ↓\n                                              NotificationProvider → NotificationBadge/NotificationsPage\n\n[FCM Push] → PushNotificationService → NotificationHandler → NotificationProvider\n```\n\n### Key Design Decisions\n1. **Singleton Services**: WebSocketService and PushNotificationService use singleton pattern for app-wide access\n2. **Stream-based Events**: All events exposed as Dart Streams for reactive UI updates\n3. **Exponential Backoff**: Reconnection uses 1s, 2s, 4s, 8s... max 30s with 10 max attempts\n4. **Separation of Concerns**: Services handle connection, providers handle state\n5. **Environment Config**: WebSocket URLs configured per environment (dev/staging/prod)\n\n### Security\n- WebSocket authenticated with user's JWT token\n- FCM token stored securely for backend registration\n- No sensitive data in push notification payloads\n\n### Performance\n- Single WebSocket connection per app instance\n- Event deduplication in providers\n- Lazy initialization of services until auth confirmed",
+    "stories": [
+      {
+        "id": "epic-realtime-client-story-1",
+        "title": "Add web_socket_channel and firebase dependencies to pubspec.yaml",
+        "description": "Add WebSocket and Firebase dependencies required for real-time communication.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: None required\n- Modify: `lib/pubspec.yaml` (project root)\n- Create: None\n\n🔧 **PATTERNS TO USE:**\n- Add dependencies in alphabetical order within each section\n- Use caret (^) version constraints\n- Add under `dependencies:` section (NOT dev_dependencies)\n\n📦 **DEPENDENCIES TO ADD:**\n```yaml\n# WebSocket support\nweb_socket_channel: ^3.0.0\n\n# Firebase Core and Messaging\nfirebase_core: ^3.3.0\nfirebase_messaging: ^15.0.0\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT add to dev_dependencies (these are runtime dependencies)\n- Do NOT remove or modify existing dependencies\n- Do NOT change SDK version constraints\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- web_socket_channel ^3.0.0 added for WebSocket client\n- firebase_core ^3.3.0 added for Firebase initialization\n- firebase_messaging ^15.0.0 added for push notifications\n- All existing dependencies remain unchanged\n\n🧪 **VERIFICATION:**\n- Run: `flutter pub get` (must complete without errors)\n- Run: `flutter analyze` (no new errors introduced)",
+        "epicId": "epic-realtime-client",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given the pubspec.yaml file, When flutter pub get is run, Then all new dependencies resolve without conflicts",
+          "Given the dependencies are added, When flutter analyze runs, Then no new errors are introduced",
+          "Given web_socket_channel is added, When importing in Dart code, Then WebSocketChannel class is available",
+          "Given firebase packages are added, When importing in Dart code, Then Firebase and FirebaseMessaging classes are available"
+        ]
+      },
+      {
+        "id": "epic-realtime-client-story-2",
+        "title": "Create WebSocketService with authentication, reconnection, and event handling in lib/core/services/websocket_service.dart",
+        "description": "Create a complete WebSocket service with connection management, authentication, exponential backoff reconnection, and event streaming.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/services/background_sync_service.dart` (for service pattern), `lib/core/config/environment.dart` (for URL config), `lib/core/utils/logger.dart` (for logging)\n- Modify: `lib/core/config/environment.dart` (add wsUrl field)\n- Create: `lib/core/services/websocket_service.dart`, `lib/core/services/websocket_events.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow `BackgroundSyncService` pattern for service structure\n- Use `AppLogger.info/debug/warning/error()` for all logging\n- Use `EnvironmentConfig` pattern for WebSocket URL configuration\n- Singleton pattern for WebSocketService instance\n\n📦 **WEBSOCKET_SERVICE.DART REQUIREMENTS:**\n```dart\n/// Connection states for WebSocket\nenum WebSocketConnectionState {\n  disconnected,\n  connecting,\n  connected,\n  reconnecting,\n  error,\n}\n\n/// WebSocket service with authentication and reconnection\nclass WebSocketService {\n  // Singleton pattern\n  static WebSocketService? _instance;\n  factory WebSocketService() => _instance ??= WebSocketService._internal();\n  \n  // Connection state stream for UI updates\n  Stream<WebSocketConnectionState> get connectionStateStream;\n  \n  // Event stream for incoming messages\n  Stream<WebSocketEvent> get eventStream;\n  \n  // Methods\n  Future<void> connect(String authToken);\n  void disconnect();\n  void send(WebSocketEvent event);\n  bool get isConnected;\n}\n```\n\n📦 **WEBSOCKET_EVENTS.DART REQUIREMENTS:**\n```dart\n/// Event types matching backend socket/types.ts\nenum WebSocketEventType {\n  // Steps events\n  stepsUpdated,\n  goalProgress,\n  \n  // Sharing events\n  friendRequestReceived,\n  friendRequestAccepted,\n  friendStepsUpdated,\n  \n  // Goals events\n  goalInviteReceived,\n  goalMemberJoined,\n  goalCompleted,\n  \n  // System events\n  connected,\n  disconnected,\n  error,\n}\n\n/// Base event class\nclass WebSocketEvent {\n  final WebSocketEventType type;\n  final Map<String, dynamic> data;\n  final DateTime timestamp;\n}\n```\n\n📦 **ENVIRONMENT.DART MODIFICATIONS:**\nAdd to EnvironmentConfig class:\n```dart\n/// WebSocket URL for real-time communication\nfinal String wsUrl;\n\n// Update constructors:\ndevelopment: wsUrl: 'ws://localhost:3000'\nstaging: wsUrl: 'wss://staging-api.apppasos.com'\nproduction: wsUrl: 'wss://api.apppasos.com'\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT create providers in this story (Story 3 handles that)\n- Do NOT modify main.dart (Story 6 handles that)\n- Do NOT use print() - use AppLogger instead\n- Do NOT hardcode URLs - use EnvironmentConfig\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Exponential backoff reconnection: 1s, 2s, 4s, 8s, max 30s\n- Maximum 10 reconnection attempts before giving up\n- Authentication via token passed to connect()\n- Parse incoming JSON messages to WebSocketEvent\n- Serialize outgoing WebSocketEvent to JSON\n- Proper cleanup on disconnect/dispose\n- Thread-safe state management\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/core/services/websocket_service.dart lib/core/services/websocket_events.dart`\n- Run: `flutter test` (should not break existing tests)",
+        "epicId": "epic-realtime-client",
+        "priority": 2,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-realtime-client-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/config/environment.dart",
+          "lib/core/utils/logger.dart"
+        ],
+        "filesToModify": [
+          "lib/core/config/environment.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/services/websocket_service.dart",
+          "lib/core/services/websocket_events.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the WebSocketService is instantiated, When connect() is called with a valid token, Then connectionStateStream emits 'connecting' then 'connected'",
+          "Given an active WebSocket connection, When the connection drops, Then reconnection attempts with exponential backoff (1s, 2s, 4s...)",
+          "Given the WebSocket receives a JSON message, When the message is parsed, Then eventStream emits a WebSocketEvent with correct type and data",
+          "Given WebSocketService.send() is called, When the connection is active, Then the event is serialized to JSON and sent",
+          "Given the EnvironmentConfig, When accessing wsUrl, Then the correct WebSocket URL for each environment is returned"
+        ]
+      },
+      {
+        "id": "epic-realtime-client-story-3",
+        "title": "Create NotificationModel and NotificationProvider in lib/features/notifications/",
+        "description": "Create the notification data model and state management provider for handling in-app notifications.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/steps/presentation/providers/steps_provider.dart` (for provider pattern), `lib/features/sharing/presentation/providers/sharing_provider.dart` (for status enum pattern)\n- Modify: None\n- Create: `lib/features/notifications/data/models/notification_model.dart`, `lib/features/notifications/presentation/providers/notification_provider.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow `StepsProvider` pattern for provider structure with status enum\n- Follow `SharingRelationship` pattern for model with fromJson/toJson\n- Use `_updateState()` helper method pattern\n- Use `AppLogger` for logging\n\n📦 **NOTIFICATION_MODEL.DART REQUIREMENTS:**\n```dart\n/// Types of notifications\nenum NotificationType {\n  friendRequest,\n  friendAccepted,\n  goalInvite,\n  goalCompleted,\n  achievement,\n  stepsMilestone,\n  system,\n}\n\n/// Notification model\nclass NotificationModel {\n  final String id;\n  final NotificationType type;\n  final String title;\n  final String body;\n  final Map<String, dynamic>? data;\n  final bool isRead;\n  final DateTime createdAt;\n  \n  // Constructor, fromJson, toJson, copyWith, equality\n}\n```\n\n📦 **NOTIFICATION_PROVIDER.DART REQUIREMENTS:**\n```dart\nenum NotificationStatus { initial, loading, loaded, error }\n\nclass NotificationProvider extends ChangeNotifier {\n  NotificationStatus _status = NotificationStatus.initial;\n  List<NotificationModel> _notifications = [];\n  int _unreadCount = 0;\n  String? _errorMessage;\n  \n  // Getters\n  NotificationStatus get status;\n  List<NotificationModel> get notifications;\n  int get unreadCount;\n  bool get hasUnread;\n  String? get errorMessage;\n  \n  // Methods\n  void addNotification(NotificationModel notification);\n  void markAsRead(String notificationId);\n  void markAllAsRead();\n  void removeNotification(String notificationId);\n  void clearAll();\n  void reset();\n  \n  // For WebSocket integration (Story 5 will use)\n  void handleWebSocketEvent(WebSocketEvent event);\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT create UI widgets in this story (Story 5 handles that)\n- Do NOT import WebSocketService directly (will be injected)\n- Do NOT use print() - use AppLogger\n- Do NOT use `new NotificationModel()` pattern - use named constructor\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- NotificationModel is immutable with copyWith\n- NotificationProvider manages list of notifications\n- Unread count updates automatically when notifications change\n- handleWebSocketEvent() converts events to notifications\n- Proper state management with _updateState() helper\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/notifications/`\n- Run: `flutter test`",
+        "epicId": "epic-realtime-client",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/sharing/presentation/providers/sharing_provider.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/notifications/data/models/notification_model.dart",
+          "lib/features/notifications/presentation/providers/notification_provider.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given a NotificationModel is created, When fromJson() is called with valid JSON, Then all fields are correctly parsed",
+          "Given a NotificationModel, When toJson() is called, Then a valid JSON map is returned",
+          "Given the NotificationProvider, When addNotification() is called, Then the notification is added and unreadCount increments",
+          "Given notifications with unread items, When markAsRead() is called, Then the notification isRead becomes true and unreadCount decrements",
+          "Given the NotificationProvider, When handleWebSocketEvent() receives a friend_request event, Then a friendRequest notification is created"
+        ]
+      },
+      {
+        "id": "epic-realtime-client-story-4",
+        "title": "Create PushNotificationService with Firebase Cloud Messaging in lib/core/services/push_notification_service.dart",
+        "description": "Create Firebase Cloud Messaging service for handling push notifications.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/services/background_sync_service.dart` (for service pattern), `lib/core/utils/logger.dart` (for logging)\n- Modify: None\n- Create: `lib/core/services/push_notification_service.dart`, `lib/core/services/notification_handler.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow `BackgroundSyncService` pattern for service structure\n- Use `AppLogger` for all logging\n- Singleton pattern for PushNotificationService\n- Top-level function for background message handler (like callbackDispatcher)\n\n📦 **PUSH_NOTIFICATION_SERVICE.DART REQUIREMENTS:**\n```dart\nimport 'package:firebase_messaging/firebase_messaging.dart';\n\n/// Top-level background message handler (MUST be top-level)\n@pragma('vm:entry-point')\nFuture<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {\n  // Handle background message\n  AppLogger.info('Background message: ${message.messageId}');\n}\n\n/// Push notification service for Firebase Cloud Messaging\nclass PushNotificationService {\n  static PushNotificationService? _instance;\n  factory PushNotificationService() => _instance ??= PushNotificationService._internal();\n  \n  final FirebaseMessaging _messaging = FirebaseMessaging.instance;\n  \n  // Stream for foreground messages\n  Stream<RemoteMessage> get onMessage;\n  \n  // Stream for notification taps\n  Stream<RemoteMessage> get onMessageOpenedApp;\n  \n  // Methods\n  Future<void> initialize();\n  Future<String?> getToken();\n  Future<void> requestPermission();\n  Future<void> subscribeToTopic(String topic);\n  Future<void> unsubscribeFromTopic(String topic);\n}\n```\n\n📦 **NOTIFICATION_HANDLER.DART REQUIREMENTS:**\n```dart\nimport 'package:firebase_messaging/firebase_messaging.dart';\nimport '../../../features/notifications/data/models/notification_model.dart';\n\n/// Converts Firebase RemoteMessage to NotificationModel\nclass NotificationHandler {\n  /// Parse RemoteMessage to NotificationModel\n  static NotificationModel? parseRemoteMessage(RemoteMessage message) {\n    // Extract type from data['type'] or notification title\n    // Create NotificationModel with appropriate NotificationType\n  }\n  \n  /// Get notification type from string\n  static NotificationType parseNotificationType(String? typeString);\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT call Firebase.initializeApp() here (Story 6 handles that)\n- Do NOT modify main.dart (Story 6 handles that)\n- Do NOT use print() - use AppLogger\n- Background handler MUST be top-level function, NOT instance method\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Request notification permissions on initialize()\n- Get FCM token for backend registration\n- Stream foreground messages to listeners\n- Handle notification taps when app opens from background\n- Parse RemoteMessage to NotificationModel\n- Topic subscription for broadcast notifications\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/core/services/push_notification_service.dart lib/core/services/notification_handler.dart`\n- Run: `flutter test`",
+        "epicId": "epic-realtime-client",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-realtime-client-story-1",
+          "epic-realtime-client-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/utils/logger.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/services/push_notification_service.dart",
+          "lib/core/services/notification_handler.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given PushNotificationService.initialize() is called, When permissions are requested, Then user is prompted for notification permission",
+          "Given the app is in foreground, When a push notification arrives, Then onMessage stream emits the RemoteMessage",
+          "Given the user taps a notification, When the app opens, Then onMessageOpenedApp stream emits the RemoteMessage",
+          "Given NotificationHandler.parseRemoteMessage() receives a message, When data contains type='friend_request', Then a NotificationModel with type friendRequest is returned",
+          "Given getToken() is called, When FCM is configured, Then a valid FCM token string is returned"
+        ]
+      },
+      {
+        "id": "epic-realtime-client-story-5",
+        "title": "Create NotificationBadge widget and NotificationsPage in lib/features/notifications/presentation/",
+        "description": "Create UI components for displaying notifications including a badge widget and notifications list page.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/widgets/app_card.dart` (for card pattern), `lib/core/widgets/app_empty_state.dart` (for empty state), `lib/core/router/app_router.dart` (for route pattern)\n- Modify: `lib/core/router/app_router.dart` (add notifications route)\n- Create: `lib/features/notifications/presentation/widgets/notification_badge.dart`, `lib/features/notifications/presentation/pages/notifications_page.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow existing widget patterns in `lib/core/widgets/`\n- Use `context.watch<NotificationProvider>()` for state\n- Use `AppRoutes` constants for navigation\n- Follow `_ProfilePlaceholderPage` pattern for page structure\n\n📦 **NOTIFICATION_BADGE.DART REQUIREMENTS:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:provider/provider.dart';\nimport '../providers/notification_provider.dart';\n\n/// Badge widget showing unread notification count\nclass NotificationBadge extends StatelessWidget {\n  final Widget child;  // Usually an Icon\n  final VoidCallback? onTap;\n  \n  // Shows red badge with count when unreadCount > 0\n  // Badge shows '9+' when count > 9\n  // Badge hidden when count is 0\n}\n```\n\n📦 **NOTIFICATIONS_PAGE.DART REQUIREMENTS:**\n```dart\n/// Full-screen notifications list page\nclass NotificationsPage extends StatelessWidget {\n  // AppBar with title 'Notifications' and 'Mark All Read' action\n  // ListView.builder with notification items\n  // Empty state when no notifications using AppEmptyState pattern\n  // Pull-to-refresh support\n  // Swipe to dismiss individual notifications\n  \n  // Each notification item shows:\n  // - Icon based on NotificationType\n  // - Title and body text\n  // - Time ago (e.g., '5m ago', '2h ago')\n  // - Unread indicator (blue dot)\n  // - Tap to mark as read and navigate to related screen\n}\n```\n\n📦 **APP_ROUTER.DART MODIFICATIONS:**\nAdd to AppRoutes class:\n```dart\nstatic const String notifications = '/notifications';\n```\n\nAdd GoRoute:\n```dart\nGoRoute(\n  path: AppRoutes.notifications,\n  name: 'notifications',\n  builder: (context, state) => const NotificationsPage(),\n),\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use placeholder text like 'Coming Soon'\n- Do NOT create empty onTap handlers - implement real navigation\n- Do NOT hardcode strings - use descriptive constants\n- Do NOT modify providers (already created in Story 3)\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- NotificationBadge shows count badge overlay on any child widget\n- Badge animates when count changes\n- NotificationsPage displays all notifications in reverse chronological order\n- Tapping notification marks it as read\n- Swipe left/right to dismiss notification\n- Pull down to refresh (simulated for now)\n- Empty state shown when no notifications\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/notifications/presentation/`\n- Run: `flutter test`\n- Visual: Badge should show correct count and hide when 0",
+        "epicId": "epic-realtime-client",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-realtime-client-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/widgets/app_card.dart",
+          "lib/core/widgets/app_empty_state.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/notifications/presentation/widgets/notification_badge.dart",
+          "lib/features/notifications/presentation/pages/notifications_page.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the NotificationBadge wraps an icon, When unreadCount is 5, Then a red badge showing '5' appears",
+          "Given the NotificationBadge, When unreadCount is 0, Then no badge is visible",
+          "Given the NotificationsPage displays notifications, When a notification is tapped, Then it is marked as read and visual indicator updates",
+          "Given the NotificationsPage, When user swipes a notification, Then the notification is removed from the list",
+          "Given navigation to /notifications, When the route is accessed, Then NotificationsPage is displayed"
+        ]
+      },
+      {
+        "id": "epic-realtime-client-story-6",
+        "title": "Initialize WebSocket and Firebase services in lib/main.dart and integrate with existing providers",
+        "description": "Wire up all real-time services in main.dart and connect WebSocket events to existing providers.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/services/websocket_service.dart`, `lib/core/services/push_notification_service.dart`, `lib/features/notifications/presentation/providers/notification_provider.dart`\n- Modify: `lib/main.dart`, `lib/features/steps/presentation/providers/steps_provider.dart`, `lib/features/sharing/presentation/providers/sharing_provider.dart`, `lib/features/goals/presentation/providers/goals_provider.dart`\n- Create: None\n\n🔧 **PATTERNS TO USE:**\n- Follow existing `_initializeDependencies()` pattern in main.dart\n- Use `MultiProvider` to wrap multiple providers\n- Initialize Firebase before runApp() with `WidgetsFlutterBinding.ensureInitialized()`\n\n📦 **MAIN.DART MODIFICATIONS:**\n```dart\nimport 'package:firebase_core/firebase_core.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  \n  // Initialize Firebase\n  await Firebase.initializeApp();\n  \n  // Set up background message handler\n  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);\n  \n  runApp(const AppPasos());\n}\n\n// In _AppPasosState:\nlate final WebSocketService _webSocketService;\nlate final PushNotificationService _pushNotificationService;\nlate final NotificationProvider _notificationProvider;\n\nvoid _initializeDependencies() {\n  // ... existing code ...\n  \n  // Initialize real-time services\n  _webSocketService = WebSocketService();\n  _pushNotificationService = PushNotificationService();\n  _notificationProvider = NotificationProvider();\n  \n  // Initialize push notifications\n  _pushNotificationService.initialize();\n  \n  // Connect WebSocket when authenticated\n  _authProvider.addListener(_handleAuthStateChange);\n}\n\nvoid _handleAuthStateChange() {\n  if (_authProvider.isAuthenticated) {\n    // Connect WebSocket with auth token\n    _webSocketService.connect(/* get token from auth */);\n    \n    // Subscribe to events\n    _webSocketService.eventStream.listen(_handleWebSocketEvent);\n  } else {\n    _webSocketService.disconnect();\n  }\n}\n\nvoid _handleWebSocketEvent(WebSocketEvent event) {\n  // Route events to appropriate providers\n  _notificationProvider.handleWebSocketEvent(event);\n  \n  // Refresh data based on event type\n  switch (event.type) {\n    case WebSocketEventType.stepsUpdated:\n      // Refresh steps data\n      break;\n    case WebSocketEventType.friendRequestReceived:\n      // Refresh sharing data\n      break;\n    // ... etc\n  }\n}\n```\n\n📦 **PROVIDER MODIFICATIONS:**\nAdd to each provider a method to handle real-time updates:\n\nsteps_provider.dart:\n```dart\n/// Handle real-time step updates from WebSocket\nvoid handleRealtimeUpdate(Map<String, dynamic> data) {\n  // Update today's steps if data contains step update\n  // Trigger UI refresh\n}\n```\n\nsharing_provider.dart:\n```dart\n/// Handle real-time sharing updates from WebSocket\nvoid handleRealtimeUpdate(WebSocketEventType type, Map<String, dynamic> data) {\n  // Handle friend request received\n  // Handle friend request accepted\n  // Refresh friends list as needed\n}\n```\n\ngoals_provider.dart:\n```dart\n/// Handle real-time goal updates from WebSocket\nvoid handleRealtimeUpdate(WebSocketEventType type, Map<String, dynamic> data) {\n  // Handle goal invite received\n  // Handle goal member joined\n  // Handle goal completed\n  // Refresh goals as needed\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT remove existing provider initialization code\n- Do NOT block main() with long async operations\n- Do NOT forget to dispose services in dispose()\n- Do NOT call WebSocket.connect() before auth is confirmed\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Firebase initializes before app starts\n- WebSocket connects automatically when user authenticates\n- WebSocket disconnects when user logs out\n- Push notification permission requested on first launch\n- Events routed to appropriate providers\n- NotificationProvider wrapped in MultiProvider\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze`\n- Run: `flutter test`\n- Run: `flutter run` (app should start without errors)\n- Verify: No crash on app startup",
+        "epicId": "epic-realtime-client",
+        "priority": 6,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-realtime-client-story-2",
+          "epic-realtime-client-story-3",
+          "epic-realtime-client-story-4",
+          "epic-realtime-client-story-5"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/websocket_service.dart",
+          "lib/core/services/push_notification_service.dart",
+          "lib/features/notifications/presentation/providers/notification_provider.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart",
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/sharing/presentation/providers/sharing_provider.dart",
+          "lib/features/goals/presentation/providers/goals_provider.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given the app starts, When main() executes, Then Firebase.initializeApp() completes without error",
+          "Given the user logs in, When AuthProvider status becomes authenticated, Then WebSocketService.connect() is called",
+          "Given the user logs out, When AuthProvider status becomes unauthenticated, Then WebSocketService.disconnect() is called",
+          "Given a WebSocket event arrives, When the event type is stepsUpdated, Then StepsProvider.handleRealtimeUpdate() is called",
+          "Given the app is disposed, When _AppPasosState.dispose() runs, Then all services are properly cleaned up"
+        ]
+      }
+    ]
+  }
+}
