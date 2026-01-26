@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T03:04:02.519Z",
+    "phase": "judge",
+    "storyId": "epic-dashboard-story-1",
+    "savedAt": "2026-01-26T03:04:02.519Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-dashboard-story-1",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
