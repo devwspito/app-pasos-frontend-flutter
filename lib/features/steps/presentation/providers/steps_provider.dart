@@ -1,8 +1,213 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/utils/logger.dart';
-import '../../domain/entities/step_record.dart';
-import '../../domain/entities/step_stats.dart';
+
+/// StepRecord entity representing a daily step count record.
+///
+/// This class is self-contained until the domain layer is fully implemented.
+/// TODO: Will be replaced with import from lib/features/steps/domain/entities/step_record.dart
+class StepRecord {
+  /// Unique identifier for the record.
+  final String id;
+
+  /// User ID who owns this record.
+  final String userId;
+
+  /// The date for this step record.
+  final DateTime date;
+
+  /// Total step count for the day.
+  final int stepCount;
+
+  /// Distance walked in meters (optional).
+  final double? distanceMeters;
+
+  /// Calories burned (optional).
+  final int? caloriesBurned;
+
+  /// When this record was created.
+  final DateTime? createdAt;
+
+  /// When this record was last updated.
+  final DateTime? updatedAt;
+
+  /// Creates a new StepRecord instance.
+  const StepRecord({
+    required this.id,
+    required this.userId,
+    required this.date,
+    required this.stepCount,
+    this.distanceMeters,
+    this.caloriesBurned,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  /// Creates a StepRecord from a JSON map.
+  factory StepRecord.fromJson(Map<String, dynamic> json) {
+    return StepRecord(
+      id: json['id']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      date: json['date'] != null
+          ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      stepCount: json['stepCount'] as int? ?? 0,
+      distanceMeters: (json['distanceMeters'] as num?)?.toDouble(),
+      caloriesBurned: json['caloriesBurned'] as int?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
+    );
+  }
+
+  /// Converts this StepRecord to a JSON map.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'date': date.toIso8601String(),
+      'stepCount': stepCount,
+      if (distanceMeters != null) 'distanceMeters': distanceMeters,
+      if (caloriesBurned != null) 'caloriesBurned': caloriesBurned,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+    };
+  }
+
+  /// Creates a copy of this StepRecord with the given fields replaced.
+  StepRecord copyWith({
+    String? id,
+    String? userId,
+    DateTime? date,
+    int? stepCount,
+    double? distanceMeters,
+    int? caloriesBurned,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return StepRecord(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      date: date ?? this.date,
+      stepCount: stepCount ?? this.stepCount,
+      distanceMeters: distanceMeters ?? this.distanceMeters,
+      caloriesBurned: caloriesBurned ?? this.caloriesBurned,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StepRecord &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          date.year == other.date.year &&
+          date.month == other.date.month &&
+          date.day == other.date.day;
+
+  @override
+  int get hashCode => id.hashCode ^ date.hashCode;
+
+  @override
+  String toString() =>
+      'StepRecord(id: $id, date: ${date.toIso8601String().split('T')[0]}, stepCount: $stepCount)';
+}
+
+/// StepStats entity representing aggregated step statistics.
+///
+/// This class is self-contained until the domain layer is fully implemented.
+/// TODO: Will be replaced with import from lib/features/steps/domain/entities/step_stats.dart
+class StepStats {
+  /// Total steps across all records.
+  final int totalSteps;
+
+  /// Average steps per day.
+  final double averageSteps;
+
+  /// Current daily step goal.
+  final int goalSteps;
+
+  /// Current streak of days meeting the goal.
+  final int streak;
+
+  /// Date with the highest step count.
+  final DateTime? bestDay;
+
+  /// Step count on the best day.
+  final int bestDaySteps;
+
+  /// Creates a new StepStats instance.
+  const StepStats({
+    required this.totalSteps,
+    required this.averageSteps,
+    required this.goalSteps,
+    required this.streak,
+    this.bestDay,
+    required this.bestDaySteps,
+  });
+
+  /// Creates an empty StepStats with default values.
+  factory StepStats.empty({int goalSteps = 10000}) {
+    return StepStats(
+      totalSteps: 0,
+      averageSteps: 0.0,
+      goalSteps: goalSteps,
+      streak: 0,
+      bestDay: null,
+      bestDaySteps: 0,
+    );
+  }
+
+  /// Creates StepStats from a JSON map.
+  factory StepStats.fromJson(Map<String, dynamic> json) {
+    return StepStats(
+      totalSteps: json['totalSteps'] as int? ?? 0,
+      averageSteps: (json['averageSteps'] as num?)?.toDouble() ?? 0.0,
+      goalSteps: json['goalSteps'] as int? ?? 10000,
+      streak: json['streak'] as int? ?? 0,
+      bestDay: json['bestDay'] != null
+          ? DateTime.tryParse(json['bestDay'].toString())
+          : null,
+      bestDaySteps: json['bestDaySteps'] as int? ?? 0,
+    );
+  }
+
+  /// Converts this StepStats to a JSON map.
+  Map<String, dynamic> toJson() {
+    return {
+      'totalSteps': totalSteps,
+      'averageSteps': averageSteps,
+      'goalSteps': goalSteps,
+      'streak': streak,
+      if (bestDay != null) 'bestDay': bestDay!.toIso8601String(),
+      'bestDaySteps': bestDaySteps,
+    };
+  }
+
+  /// Returns goal completion percentage (0.0 to 1.0 based on average).
+  double get goalCompletionRate =>
+      goalSteps > 0 ? (averageSteps / goalSteps).clamp(0.0, 1.0) : 0.0;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StepStats &&
+          runtimeType == other.runtimeType &&
+          totalSteps == other.totalSteps &&
+          goalSteps == other.goalSteps;
+
+  @override
+  int get hashCode => totalSteps.hashCode ^ goalSteps.hashCode;
+
+  @override
+  String toString() =>
+      'StepStats(total: $totalSteps, avg: ${averageSteps.toStringAsFixed(0)}, streak: $streak)';
+}
 
 /// Represents the current status of steps data loading.
 ///
