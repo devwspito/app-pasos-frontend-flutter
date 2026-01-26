@@ -1,0 +1,114 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T00:05:10.394Z",
+    "phase": "techlead",
+    "epicId": "epic-platform-config",
+    "savedAt": "2026-01-26T00:05:10.394Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-platform-config",
+    "storiesCount": 4,
+    "architecture": "## Platform Configuration Architecture\n\n### Overview\nThis epic configures platform-specific health permissions for the App Pasos step counting application. The architecture follows existing codebase patterns with abstract interfaces and implementations.\n\n### Architecture Decisions\n1. **Abstract Interface Pattern**: Following NetworkInfo/NetworkInfoImpl pattern for testability and platform agnosticism\n2. **Platform-Specific Configuration**: Native files (AndroidManifest.xml, Info.plist) for OS-level permissions\n3. **Health Package**: Using `health` package v10.2.0 for unified Health Connect (Android) and HealthKit (iOS) access\n\n### File Structure\n```\nlib/core/platform/\n├── health_permissions.dart    # Abstract + Implementation for health permissions\n└── platform_info.dart         # Platform detection utilities\n\nandroid/app/src/main/\n└── AndroidManifest.xml        # Health Connect permissions\n\nios/Runner/\n└── Info.plist                 # HealthKit usage descriptions\n```\n\n### Data Flow\n1. App requests permissions via HealthPermissionService\n2. Service detects platform via PlatformInfo\n3. Platform-specific permission dialogs shown to user\n4. Service returns permission status for app to handle\n\n### SOLID Compliance\n- **SRP**: Each file has single responsibility (permissions, platform detection, config)\n- **OCP**: Abstract interfaces allow extension without modification\n- **LSP**: HealthPermissionServiceImpl substitutable for HealthPermissionService\n- **ISP**: Focused interfaces (PlatformInfo, HealthPermissionService)\n- **DIP**: Depends on abstractions (HealthPermissionService), not concretions\n\n### Security Considerations\n- Health data is sensitive - requires explicit user consent\n- Usage descriptions explain WHY data is needed (GDPR/privacy compliance)\n- Minimal permissions requested (only READ, not WRITE for steps)",
+    "stories": [
+      {
+        "id": "epic-platform-config-story-1",
+        "title": "Add health package dependency to pubspec.yaml",
+        "description": "Add the health package to pubspec.yaml for cross-platform health data access.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify pubspec.yaml\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/network/network_info.dart (to understand package integration patterns)\n- Modify: pubspec.yaml\n- Create: NONE\n\n🔧 **PATTERNS TO USE:**\n- Follow existing dependency declaration format in pubspec.yaml (see lines 30-63)\n- Use caret syntax for version (^X.Y.Z) like other dependencies\n- Add dependency in the dependencies section under connectivity_plus\n\n📦 **REQUIRED CHANGES:**\n- Add `health: ^10.2.0` to dependencies section\n- This package provides unified API for HealthKit (iOS) and Health Connect (Android)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use exact version pinning (health: 10.2.0) ← Use caret syntax instead\n- Do NOT add to dev_dependencies ← This is a runtime dependency\n- Do NOT modify any other file\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Health package must be added under dependencies section\n- Version should be ^10.2.0 or latest compatible\n- Package enables: steps, distance, calories, heart rate data types\n\n🧪 **VERIFICATION:**\n- Run: flutter pub get\n- Verify: No dependency resolution errors\n- Check: pubspec.lock contains health package entry",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/network_info.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml exists, When health package is added, Then flutter pub get succeeds without errors",
+          "Given health package is added, When checking pubspec.lock, Then health package version is resolved",
+          "Given dependencies section, When health is added, Then it follows existing version syntax pattern (^X.Y.Z)"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-2",
+        "title": "Configure Android Health Connect permissions in AndroidManifest.xml",
+        "description": "Add Health Connect permissions and activity recognition to AndroidManifest.xml for Android 14+ health data access.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify android/app/src/main/AndroidManifest.xml\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: android/app/src/main/AndroidManifest.xml (current state)\n- Modify: android/app/src/main/AndroidManifest.xml\n- Create: NONE\n\n🔧 **PATTERNS TO USE:**\n- Follow existing manifest structure with proper XML namespacing\n- Add permissions BEFORE the <application> tag\n- Add intent-filter INSIDE <activity> for Health Connect integration\n\n📦 **REQUIRED CHANGES:**\n1. Add permissions before <application> tag:\n   - android.permission.ACTIVITY_RECOGNITION\n   - android.permission.health.READ_STEPS\n   - android.permission.health.READ_DISTANCE\n   - android.permission.health.READ_TOTAL_CALORIES_BURNED\n   - android.permission.health.READ_HEART_RATE\n\n2. Add intent-filter inside MainActivity for Health Connect:\n   ```xml\n   <intent-filter>\n     <action android:name=\"androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE\" />\n   </intent-filter>\n   ```\n\n3. Add Health Connect intent to <queries> section:\n   ```xml\n   <intent>\n     <action android:name=\"androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE\" />\n   </intent>\n   ```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT remove existing permissions or intent-filters\n- Do NOT modify MainActivity activity attributes\n- Do NOT add permissions inside <application> tag ← Must be at manifest level\n- Do NOT create separate manifest files\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All health permissions must be declared for Health Connect API\n- Activity recognition permission for step detection\n- Health Connect rationale intent-filter for permission UI\n\n🧪 **VERIFICATION:**\n- Run: flutter build apk --debug\n- Verify: Build completes without manifest errors\n- Check: AndroidManifest.xml is valid XML",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "android/app/src/main/AndroidManifest.xml"
+        ],
+        "filesToModify": [
+          "android/app/src/main/AndroidManifest.xml"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given AndroidManifest.xml, When health permissions are added, Then all READ_STEPS, READ_DISTANCE, READ_TOTAL_CALORIES_BURNED, READ_HEART_RATE permissions are present",
+          "Given MainActivity, When intent-filter is added, Then Health Connect rationale action is declared",
+          "Given queries section, When health intent is added, Then Health Connect action is queryable",
+          "Given all changes applied, When flutter build apk runs, Then build completes successfully"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-3",
+        "title": "Configure iOS HealthKit permissions in Info.plist",
+        "description": "Add HealthKit usage descriptions to Info.plist and configure entitlements for iOS health data access.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify ios/Runner/Info.plist\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: ios/Runner/Info.plist (current state)\n- Modify: ios/Runner/Info.plist\n- Create: NONE\n\n🔧 **PATTERNS TO USE:**\n- Follow existing plist key-value structure\n- Add new keys inside the main <dict> tag\n- Use descriptive user-facing strings for permission prompts\n\n📦 **REQUIRED CHANGES:**\n1. Add NSHealthShareUsageDescription key:\n   ```xml\n   <key>NSHealthShareUsageDescription</key>\n   <string>This app needs access to your health data to track your daily steps, distance walked, calories burned, and heart rate to help you monitor your fitness goals.</string>\n   ```\n\n2. Add NSHealthUpdateUsageDescription key:\n   ```xml\n   <key>NSHealthUpdateUsageDescription</key>\n   <string>This app needs permission to write health data to record your activity and fitness progress.</string>\n   ```\n\n3. Add UIBackgroundModes for health updates:\n   ```xml\n   <key>UIBackgroundModes</key>\n   <array>\n     <string>processing</string>\n   </array>\n   ```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT remove existing Info.plist keys\n- Do NOT use generic/vague usage descriptions ← Must explain WHY app needs access\n- Do NOT add duplicate UIBackgroundModes if already present ← Merge arrays\n- Do NOT create separate plist files\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- NSHealthShareUsageDescription required for reading health data\n- NSHealthUpdateUsageDescription required for writing health data\n- UIBackgroundModes enables background health data sync\n- Usage descriptions must be user-friendly and explain purpose\n\n🧪 **VERIFICATION:**\n- Run: flutter build ios --debug --no-codesign\n- Verify: Build completes without plist errors\n- Check: Info.plist is valid XML/plist format",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "ios/Runner/Info.plist"
+        ],
+        "filesToModify": [
+          "ios/Runner/Info.plist"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given Info.plist, When health descriptions are added, Then NSHealthShareUsageDescription key is present with descriptive string",
+          "Given Info.plist, When write permission is configured, Then NSHealthUpdateUsageDescription key is present",
+          "Given Info.plist, When background modes are added, Then UIBackgroundModes includes processing",
+          "Given all changes applied, When flutter build ios runs, Then build completes successfully"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-4",
+        "title": "Create HealthPermissionService in lib/core/platform/health_permissions.dart",
+        "description": "Create platform-agnostic service for requesting and checking health permissions following existing patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files in lib/core/platform/\n- Creating files outside this directory is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/network/network_info.dart (for abstract interface + impl pattern)\n- Read: lib/core/utils/logger.dart (for logging pattern)\n- Modify: NONE\n- Create: lib/core/platform/health_permissions.dart, lib/core/platform/platform_info.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow NetworkInfo/NetworkInfoImpl pattern: abstract class + implementation\n- Use AppLogger for logging permission requests/results\n- Use late static initialization like AppConfig\n- Comprehensive dartdoc with examples (see AppConfig, AppLogger)\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**File 1: lib/core/platform/platform_info.dart**\n```dart\nimport 'dart:io' show Platform;\n\n/// Provides platform detection utilities.\nabstract class PlatformInfo {\n  bool get isAndroid;\n  bool get isIOS;\n  String get platformName;\n}\n\nclass PlatformInfoImpl implements PlatformInfo {\n  @override\n  bool get isAndroid => Platform.isAndroid;\n  @override\n  bool get isIOS => Platform.isIOS;\n  @override\n  String get platformName => Platform.operatingSystem;\n}\n```\n\n**File 2: lib/core/platform/health_permissions.dart**\n```dart\nimport 'package:health/health.dart';\nimport '../utils/logger.dart';\n\n/// Health data types supported by the app.\nenum HealthDataType { steps, distance, calories, heartRate }\n\n/// Permission status for health data access.\nenum HealthPermissionStatus { granted, denied, notDetermined, restricted }\n\n/// Abstract interface for health permissions.\nabstract class HealthPermissionService {\n  Future<HealthPermissionStatus> checkPermission(HealthDataType type);\n  Future<bool> requestPermissions(List<HealthDataType> types);\n  Future<bool> hasAllPermissions(List<HealthDataType> types);\n}\n\n/// Implementation using health package.\nclass HealthPermissionServiceImpl implements HealthPermissionService {\n  final Health _health;\n  \n  HealthPermissionServiceImpl({Health? health}) : _health = health ?? Health();\n  // ... implement methods\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use concrete classes directly ← Use abstract interface pattern\n- Do NOT hardcode platform checks in permission logic ← Use PlatformInfo\n- Do NOT skip dartdoc documentation ← Must have comprehensive docs\n- Do NOT import platform-specific code directly ← Use abstractions\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- PlatformInfo: Detect Android vs iOS platform\n- HealthPermissionService: Abstract interface for health permissions\n- HealthPermissionServiceImpl: Implementation using health package\n- Methods: checkPermission, requestPermissions, hasAllPermissions\n- Support data types: steps, distance, calories, heartRate\n- Log all permission requests and results using AppLogger\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/platform/\n- Verify: No analyzer errors or warnings\n- Run: flutter build apk --debug && flutter build ios --debug --no-codesign\n- Verify: Both platforms build successfully with new files",
+        "epicId": "epic-platform-config",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-platform-config-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/network_info.dart",
+          "lib/core/utils/logger.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/platform/health_permissions.dart",
+          "lib/core/platform/platform_info.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given lib/core/platform/ directory, When health_permissions.dart is created, Then it contains HealthPermissionService abstract class",
+          "Given HealthPermissionService, When implementation is created, Then HealthPermissionServiceImpl implements all methods",
+          "Given platform_info.dart, When created, Then PlatformInfo provides isAndroid, isIOS, platformName",
+          "Given all files created, When flutter analyze runs, Then no errors or warnings are reported",
+          "Given health package dependency exists, When service imports health, Then import resolves correctly"
+        ]
+      }
+    ]
+  }
+}
