@@ -1,0 +1,149 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T01:32:10.121Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-26T01:32:10.121Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 5,
+    "architecture": "## UI Foundation Architecture\n\n### Design System Structure\n```\nlib/core/\n├── theme/\n│   ├── app_theme.dart      # ThemeData for light/dark modes\n│   ├── app_colors.dart     # Color constants and semantic colors\n│   ├── app_typography.dart # TextStyle constants (Material 3 type scale)\n│   └── app_spacing.dart    # Spacing, radius, and size constants\n└── widgets/\n    ├── app_button.dart     # Primary, secondary, outline, text variants\n    ├── app_text_field.dart # Form input with validation support\n    ├── app_card.dart       # Material 3 card wrapper\n    ├── app_loading.dart    # Loading indicators\n    ├── app_error_widget.dart   # Error display with retry\n    ├── app_empty_state.dart    # Empty content placeholder\n    ├── app_avatar.dart     # User avatar with fallbacks\n    └── app_bottom_nav.dart # Material 3 NavigationBar wrapper\n```\n\n### Material Design 3 Compliance\n- **ColorScheme.fromSeed()**: Dynamic color generation from seed color\n- **useMaterial3: true**: Enables Material 3 component styling\n- **NavigationBar**: Uses M3 navigation instead of BottomNavigationBar\n- **Type Scale**: Follows M3 typography naming (displayLarge, bodyMedium, etc.)\n\n### 8-Point Grid System\nAll spacing uses multiples of 4 or 8 for visual consistency:\n- xs: 4px, sm: 8px, md: 16px, lg: 24px, xl: 32px, xxl: 48px\n\n### SOLID Principles Applied\n- **SRP**: Each widget has single responsibility (AppButton = buttons only)\n- **OCP**: Widgets extensible via parameters without modification\n- **LSP**: All buttons can substitute each other via variant enum\n- **ISP**: Small focused interfaces (no bloated widget props)\n- **DIP**: Widgets depend on Theme abstraction, not hardcoded values\n\n### Verification Commands\n```bash\nflutter analyze                    # Static analysis\nflutter test                       # Run unit tests\nflutter build apk --debug          # Verify compilation\n```",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Create AppTheme and AppColors in lib/core/theme/ with Material Design 3",
+        "description": "Setup Material Design 3 theme configuration with light and dark mode support.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/config/app_config.dart, lib/core/constants/app_constants.dart (for pattern reference)\n- Modify: lib/main.dart (to use AppTheme)\n- Create: lib/core/theme/app_theme.dart, lib/core/theme/app_colors.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow utility class pattern from AppConstants: `class AppColors { AppColors._(); }`\n- Use `ColorScheme.fromSeed()` for Material Design 3 compliance\n- Use `ThemeData.light().copyWith()` and `ThemeData.dark().copyWith()` for theme creation\n- Reference colors via `Theme.of(context).colorScheme.primary`\n\n📦 **IMPLEMENTATION REQUIREMENTS:**\n\n**AppColors (lib/core/theme/app_colors.dart):**\n- Primary seed color: `Color(0xFF6750A4)` (Material 3 purple)\n- Custom brand colors as static const Color fields\n- Semantic colors: success (green), warning (amber), error (red), info (blue)\n- Surface and background color constants\n\n**AppTheme (lib/core/theme/app_theme.dart):**\n- Static `ThemeData get lightTheme` using ColorScheme.fromSeed with Brightness.light\n- Static `ThemeData get darkTheme` using ColorScheme.fromSeed with Brightness.dark\n- Configure AppBarTheme, CardTheme, InputDecorationTheme, ElevatedButtonTheme\n- Set useMaterial3: true\n\n**main.dart modifications:**\n- Import AppTheme from lib/core/theme/app_theme.dart\n- Replace inline ThemeData with `theme: AppTheme.lightTheme`\n- Add `darkTheme: AppTheme.darkTheme`\n- Add `themeMode: ThemeMode.system` for system-based switching\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded color values in widgets ← Use AppColors constants\n- Using old MaterialApp theme syntax without useMaterial3 ← WRONG\n- Creating ThemeData from scratch without copyWith ← Loses defaults\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/theme/\nflutter test\n```\n- App should compile and run with new theme\n- Both light and dark themes should be available",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/app_config.dart",
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/theme/app_colors.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the app starts, When ThemeMode.system is used, Then the app uses light or dark theme based on device settings",
+          "Given AppColors is imported, When accessing AppColors.primary, Then it returns the correct Color constant",
+          "Given AppTheme.lightTheme is applied, When checking useMaterial3, Then it returns true",
+          "Given the app runs, When flutter analyze is executed, Then no errors are reported in theme files"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Create AppTypography and AppSpacing constants in lib/core/theme/",
+        "description": "Define text styles and spacing constants for consistent UI throughout the app.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- DO NOT modify any existing files\n\n📁 **FILES:**\n- Read: lib/core/constants/app_constants.dart (for pattern reference), lib/core/theme/app_colors.dart (if available for color reference)\n- Modify: none\n- Create: lib/core/theme/app_typography.dart, lib/core/theme/app_spacing.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow utility class pattern: `class AppTypography { AppTypography._(); }`\n- Use `TextStyle` constants for typography\n- Use `double` constants for spacing (multiples of 4.0 or 8.0 for 8-point grid)\n- Follow Material 3 type scale naming: displayLarge, headlineMedium, bodyLarge, etc.\n\n📦 **IMPLEMENTATION REQUIREMENTS:**\n\n**AppTypography (lib/core/theme/app_typography.dart):**\n- Static TextStyle constants for all Material 3 type roles:\n  - displayLarge, displayMedium, displaySmall\n  - headlineLarge, headlineMedium, headlineSmall\n  - titleLarge, titleMedium, titleSmall\n  - bodyLarge, bodyMedium, bodySmall\n  - labelLarge, labelMedium, labelSmall\n- Use fontWeight, fontSize, letterSpacing as per Material 3 specs\n- Default fontFamily: null (uses system font)\n\n**AppSpacing (lib/core/theme/app_spacing.dart):**\n- Static const double values:\n  - xs: 4.0, sm: 8.0, md: 16.0, lg: 24.0, xl: 32.0, xxl: 48.0\n- Semantic spacing: paddingPage: 16.0, paddingCard: 12.0, gap: 8.0\n- Border radius constants: radiusSm: 4.0, radiusMd: 8.0, radiusLg: 16.0, radiusXl: 24.0\n- Icon sizes: iconSm: 16.0, iconMd: 24.0, iconLg: 32.0\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Magic numbers in widgets (padding: 16) ← Use AppSpacing.md\n- Inline TextStyle definitions ← Use AppTypography constants\n- Non-standard spacing values (7, 13, 15) ← Use 8-point grid multiples\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/theme/app_typography.dart lib/core/theme/app_spacing.dart\n```\n- Files should have no analysis errors\n- All constants should be accessible as static members",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_typography.dart",
+          "lib/core/theme/app_spacing.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppTypography is imported, When accessing AppTypography.bodyLarge, Then it returns a valid TextStyle with fontSize and fontWeight",
+          "Given AppSpacing is imported, When accessing AppSpacing.md, Then it returns 16.0",
+          "Given AppSpacing is imported, When accessing AppSpacing.radiusMd, Then it returns 8.0",
+          "Given flutter analyze runs, Then no errors are reported for typography and spacing files"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create AppButton and AppTextField reusable widgets in lib/core/widgets/",
+        "description": "Create reusable input widgets with consistent styling based on the design system.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- DO NOT modify any existing files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_spacing.dart, lib/core/utils/validators.dart\n- Modify: none\n- Create: lib/core/widgets/app_button.dart, lib/core/widgets/app_text_field.dart\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget for widgets without internal state\n- Use `Theme.of(context).colorScheme` for colors\n- Use `AppSpacing` constants for padding and margins\n- Accept callbacks via named parameters (e.g., `VoidCallback? onPressed`)\n- Use `const` constructor where possible\n\n📦 **IMPLEMENTATION REQUIREMENTS:**\n\n**AppButton (lib/core/widgets/app_button.dart):**\n- Enum `AppButtonVariant { primary, secondary, outline, text }`\n- Enum `AppButtonSize { small, medium, large }`\n- Properties: label (String), onPressed (VoidCallback?), variant, size, isLoading, isDisabled, icon (IconData?)\n- Uses ElevatedButton, OutlinedButton, or TextButton based on variant\n- Shows CircularProgressIndicator when isLoading: true\n- Disabled state when isDisabled: true or onPressed: null\n- Full width option via `fullWidth: bool` parameter\n\n**AppTextField (lib/core/widgets/app_text_field.dart):**\n- Properties: controller, label, hint, errorText, obscureText, keyboardType, validator, onChanged, prefixIcon, suffixIcon, enabled, maxLines\n- Uses TextFormField with OutlineInputBorder\n- Integrates with Validators from lib/core/utils/validators.dart\n- Support for password visibility toggle when obscureText: true\n- Uses Theme.of(context).inputDecorationTheme for base styling\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded colors (Colors.blue) ← Use Theme.of(context).colorScheme\n- Hardcoded padding values ← Use AppSpacing constants\n- Creating new TextEditingController inside widget ← Accept as parameter\n- Missing const on stateless constructors ← Add const\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/widgets/app_button.dart lib/core/widgets/app_text_field.dart\n```\n- Widgets should compile without errors\n- All parameters should have proper types and defaults",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/core/utils/validators.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/widgets/app_button.dart",
+          "lib/core/widgets/app_text_field.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppButton with variant: primary, When rendered, Then it displays as ElevatedButton with primary color",
+          "Given AppButton with isLoading: true, When rendered, Then it shows CircularProgressIndicator instead of label",
+          "Given AppTextField with obscureText: true, When rendered, Then it shows password field with visibility toggle icon",
+          "Given AppTextField with validator, When form validates, Then validator function is called"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Create AppLoading, AppErrorWidget, and AppEmptyState feedback widgets",
+        "description": "Create feedback widgets for loading states, error handling, and empty content display.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- DO NOT modify any existing files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_spacing.dart, lib/core/theme/app_typography.dart\n- Modify: none\n- Create: lib/core/widgets/app_loading.dart, lib/core/widgets/app_error_widget.dart, lib/core/widgets/app_empty_state.dart\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget with const constructors\n- Use `Theme.of(context)` for theming\n- Use `AppSpacing` for consistent spacing\n- Center content vertically and horizontally by default\n- Accept optional customization parameters\n\n📦 **IMPLEMENTATION REQUIREMENTS:**\n\n**AppLoading (lib/core/widgets/app_loading.dart):**\n- Enum `AppLoadingSize { small, medium, large }` with sizes 16, 32, 48\n- Properties: size (AppLoadingSize), color (Color?), message (String?)\n- Uses CircularProgressIndicator.adaptive() for platform-appropriate spinner\n- Optional text message below the spinner\n- Centered in parent by default\n- Factory constructor `AppLoading.overlay()` for full-screen overlay loading\n\n**AppErrorWidget (lib/core/widgets/app_error_widget.dart):**\n- Properties: message (String), onRetry (VoidCallback?), icon (IconData?), title (String?)\n- Default icon: Icons.error_outline with error color\n- Shows title (default: 'Something went wrong'), message, and optional retry button\n- Retry button uses AppButton if onRetry is provided\n- Centered layout with proper spacing\n\n**AppEmptyState (lib/core/widgets/app_empty_state.dart):**\n- Properties: message (String), icon (IconData?), title (String?), actionLabel (String?), onAction (VoidCallback?)\n- Default icon: Icons.inbox_outlined\n- Shows icon, title, message, and optional action button\n- Centered layout with muted colors for secondary importance\n- Support for custom widget via `child` parameter\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded strings without parameters ← Accept message as parameter\n- Missing null safety on optional callbacks ← Use VoidCallback?\n- Fixed sizes without responsive design ← Use MediaQuery or LayoutBuilder if needed\n- Inline styles ← Use Theme and AppSpacing\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/widgets/app_loading.dart lib/core/widgets/app_error_widget.dart lib/core/widgets/app_empty_state.dart\n```\n- All widgets should compile without errors\n- All widgets should be usable in any screen context",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/core/theme/app_typography.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/widgets/app_loading.dart",
+          "lib/core/widgets/app_error_widget.dart",
+          "lib/core/widgets/app_empty_state.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppLoading with size: medium, When rendered, Then it shows a 32px CircularProgressIndicator",
+          "Given AppLoading with message: 'Loading data', When rendered, Then it shows spinner with text below",
+          "Given AppErrorWidget with onRetry callback, When rendered, Then it shows retry button",
+          "Given AppEmptyState with actionLabel and onAction, When rendered, Then it shows action button"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-5",
+        "title": "Create AppCard, AppAvatar, and AppBottomNav layout widgets",
+        "description": "Create layout widgets for cards, user avatars, and bottom navigation.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- DO NOT modify any existing files\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_spacing.dart, lib/core/theme/app_typography.dart\n- Modify: none\n- Create: lib/core/widgets/app_card.dart, lib/core/widgets/app_avatar.dart, lib/core/widgets/app_bottom_nav.dart\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget with const constructors where possible\n- Use `Theme.of(context).cardTheme` for card styling\n- Use `AppSpacing.radiusMd` for border radius\n- Use `ClipRRect` or `ClipOval` for avatar clipping\n- Use `NavigationBar` (Material 3) instead of BottomNavigationBar\n\n📦 **IMPLEMENTATION REQUIREMENTS:**\n\n**AppCard (lib/core/widgets/app_card.dart):**\n- Properties: child (Widget), padding (EdgeInsets?), margin (EdgeInsets?), elevation (double?), onTap (VoidCallback?), borderRadius (double?)\n- Uses Card widget with Material 3 styling\n- Optional InkWell wrapper when onTap is provided\n- Default padding: AppSpacing.md (16.0)\n- Default border radius: AppSpacing.radiusMd (8.0)\n- Support for custom decoration via `decoration` parameter\n\n**AppAvatar (lib/core/widgets/app_avatar.dart):**\n- Enum `AppAvatarSize { small, medium, large, xlarge }` with sizes 32, 48, 64, 96\n- Properties: imageUrl (String?), initials (String?), size (AppAvatarSize), backgroundColor (Color?)\n- Shows image if imageUrl provided, otherwise shows initials\n- Fallback to person icon if neither imageUrl nor initials provided\n- Circular shape using ClipOval\n- Uses CachedNetworkImage pattern (Image.network with errorBuilder)\n\n**AppBottomNav (lib/core/widgets/app_bottom_nav.dart):**\n- Model class `AppBottomNavItem { icon, selectedIcon, label }`\n- Properties: items (List<AppBottomNavItem>), currentIndex (int), onTap (ValueChanged<int>)\n- Uses NavigationBar widget (Material 3)\n- Uses NavigationDestination for each item\n- Supports 3-5 navigation items\n- Uses Theme.of(context).colorScheme for selected/unselected states\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Using BottomNavigationBar instead of NavigationBar ← Material 3 uses NavigationBar\n- Hardcoded avatar sizes ← Use AppAvatarSize enum\n- Missing error handling for network images ← Use errorBuilder\n- Inline color values ← Use Theme.of(context).colorScheme\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/widgets/app_card.dart lib/core/widgets/app_avatar.dart lib/core/widgets/app_bottom_nav.dart\n```\n- All widgets should compile without errors\n- AppBottomNav should use Material 3 NavigationBar",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_spacing.dart",
+          "lib/core/theme/app_typography.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/widgets/app_card.dart",
+          "lib/core/widgets/app_avatar.dart",
+          "lib/core/widgets/app_bottom_nav.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppCard with onTap callback, When tapped, Then callback is invoked with ripple effect",
+          "Given AppAvatar with imageUrl, When rendered, Then it shows circular network image",
+          "Given AppAvatar with only initials, When rendered, Then it shows initials in circle background",
+          "Given AppBottomNav with 4 items, When item at index 2 is tapped, Then onTap(2) is called"
+        ]
+      }
+    ]
+  }
+}
