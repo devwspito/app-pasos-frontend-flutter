@@ -1,0 +1,226 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "5866424e1990a21bb428f1f3",
+    "timestamp": "2026-01-26T04:00:19.061Z",
+    "phase": "techlead",
+    "epicId": "epic-sharing-ui",
+    "savedAt": "2026-01-26T04:00:19.061Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-sharing-ui",
+    "storiesCount": 7,
+    "architecture": "## Architecture Overview\n\nThis epic implements the Sharing/Friends feature following **Clean Architecture** with **Provider** for state management.\n\n### Layer Structure:\n```\nlib/features/sharing/\n├── data/\n│   ├── models/                    # JSON-serializable data transfer objects\n│   │   ├── sharing_relationship_model.dart\n│   │   └── friend_stats_model.dart\n│   ├── datasources/               # Remote API communication\n│   │   └── sharing_remote_datasource.dart\n│   └── repositories/              # Repository implementations\n│       └── sharing_repository_impl.dart\n├── domain/\n│   ├── entities/                  # Business objects (immutable)\n│   │   ├── sharing_relationship.dart\n│   │   └── friend_stats.dart\n│   ├── repositories/              # Repository contracts\n│   │   └── sharing_repository.dart\n│   └── usecases/                  # Business operations\n│       ├── get_relationships_usecase.dart\n│       ├── send_request_usecase.dart\n│       ├── accept_request_usecase.dart\n│       └── get_friend_stats_usecase.dart\n└── presentation/\n    ├── providers/                 # State management\n    │   └── sharing_provider.dart\n    ├── pages/                     # Full screen views\n    │   ├── friends_page.dart\n    │   ├── friend_requests_page.dart\n    │   ├── add_friend_page.dart\n    │   └── friend_detail_page.dart\n    └── widgets/                   # Reusable UI components\n        ├── friend_card.dart\n        ├── request_card.dart\n        └── user_search_field.dart\n```\n\n### Key Patterns:\n\n1. **Dependency Flow**: UI → Provider → UseCase → Repository → DataSource → API\n2. **Model/Entity Separation**: Models handle JSON, Entities contain business logic\n3. **Optimistic Updates**: Accept/Reject actions update UI immediately, rollback on error\n4. **Reusable Widgets**: Leverages existing core widgets (AppCard, AppButton, AppAvatar)\n\n### API Contracts (Backend Integration):\n\n| Endpoint | Method | Request | Response |\n|----------|--------|---------|----------|\n| /sharing/relationships | GET | - | List<SharingRelationship> |\n| /sharing/requests/pending | GET | - | List<SharingRelationship> |\n| /sharing/requests | POST | {targetUserId} | SharingRelationship |\n| /sharing/requests/{id}/accept | PUT | - | SharingRelationship |\n| /sharing/requests/{id}/reject | PUT | - | void |\n| /sharing/relationships/{id} | DELETE | - | void |\n| /sharing/friends/stats | GET | - | List<FriendStats> |\n| /users/search?q={query} | GET | - | List<UserSearchResult> |\n\n### Setup Commands:\n```bash\ncd app-pasos-frontend-flutter\nflutter pub get\n```\n\n### Verification Commands:\n```bash\nflutter analyze lib/features/sharing/\nflutter test\n```",
+    "stories": [
+      {
+        "id": "epic-sharing-ui-story-1",
+        "title": "Create SharingRelationshipModel and FriendStatsModel in lib/features/sharing/data/models/",
+        "description": "Create the data layer models for sharing relationships and friend statistics following the existing pattern from StepModel.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/steps/data/models/step_model.dart`, `lib/features/auth/data/models/user_model.dart`\n- Create: `lib/features/sharing/data/models/sharing_relationship_model.dart`, `lib/features/sharing/data/models/friend_stats_model.dart`\n\n🔧 **PATTERNS TO USE:**\n- Extend `Equatable` for value equality (from equatable package)\n- Factory constructor `fromJson(Map<String, dynamic> json)` for API deserialization\n- Method `toJson()` for serialization\n- `copyWith()` method for immutable updates\n- Use `props` getter for Equatable comparison\n\n📦 **SharingRelationshipModel FIELDS:**\n- `id`: String (relationship ID)\n- `requesterId`: String (user who sent request)\n- `targetId`: String (user who received request)\n- `status`: String ('pending', 'accepted', 'rejected', 'blocked')\n- `createdAt`: DateTime\n- `updatedAt`: DateTime?\n- `requesterUsername`: String?\n- `requesterProfileImageUrl`: String?\n- `targetUsername`: String?\n- `targetProfileImageUrl`: String?\n\n📦 **FriendStatsModel FIELDS:**\n- `friendId`: String\n- `username`: String\n- `profileImageUrl`: String?\n- `todaySteps`: int\n- `weeklyAverage`: double\n- `lastActive`: DateTime?\n- `streak`: int\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use dynamic types for JSON values - use proper type casting\n- Do NOT forget null safety handling in fromJson\n- Do NOT create entities in this story - models only\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/data/models/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/models/step_model.dart",
+          "lib/features/auth/data/models/user_model.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/data/models/sharing_relationship_model.dart",
+          "lib/features/sharing/data/models/friend_stats_model.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SharingRelationshipModel class exists, When fromJson is called with valid JSON, Then all fields are correctly parsed",
+          "Given FriendStatsModel class exists, When toJson is called, Then all fields are correctly serialized",
+          "Given both models extend Equatable, When two instances with same data are compared, Then they are equal",
+          "Given flutter analyze is run, When checking the models, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-2",
+        "title": "Create SharingRemoteDataSource in lib/features/sharing/data/datasources/",
+        "description": "Create the remote data source for sharing API operations following the existing StepsRemoteDataSource pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/steps/data/datasources/steps_remote_datasource.dart`, `lib/core/network/dio_client.dart`, `lib/core/constants/api_endpoints.dart`\n- Create: `lib/features/sharing/data/datasources/sharing_remote_datasource.dart`\n\n🔧 **PATTERNS TO USE:**\n- Abstract class `SharingRemoteDataSource` defining the interface\n- Concrete class `SharingRemoteDataSourceImpl` implementing the interface\n- Use `DioClient` singleton for HTTP requests\n- Define API endpoints as static constants within the file (e.g., `/sharing/relationships`, `/sharing/requests`)\n\n📦 **API METHODS TO IMPLEMENT:**\n1. `Future<List<SharingRelationshipModel>> getRelationships()` - GET /sharing/relationships\n2. `Future<List<SharingRelationshipModel>> getPendingRequests()` - GET /sharing/requests/pending\n3. `Future<SharingRelationshipModel> sendFriendRequest(String targetUserId)` - POST /sharing/requests\n4. `Future<SharingRelationshipModel> acceptRequest(String relationshipId)` - PUT /sharing/requests/{id}/accept\n5. `Future<void> rejectRequest(String relationshipId)` - PUT /sharing/requests/{id}/reject\n6. `Future<void> removeFriend(String relationshipId)` - DELETE /sharing/relationships/{id}\n7. `Future<List<FriendStatsModel>> getFriendStats()` - GET /sharing/friends/stats\n8. `Future<List<UserSearchResult>> searchUsers(String query)` - GET /users/search?q={query}\n\n📦 **UserSearchResult inline class for search:**\n- `id`: String\n- `username`: String\n- `profileImageUrl`: String?\n- `isAlreadyFriend`: bool\n- `hasPendingRequest`: bool\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT modify ApiEndpoints.dart - define endpoints locally in datasource\n- Do NOT catch and swallow DioExceptions - rethrow or handle appropriately for 404s\n- Do NOT forget to import models from story 1 (use relative import)\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/data/datasources/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-sharing-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/data/datasources/steps_remote_datasource.dart",
+          "lib/core/network/dio_client.dart",
+          "lib/core/constants/api_endpoints.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SharingRemoteDataSource abstract class exists, When reviewed, Then it defines all 8 API methods",
+          "Given SharingRemoteDataSourceImpl exists, When instantiated, Then it uses DioClient singleton",
+          "Given getRelationships is called, When API returns data, Then it parses to List<SharingRelationshipModel>",
+          "Given sendFriendRequest is called with userId, When successful, Then it returns created SharingRelationshipModel",
+          "Given flutter analyze is run, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-3",
+        "title": "Create SharingRelationship and FriendStats domain entities in lib/features/sharing/domain/",
+        "description": "Create the domain layer entities for sharing relationships following the existing StepRecord entity pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/steps/domain/entities/step_record.dart`, `lib/features/steps/domain/entities/step_stats.dart`\n- Create: `lib/features/sharing/domain/entities/sharing_relationship.dart`, `lib/features/sharing/domain/entities/friend_stats.dart`\n\n🔧 **PATTERNS TO USE:**\n- Extend `Equatable` for value equality\n- Immutable classes with const constructors\n- Include business logic helper methods/getters\n- NO JSON serialization (that's the model's job)\n- Use `copyWith()` for creating modified copies\n\n📦 **SharingRelationship ENTITY FIELDS + METHODS:**\n- Fields: `id`, `requesterId`, `targetId`, `status`, `createdAt`, `updatedAt`, `requesterUsername`, `requesterProfileImageUrl`, `targetUsername`, `targetProfileImageUrl`\n- Business methods:\n  - `bool get isPending => status == 'pending'`\n  - `bool get isAccepted => status == 'accepted'`\n  - `bool get isRejected => status == 'rejected'`\n  - `bool get isBlocked => status == 'blocked'`\n  - `bool isRequester(String userId) => requesterId == userId`\n  - `String getOtherUsername(String currentUserId)` - returns the username of the other person\n  - `String? getOtherProfileImage(String currentUserId)` - returns profile image of other person\n\n📦 **FriendStats ENTITY FIELDS + METHODS:**\n- Fields: `friendId`, `username`, `profileImageUrl`, `todaySteps`, `weeklyAverage`, `lastActive`, `streak`\n- Business methods:\n  - `bool get isActiveToday` - checks if lastActive is today\n  - `bool get hasStreak => streak > 0`\n  - `String get initials` - returns first 2 letters of username\n  - `double percentOfGoal(int goal)` - calculates goal percentage\n  - Factory: `FriendStats.empty()` for placeholder state\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT add fromJson/toJson - entities are pure business objects\n- Do NOT reference data layer models - entities are independent\n- Do NOT use mutable fields - all must be final\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/domain/entities/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/domain/entities/step_record.dart",
+          "lib/features/steps/domain/entities/step_stats.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/domain/entities/sharing_relationship.dart",
+          "lib/features/sharing/domain/entities/friend_stats.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SharingRelationship entity exists, When isPending getter is called on pending status, Then returns true",
+          "Given SharingRelationship entity exists, When getOtherUsername is called with currentUserId, Then returns the other user's username",
+          "Given FriendStats entity exists, When isActiveToday is called, Then correctly compares lastActive with today",
+          "Given both entities extend Equatable, When compared by value, Then equality works correctly",
+          "Given flutter analyze is run, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-4",
+        "title": "Create SharingRepository interface and usecases in lib/features/sharing/domain/",
+        "description": "Create the repository interface and use cases for sharing operations following clean architecture patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/steps/presentation/providers/steps_provider.dart` (for usecase interface pattern)\n- Create: `lib/features/sharing/domain/repositories/sharing_repository.dart`, `lib/features/sharing/domain/usecases/get_relationships_usecase.dart`, `lib/features/sharing/domain/usecases/send_request_usecase.dart`, `lib/features/sharing/domain/usecases/accept_request_usecase.dart`, `lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart`\n\n🔧 **PATTERNS TO USE:**\n- Abstract `SharingRepository` class defining all operations\n- Each UseCase class with a single `call()` method\n- UseCases take repository as constructor dependency\n- Return domain entities, not models\n\n📦 **SharingRepository INTERFACE METHODS:**\n```dart\nabstract class SharingRepository {\n  Future<List<SharingRelationship>> getRelationships();\n  Future<List<SharingRelationship>> getPendingRequests();\n  Future<SharingRelationship> sendFriendRequest(String targetUserId);\n  Future<SharingRelationship> acceptRequest(String relationshipId);\n  Future<void> rejectRequest(String relationshipId);\n  Future<void> removeFriend(String relationshipId);\n  Future<List<FriendStats>> getFriendStats();\n  Future<List<UserSearchResult>> searchUsers(String query);\n}\n```\n\n📦 **USECASES TO CREATE:**\n1. `GetRelationshipsUseCase` - calls `repository.getRelationships()`\n2. `SendRequestUseCase` - takes `targetUserId`, calls `repository.sendFriendRequest()`\n3. `AcceptRequestUseCase` - takes `relationshipId`, calls `repository.acceptRequest()`\n4. `GetFriendStatsUseCase` - calls `repository.getFriendStats()`\n\n📦 **UserSearchResult CLASS (in repository file):**\n- `id`: String\n- `username`: String\n- `profileImageUrl`: String?\n- `isAlreadyFriend`: bool\n- `hasPendingRequest`: bool\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT import data layer classes in domain layer\n- Do NOT implement the repository here - only define interface\n- Do NOT add business logic to usecases beyond calling repository\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/domain/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-sharing-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/domain/repositories/sharing_repository.dart",
+          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
+          "lib/features/sharing/domain/usecases/send_request_usecase.dart",
+          "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
+          "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SharingRepository abstract class exists, When reviewed, Then it defines all 8 methods returning domain entities",
+          "Given GetRelationshipsUseCase exists, When call() is invoked, Then it delegates to repository.getRelationships()",
+          "Given SendRequestUseCase exists, When call(targetUserId) is invoked, Then it delegates to repository.sendFriendRequest()",
+          "Given all usecases are created, When flutter analyze is run, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-5",
+        "title": "Create SharingRepositoryImpl in lib/features/sharing/data/repositories/",
+        "description": "Create the concrete repository implementation that connects domain layer to data layer, converting between models and entities.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/sharing/domain/repositories/sharing_repository.dart`, `lib/features/sharing/data/datasources/sharing_remote_datasource.dart`, `lib/features/sharing/data/models/sharing_relationship_model.dart`, `lib/features/sharing/domain/entities/sharing_relationship.dart`\n- Create: `lib/features/sharing/data/repositories/sharing_repository_impl.dart`\n\n🔧 **PATTERNS TO USE:**\n- Implement `SharingRepository` interface\n- Inject `SharingRemoteDataSource` via constructor\n- Convert models to entities using `toEntity()` method (add to models if needed via extension)\n- Handle errors appropriately (let exceptions propagate to provider)\n\n📦 **SharingRepositoryImpl STRUCTURE:**\n```dart\nclass SharingRepositoryImpl implements SharingRepository {\n  final SharingRemoteDataSource _remoteDataSource;\n\n  SharingRepositoryImpl({SharingRemoteDataSource? remoteDataSource})\n      : _remoteDataSource = remoteDataSource ?? SharingRemoteDataSourceImpl();\n\n  @override\n  Future<List<SharingRelationship>> getRelationships() async {\n    final models = await _remoteDataSource.getRelationships();\n    return models.map((m) => _modelToEntity(m)).toList();\n  }\n  // ... implement all methods\n}\n```\n\n📦 **MODEL TO ENTITY CONVERSION:**\nCreate private helper methods to convert:\n- `SharingRelationshipModel` → `SharingRelationship`\n- `FriendStatsModel` → `FriendStats`\n- Handle UserSearchResult (pass through or convert)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT catch exceptions here - let them propagate to the provider for handling\n- Do NOT add caching logic in this story - keep it simple\n- Do NOT import presentation layer classes\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/data/repositories/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-sharing-ui-story-1",
+          "epic-sharing-ui-story-2",
+          "epic-sharing-ui-story-3",
+          "epic-sharing-ui-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/domain/repositories/sharing_repository.dart",
+          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
+          "lib/features/sharing/data/models/sharing_relationship_model.dart",
+          "lib/features/sharing/domain/entities/sharing_relationship.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/data/repositories/sharing_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SharingRepositoryImpl implements SharingRepository, When getRelationships is called, Then it returns List<SharingRelationship> entities",
+          "Given sendFriendRequest is called, When API succeeds, Then it returns converted SharingRelationship entity",
+          "Given model to entity conversion is implemented, When model has all fields, Then entity contains all converted values",
+          "Given flutter analyze is run, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-6",
+        "title": "Create SharingProvider in lib/features/sharing/presentation/providers/",
+        "description": "Create the state management provider for sharing features following the existing StepsProvider pattern with optimistic updates for friend request actions.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/steps/presentation/providers/steps_provider.dart`, `lib/features/auth/presentation/providers/auth_provider.dart`\n- Create: `lib/features/sharing/presentation/providers/sharing_provider.dart`\n\n🔧 **PATTERNS TO USE:**\n- Extend `ChangeNotifier`\n- `SharingStatus` enum: `initial`, `loading`, `loaded`, `error`\n- Private state with public getters\n- `_updateState()` helper method for consolidated state changes\n- `notifyListeners()` after state changes\n- `_parseError()` for user-friendly error messages\n- **Optimistic updates** for accept/reject actions\n\n📦 **SharingProvider STATE:**\n```dart\nenum SharingStatus { initial, loading, loaded, error }\n\nclass SharingProvider extends ChangeNotifier {\n  SharingStatus _status = SharingStatus.initial;\n  List<SharingRelationship> _friends = [];\n  List<SharingRelationship> _pendingRequests = [];\n  List<FriendStats> _friendStats = [];\n  List<UserSearchResult> _searchResults = [];\n  String? _errorMessage;\n  bool _isSearching = false;\n  \n  // Getters\n  SharingStatus get status => _status;\n  List<SharingRelationship> get friends => List.unmodifiable(_friends);\n  List<SharingRelationship> get pendingRequests => List.unmodifiable(_pendingRequests);\n  List<FriendStats> get friendStats => List.unmodifiable(_friendStats);\n  int get friendCount => _friends.length;\n  int get pendingCount => _pendingRequests.length;\n  // ...\n}\n```\n\n📦 **METHODS TO IMPLEMENT:**\n1. `loadFriendsData()` - loads friends and pending requests in parallel\n2. `loadFriendStats()` - loads friend statistics\n3. `sendFriendRequest(String targetUserId)` - sends request, adds to pending optimistically\n4. `acceptRequest(String relationshipId)` - **optimistic**: move from pending to friends immediately, rollback on error\n5. `rejectRequest(String relationshipId)` - **optimistic**: remove from pending immediately, rollback on error\n6. `removeFriend(String relationshipId)` - removes friend\n7. `searchUsers(String query)` - searches for users to add as friends\n8. `clearSearch()` - clears search results\n9. `clearError()` - clears error message\n10. `reset()` - resets all state\n\n📦 **OPTIMISTIC UPDATE PATTERN:**\n```dart\nFuture<void> acceptRequest(String relationshipId) async {\n  // 1. Find the request\n  final request = _pendingRequests.firstWhere((r) => r.id == relationshipId);\n  \n  // 2. Optimistic update - move to friends immediately\n  _pendingRequests.removeWhere((r) => r.id == relationshipId);\n  final acceptedRelationship = request.copyWith(status: 'accepted');\n  _friends.add(acceptedRelationship);\n  notifyListeners();\n  \n  try {\n    // 3. Make API call\n    await _repository.acceptRequest(relationshipId);\n  } catch (e) {\n    // 4. Rollback on error\n    _friends.removeWhere((r) => r.id == relationshipId);\n    _pendingRequests.add(request);\n    _errorMessage = _parseError(e);\n    notifyListeners();\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT call notifyListeners multiple times in sequence - use _updateState helper\n- Do NOT forget to implement optimistic updates for accept/reject\n- Do NOT import data layer directly - use repository via usecases\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/presentation/providers/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-sharing-ui-story-4",
+          "epic-sharing-ui-story-5"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/steps/presentation/providers/steps_provider.dart",
+          "lib/features/auth/presentation/providers/auth_provider.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/presentation/providers/sharing_provider.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SharingProvider exists, When loadFriendsData is called, Then both friends and pendingRequests are populated",
+          "Given acceptRequest is called, When before API responds, Then the request is optimistically moved to friends list",
+          "Given acceptRequest API fails, When error occurs, Then the request is rolled back to pendingRequests",
+          "Given searchUsers is called with query, When API returns results, Then searchResults is populated",
+          "Given flutter analyze is run, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-7",
+        "title": "Create FriendsPage, FriendRequestsPage, AddFriendPage, FriendDetailPage and widgets, update AppRouter",
+        "description": "Create all UI pages for the sharing feature and register routes in AppRouter. This story creates the complete UI layer.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/core/router/app_router.dart`, `lib/core/widgets/app_card.dart`, `lib/core/widgets/app_button.dart`, `lib/core/widgets/app_avatar.dart`, `lib/core/widgets/app_empty_state.dart`\n- Modify: `lib/core/router/app_router.dart`\n- Create: `lib/features/sharing/presentation/pages/friends_page.dart`, `lib/features/sharing/presentation/pages/friend_requests_page.dart`, `lib/features/sharing/presentation/pages/add_friend_page.dart`, `lib/features/sharing/presentation/pages/friend_detail_page.dart`, `lib/features/sharing/presentation/widgets/friend_card.dart`, `lib/features/sharing/presentation/widgets/request_card.dart`, `lib/features/sharing/presentation/widgets/user_search_field.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `context.watch<SharingProvider>()` for reactive state\n- Use core widgets: `AppCard`, `AppButton`, `AppAvatar`, `AppEmptyState`\n- Use `GoRouter` for navigation (`context.go()`, `context.push()`)\n- Material 3 styling with `Theme.of(context)`\n\n📦 **ROUTES TO ADD TO AppRoutes:**\n```dart\nstatic const String friends = '/friends';\nstatic const String friendRequests = '/friends/requests';\nstatic const String addFriend = '/friends/add';\nstatic const String friendDetail = '/friends/:id';\n```\n\n📦 **FriendsPage SPECIFICATIONS:**\n- AppBar with title 'Friends' and actions: IconButton for requests (with badge for pending count), IconButton for add friend\n- ListView of FriendCard widgets showing accepted friends\n- Pull-to-refresh using RefreshIndicator\n- AppEmptyState when no friends with 'Add your first friend!' message and button\n- Loading state with CircularProgressIndicator\n\n📦 **FriendRequestsPage SPECIFICATIONS:**\n- AppBar with title 'Friend Requests' and back button\n- ListView of RequestCard widgets showing pending requests\n- AppEmptyState when no pending requests\n- Loading indicator during initial load\n\n📦 **AddFriendPage SPECIFICATIONS:**\n- AppBar with title 'Add Friend' and back button\n- UserSearchField at top with search icon and debounced search\n- ListView of search results with 'Add Friend' button for each\n- Shows existing friend status and pending request status\n- AppEmptyState when search returns no results\n\n📦 **FriendDetailPage SPECIFICATIONS:**\n- Receives friendId from route parameters\n- AppBar with back button\n- Large AppAvatar at top\n- Username and stats display (today's steps, weekly average, streak)\n- 'Remove Friend' button with confirmation dialog\n\n📦 **FriendCard WIDGET:**\n- AppAvatar on left\n- Username and last active time\n- Today's steps count\n- Tappable to navigate to FriendDetailPage\n\n📦 **RequestCard WIDGET:**\n- AppAvatar on left\n- Username and request time\n- Row of Accept (green) and Reject (red) buttons\n- Shows loading state during action\n\n📦 **UserSearchField WIDGET:**\n- TextField with search icon prefix\n- Clear button suffix when text present\n- `onChanged` callback with debounce (300ms)\n- Hint text: 'Search by username...'\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use placeholder text like 'Coming Soon' or 'TODO'\n- Do NOT create buttons without onPressed handlers\n- Do NOT forget to handle loading/error states in each page\n- Do NOT use hardcoded colors - use Theme.of(context).colorScheme\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/project-696ffdab5864812d9011439d/team-6-sharing-ui---friends-and-social-features/app-pasos-frontend-flutter && flutter analyze lib/features/sharing/presentation/ && flutter analyze lib/core/router/\n```",
+        "epicId": "epic-sharing-ui",
+        "priority": 5,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-sharing-ui-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/router/app_router.dart",
+          "lib/core/widgets/app_card.dart",
+          "lib/core/widgets/app_button.dart",
+          "lib/core/widgets/app_avatar.dart",
+          "lib/core/widgets/app_empty_state.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/sharing/presentation/pages/friends_page.dart",
+          "lib/features/sharing/presentation/pages/friend_requests_page.dart",
+          "lib/features/sharing/presentation/pages/add_friend_page.dart",
+          "lib/features/sharing/presentation/pages/friend_detail_page.dart",
+          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/sharing/presentation/widgets/request_card.dart",
+          "lib/features/sharing/presentation/widgets/user_search_field.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppRouter is updated, When /friends route is accessed, Then FriendsPage is displayed",
+          "Given FriendsPage is displayed, When there are friends, Then FriendCard widgets are shown in a ListView",
+          "Given FriendsPage has no friends, When displayed, Then AppEmptyState is shown with 'Add your first friend!' message",
+          "Given FriendRequestsPage is displayed, When Accept button is tapped, Then request is moved to friends optimistically",
+          "Given AddFriendPage is displayed, When user types in search field, Then searchUsers is called after debounce",
+          "Given FriendDetailPage is accessed with friendId, When displayed, Then friend's stats are shown",
+          "Given RequestCard exists, When Accept is tapped, Then acceptRequest is called on provider",
+          "Given all pages are created, When flutter analyze is run, Then no errors are reported"
+        ]
+      }
+    ]
+  }
+}
