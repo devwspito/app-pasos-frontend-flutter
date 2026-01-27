@@ -1,0 +1,230 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "12baa90f412362136a0177ff",
+    "timestamp": "2026-01-27T12:29:15.339Z",
+    "phase": "techlead",
+    "epicId": "epic-dashboard",
+    "savedAt": "2026-01-27T12:29:15.339Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-dashboard",
+    "storiesCount": 7,
+    "architecture": "## Architecture Overview\n\nThe Dashboard & Step Tracking Module follows **Clean Architecture** with **BLoC** state management, consistent with the existing auth feature.\n\n### Layer Structure\n\n```\nlib/features/dashboard/\n├── domain/                    # Business Logic Layer\n│   ├── entities/              # Pure Dart classes (StepRecord, StepStats)\n│   │   ├── step_record.dart\n│   │   └── step_stats.dart\n│   ├── repositories/          # Abstract interfaces\n│   │   └── steps_repository.dart\n│   └── usecases/             # Single-purpose operations\n│       ├── get_today_steps_usecase.dart\n│       ├── get_weekly_trend_usecase.dart\n│       ├── get_hourly_peaks_usecase.dart\n│       └── record_steps_usecase.dart\n├── data/                      # Data Access Layer\n│   ├── models/               # JSON serializable DTOs\n│   │   ├── step_model.dart\n│   │   ├── step_stats_model.dart\n│   │   ├── weekly_trend_model.dart\n│   │   └── hourly_peak_model.dart\n│   ├── datasources/          # API & Cache access\n│   │   ├── steps_remote_datasource.dart\n│   │   └── steps_local_datasource.dart\n│   └── repositories/         # Interface implementations\n│       └── steps_repository_impl.dart\n└── presentation/              # UI Layer\n    ├── bloc/                 # State management\n    │   ├── dashboard_bloc.dart\n    │   ├── dashboard_event.dart\n    │   └── dashboard_state.dart\n    ├── pages/                # Screen widgets\n    │   └── dashboard_page.dart\n    └── widgets/              # Reusable components\n        ├── step_counter_card.dart\n        ├── weekly_chart.dart\n        ├── hourly_chart.dart\n        ├── stats_summary_card.dart\n        └── activity_history_list.dart\n```\n\n### Data Flow\n\n```\nUI (DashboardPage) \n    → BLoC (DashboardBloc) \n    → UseCase (GetTodayStepsUseCase)\n    → Repository (StepsRepositoryImpl)\n    → DataSource (StepsRemoteDatasource / StepsLocalDatasource)\n    → API / Cache\n```\n\n### Backend API Integration\n\n| Endpoint | Method | Response | Flutter Usage |\n|----------|--------|----------|---------------|\n| /steps/today | GET | {total, date} | GetTodayStepsUseCase |\n| /steps/weekly | GET | {trend: [{date, total}]} | GetWeeklyTrendUseCase |\n| /steps/hourly-peaks | GET | {peaks: [{hour, total}]} | GetHourlyPeaksUseCase |\n| /steps/stats | GET | {today, week, month, allTime} | StepStats entity |\n| /steps | POST | {step: {...}} | RecordStepsUseCase |\n\n### Offline Support Strategy\n\nThe StepsRepositoryImpl implements a **cache-first-then-network** pattern:\n1. Try remote API call\n2. On success: cache data locally, return fresh data\n3. On NetworkException: return cached data\n4. On no cache: propagate error\n\n### SOLID Compliance\n\n- **SRP**: Each use case handles one operation\n- **OCP**: New datasources can be added without modifying repository\n- **LSP**: Models extend entities maintaining contracts\n- **ISP**: StepsRepository has focused methods\n- **DIP**: BLoC depends on use cases (abstractions), not implementations",
+    "stories": [
+      {
+        "id": "epic-dashboard-story-1",
+        "title": "Create domain layer entities and repository interface in lib/features/dashboard/domain/",
+        "description": "## Description\nCreate the domain layer foundation for the dashboard feature including entities and repository interface.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/features/auth/domain/entities/user.dart`, `lib/features/auth/domain/repositories/auth_repository.dart`\n- Create:\n  - `lib/features/dashboard/domain/entities/step_record.dart`\n  - `lib/features/dashboard/domain/entities/step_stats.dart`\n  - `lib/features/dashboard/domain/repositories/steps_repository.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow User entity pattern from `lib/features/auth/domain/entities/user.dart`\n- Use Equatable for entity equality\n- Follow AuthRepository pattern from `lib/features/auth/domain/repositories/auth_repository.dart`\n- Repository is abstract interface class\n\n📦 **REQUIRED ENTITIES:**\n\n**StepRecord entity:**\n```dart\nclass StepRecord extends Equatable {\n  final String id;\n  final int count;\n  final String source; // 'native', 'manual', 'web'\n  final String date; // YYYY-MM-DD\n  final int hour; // 0-23\n  final DateTime timestamp;\n}\n```\n\n**StepStats entity:**\n```dart\nclass StepStats extends Equatable {\n  final int today;\n  final int week;\n  final int month;\n  final int allTime;\n  final List<DailySteps> weeklyTrend; // [{date, total}]\n  final List<HourlySteps> hourlyPeaks; // [{hour, total}]\n}\n\nclass DailySteps extends Equatable {\n  final String date;\n  final int total;\n}\n\nclass HourlySteps extends Equatable {\n  final int hour;\n  final int total;\n}\n```\n\n**StepsRepository interface:**\n```dart\nabstract interface class StepsRepository {\n  Future<int> getTodaySteps();\n  Future<List<DailySteps>> getWeeklyTrend();\n  Future<List<HourlySteps>> getHourlyPeaks({String? date});\n  Future<StepStats> getStats();\n  Future<StepRecord> recordSteps({required int count, required String source});\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT add JSON serialization in domain entities\n- DO NOT import data layer classes\n- DO NOT add implementation details in entities\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter analyze lib/features/dashboard/domain/\n```",
+        "epicId": "epic-dashboard",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/auth/domain/repositories/auth_repository.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/domain/entities/step_record.dart",
+          "lib/features/dashboard/domain/entities/step_stats.dart",
+          "lib/features/dashboard/domain/repositories/steps_repository.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given domain layer files are created, When flutter analyze runs, Then no errors occur",
+          "Given StepRecord entity, When created with required fields, Then all fields are accessible and equatable works",
+          "Given StepStats entity, When created with stats and trends, Then all nested entities work correctly",
+          "Given StepsRepository interface, When read, Then all 5 methods are defined with proper return types"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-2",
+        "title": "Create data layer models with JSON serialization in lib/features/dashboard/data/models/",
+        "description": "## Description\nCreate data models that extend domain entities and add JSON serialization for API communication.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/data/models/user_model.dart`, `lib/features/dashboard/domain/entities/step_record.dart`, `lib/features/dashboard/domain/entities/step_stats.dart`\n- Create:\n  - `lib/features/dashboard/data/models/step_model.dart`\n  - `lib/features/dashboard/data/models/step_stats_model.dart`\n  - `lib/features/dashboard/data/models/weekly_trend_model.dart`\n  - `lib/features/dashboard/data/models/hourly_peak_model.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow UserModel pattern from `lib/features/auth/data/models/user_model.dart`\n- Models extend domain entities\n- Implement `fromJson(Map<String, dynamic>)` factory constructor\n- Implement `toJson()` method\n- Implement `copyWith()` method\n\n📦 **REQUIRED MODELS:**\n\n**StepModel** (extends StepRecord):\n```dart\nfactory StepModel.fromJson(Map<String, dynamic> json) {\n  return StepModel(\n    id: json['_id'] as String? ?? json['id'] as String? ?? '',\n    count: json['count'] as int? ?? 0,\n    source: json['source'] as String? ?? 'manual',\n    date: json['date'] as String? ?? '',\n    hour: json['hour'] as int? ?? 0,\n    timestamp: DateTime.parse(json['timestamp'] as String),\n  );\n}\n```\n\n**WeeklyTrendModel** (extends DailySteps):\n```dart\nfactory WeeklyTrendModel.fromJson(Map<String, dynamic> json) {\n  return WeeklyTrendModel(\n    date: json['date'] as String,\n    total: json['total'] as int,\n  );\n}\n```\n\n**HourlyPeakModel** (extends HourlySteps):\n```dart\nfactory HourlyPeakModel.fromJson(Map<String, dynamic> json) {\n  return HourlyPeakModel(\n    hour: json['hour'] as int,\n    total: json['total'] as int,\n  );\n}\n```\n\n**StepStatsModel** (extends StepStats):\n- Parse nested `weeklyTrend` as `List<WeeklyTrendModel>`\n- Parse nested `hourlyPeaks` as `List<HourlyPeakModel>`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use dynamic types in fromJson\n- DO NOT forget null safety with `as Type?`\n- DO NOT hardcode default values without fallbacks\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter analyze lib/features/dashboard/data/models/\n```",
+        "epicId": "epic-dashboard",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/data/models/user_model.dart",
+          "lib/features/dashboard/domain/entities/step_record.dart",
+          "lib/features/dashboard/domain/entities/step_stats.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/data/models/step_model.dart",
+          "lib/features/dashboard/data/models/step_stats_model.dart",
+          "lib/features/dashboard/data/models/weekly_trend_model.dart",
+          "lib/features/dashboard/data/models/hourly_peak_model.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepModel, When fromJson is called with valid API response, Then model is created correctly",
+          "Given WeeklyTrendModel, When parsing backend response {date, total}, Then fields map correctly",
+          "Given HourlyPeakModel, When parsing backend response {hour, total}, Then fields map correctly",
+          "Given StepStatsModel, When parsing full stats response, Then nested lists are parsed correctly"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-3",
+        "title": "Create datasources and repository implementation in lib/features/dashboard/data/",
+        "description": "## Description\nCreate remote datasource for API calls, local datasource for caching, and repository implementation coordinating both.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/data/datasources/auth_remote_datasource.dart`, `lib/features/auth/data/repositories/auth_repository_impl.dart`, `lib/core/network/api_client.dart`, `lib/core/network/api_endpoints.dart`\n- Modify: `lib/core/network/api_endpoints.dart` (add steps endpoints)\n- Create:\n  - `lib/features/dashboard/data/datasources/steps_remote_datasource.dart`\n  - `lib/features/dashboard/data/datasources/steps_local_datasource.dart`\n  - `lib/features/dashboard/data/repositories/steps_repository_impl.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow AuthRemoteDatasource pattern for remote datasource\n- Use ApiClient from `lib/core/network/api_client.dart`\n- Follow AuthRepositoryImpl pattern for repository\n- Use SharedPreferences for local caching (add to pubspec.yaml if needed)\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**Add to ApiEndpoints class:**\n```dart\n// Steps endpoints\nstatic const String stepsRecord = '/steps';\nstatic const String stepsToday = '/steps/today';\nstatic const String stepsWeekly = '/steps/weekly';\nstatic const String stepsHourlyPeaks = '/steps/hourly-peaks';\nstatic const String stepsStats = '/steps/stats';\n```\n\n**StepsRemoteDatasource interface & impl:**\n- `getTodaySteps()` → GET /steps/today → returns `{total, date}`\n- `getWeeklyTrend()` → GET /steps/weekly → returns `{trend: [...]}`\n- `getHourlyPeaks(date)` → GET /steps/hourly-peaks?date= → returns `{peaks: [...]}`\n- `getStats()` → GET /steps/stats → returns `{today, week, month, allTime}`\n- `recordSteps(count, source)` → POST /steps → returns `{step: {...}}`\n\n**StepsLocalDatasource:**\n- Cache today's steps, weekly trend, hourly peaks in SharedPreferences\n- Implement `cacheSteps()`, `getCachedSteps()`, `clearCache()`\n- Use JSON encoding for complex objects\n\n**StepsRepositoryImpl:**\n- Try remote first, cache results\n- If offline (NetworkException), return cached data\n- Coordinate between remote and local datasources\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use ApiClient directly in repository (use datasource)\n- DO NOT ignore errors from API calls\n- DO NOT forget to handle null responses\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter analyze lib/features/dashboard/data/ && flutter analyze lib/core/network/api_endpoints.dart\n```",
+        "epicId": "epic-dashboard",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-dashboard-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+          "lib/features/auth/data/repositories/auth_repository_impl.dart",
+          "lib/core/network/api_client.dart",
+          "lib/core/network/api_endpoints.dart"
+        ],
+        "filesToModify": [
+          "lib/core/network/api_endpoints.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
+          "lib/features/dashboard/data/datasources/steps_local_datasource.dart",
+          "lib/features/dashboard/data/repositories/steps_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepsRemoteDatasource, When calling getTodaySteps, Then API /steps/today is called correctly",
+          "Given StepsLocalDatasource, When caching data, Then data persists in SharedPreferences",
+          "Given StepsRepositoryImpl online, When fetching data, Then remote is used and cached",
+          "Given StepsRepositoryImpl offline, When NetworkException occurs, Then cached data is returned",
+          "Given ApiEndpoints, When steps constants added, Then all 5 endpoint paths are defined"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-4",
+        "title": "Create use cases for dashboard operations in lib/features/dashboard/domain/usecases/",
+        "description": "## Description\nCreate use case classes for each dashboard operation following Single Responsibility Principle.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/domain/usecases/login_usecase.dart`, `lib/features/dashboard/domain/repositories/steps_repository.dart`\n- Create:\n  - `lib/features/dashboard/domain/usecases/get_today_steps_usecase.dart`\n  - `lib/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart`\n  - `lib/features/dashboard/domain/usecases/get_hourly_peaks_usecase.dart`\n  - `lib/features/dashboard/domain/usecases/record_steps_usecase.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow LoginUseCase pattern from `lib/features/auth/domain/usecases/login_usecase.dart`\n- Each use case has single call() method\n- Use Params classes with Equatable for inputs\n- Depend on StepsRepository interface (DIP)\n\n📦 **REQUIRED USE CASES:**\n\n**GetTodayStepsUseCase:**\n```dart\nclass GetTodayStepsUseCase {\n  final StepsRepository _repository;\n  GetTodayStepsUseCase({required StepsRepository repository}) : _repository = repository;\n  Future<int> call() => _repository.getTodaySteps();\n}\n```\n\n**GetWeeklyTrendUseCase:**\n```dart\nclass GetWeeklyTrendUseCase {\n  final StepsRepository _repository;\n  GetWeeklyTrendUseCase({required StepsRepository repository}) : _repository = repository;\n  Future<List<DailySteps>> call() => _repository.getWeeklyTrend();\n}\n```\n\n**GetHourlyPeaksUseCase:**\n```dart\nclass HourlyPeaksParams extends Equatable {\n  final String? date;\n  const HourlyPeaksParams({this.date});\n  @override List<Object?> get props => [date];\n}\n\nclass GetHourlyPeaksUseCase {\n  final StepsRepository _repository;\n  GetHourlyPeaksUseCase({required StepsRepository repository}) : _repository = repository;\n  Future<List<HourlySteps>> call(HourlyPeaksParams params) => \n    _repository.getHourlyPeaks(date: params.date);\n}\n```\n\n**RecordStepsUseCase:**\n```dart\nclass RecordStepsParams extends Equatable {\n  final int count;\n  final String source;\n  const RecordStepsParams({required this.count, required this.source});\n  @override List<Object?> get props => [count, source];\n}\n\nclass RecordStepsUseCase {\n  final StepsRepository _repository;\n  RecordStepsUseCase({required StepsRepository repository}) : _repository = repository;\n  Future<StepRecord> call(RecordStepsParams params) => \n    _repository.recordSteps(count: params.count, source: params.source);\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT inject repository implementation (use interface)\n- DO NOT add business logic beyond repository delegation\n- DO NOT use multiple responsibilities in one use case\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter analyze lib/features/dashboard/domain/usecases/\n```",
+        "epicId": "epic-dashboard",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-dashboard-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/usecases/login_usecase.dart",
+          "lib/features/dashboard/domain/repositories/steps_repository.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/domain/usecases/get_today_steps_usecase.dart",
+          "lib/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart",
+          "lib/features/dashboard/domain/usecases/get_hourly_peaks_usecase.dart",
+          "lib/features/dashboard/domain/usecases/record_steps_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GetTodayStepsUseCase, When called, Then returns int from repository",
+          "Given GetWeeklyTrendUseCase, When called, Then returns List<DailySteps> from repository",
+          "Given GetHourlyPeaksUseCase with date param, When called, Then passes date to repository",
+          "Given RecordStepsUseCase with count and source, When called, Then returns StepRecord"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-5",
+        "title": "Create DashboardBloc with events and states in lib/features/dashboard/presentation/bloc/",
+        "description": "## Description\nCreate BLoC for dashboard state management with events, states, and event handlers.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/presentation/bloc/auth_bloc.dart`, `lib/features/auth/presentation/bloc/auth_event.dart`, `lib/features/auth/presentation/bloc/auth_state.dart`\n- Create:\n  - `lib/features/dashboard/presentation/bloc/dashboard_bloc.dart`\n  - `lib/features/dashboard/presentation/bloc/dashboard_event.dart`\n  - `lib/features/dashboard/presentation/bloc/dashboard_state.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow AuthBloc pattern from `lib/features/auth/presentation/bloc/auth_bloc.dart`\n- Use sealed classes for events and states\n- Inject use cases via constructor\n- Handle errors with try/catch emitting error states\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**DashboardEvent (dashboard_event.dart):**\n```dart\nsealed class DashboardEvent extends Equatable {\n  const DashboardEvent();\n  @override List<Object?> get props => [];\n}\n\nfinal class DashboardLoadRequested extends DashboardEvent {\n  const DashboardLoadRequested();\n}\n\nfinal class DashboardRefreshRequested extends DashboardEvent {\n  const DashboardRefreshRequested();\n}\n\nfinal class DashboardRecordStepsRequested extends DashboardEvent {\n  final int count;\n  final String source;\n  const DashboardRecordStepsRequested({required this.count, required this.source});\n  @override List<Object?> get props => [count, source];\n}\n\nfinal class DashboardHourlyPeaksRequested extends DashboardEvent {\n  final String? date;\n  const DashboardHourlyPeaksRequested({this.date});\n  @override List<Object?> get props => [date];\n}\n```\n\n**DashboardState (dashboard_state.dart):**\n```dart\nsealed class DashboardState extends Equatable {\n  const DashboardState();\n  @override List<Object?> get props => [];\n}\n\nfinal class DashboardInitial extends DashboardState {\n  const DashboardInitial();\n}\n\nfinal class DashboardLoading extends DashboardState {\n  const DashboardLoading();\n}\n\nfinal class DashboardLoaded extends DashboardState {\n  final int todaySteps;\n  final List<DailySteps> weeklyTrend;\n  final List<HourlySteps> hourlyPeaks;\n  final StepStats? stats;\n  const DashboardLoaded({required this.todaySteps, required this.weeklyTrend, required this.hourlyPeaks, this.stats});\n  @override List<Object?> get props => [todaySteps, weeklyTrend, hourlyPeaks, stats];\n}\n\nfinal class DashboardError extends DashboardState {\n  final String message;\n  const DashboardError({required this.message});\n  @override List<Object?> get props => [message];\n}\n```\n\n**DashboardBloc (dashboard_bloc.dart):**\n- Inject all 4 use cases via constructor\n- Handle DashboardLoadRequested: fetch today, weekly, hourly in parallel\n- Handle DashboardRefreshRequested: same as load but for pull-to-refresh\n- Handle DashboardRecordStepsRequested: record then reload\n- Handle DashboardHourlyPeaksRequested: fetch hourly for specific date\n- Convert AppException to user-friendly messages (follow AuthBloc pattern)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use repository directly (use use cases)\n- DO NOT forget to emit loading state before async operations\n- DO NOT swallow exceptions without emitting error state\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter analyze lib/features/dashboard/presentation/bloc/\n```",
+        "epicId": "epic-dashboard",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/bloc/auth_bloc.dart",
+          "lib/features/auth/presentation/bloc/auth_event.dart",
+          "lib/features/auth/presentation/bloc/auth_state.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_state.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given DashboardBloc, When DashboardLoadRequested, Then emits Loading then Loaded with data",
+          "Given DashboardBloc, When API error occurs, Then emits DashboardError with message",
+          "Given DashboardBloc, When DashboardRecordStepsRequested, Then records steps and reloads",
+          "Given DashboardState, When DashboardLoaded created, Then all fields are accessible"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-6",
+        "title": "Create dashboard UI widgets in lib/features/dashboard/presentation/widgets/",
+        "description": "## Description\nCreate reusable dashboard widgets including step counter card, charts, and activity list using fl_chart.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/shared/widgets/app_card.dart`, `lib/shared/widgets/loading_indicator.dart`\n- Modify: `pubspec.yaml` (add fl_chart dependency)\n- Create:\n  - `lib/features/dashboard/presentation/widgets/step_counter_card.dart`\n  - `lib/features/dashboard/presentation/widgets/weekly_chart.dart`\n  - `lib/features/dashboard/presentation/widgets/hourly_chart.dart`\n  - `lib/features/dashboard/presentation/widgets/stats_summary_card.dart`\n  - `lib/features/dashboard/presentation/widgets/activity_history_list.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use AppCard from `lib/shared/widgets/app_card.dart` as container\n- Use fl_chart BarChart for weekly and hourly charts\n- Use AnimatedBuilder for smooth step counter animations\n- Follow Material 3 design guidelines\n\n📦 **REQUIRED WIDGETS:**\n\n**Add to pubspec.yaml dependencies:**\n```yaml\nfl_chart: ^0.68.0\nshared_preferences: ^2.2.2\n```\n\n**StepCounterCard:**\n- Animated circular progress showing today's steps vs goal (default 10000)\n- Large center number with step count\n- Percentage text below\n- Uses AnimatedBuilder with Tween for smooth animation\n- Accepts `steps: int`, `goal: int` parameters\n\n**WeeklyChart:**\n- BarChart showing 7 days of data\n- X-axis: day names (Mon-Sun)\n- Y-axis: step count\n- Highlight today's bar with different color\n- Accepts `data: List<DailySteps>` parameter\n\n**HourlyChart:**\n- BarChart showing 24 hours\n- X-axis: hours (0-23)\n- Y-axis: step count\n- Highlight current hour\n- Accepts `data: List<HourlySteps>` parameter\n\n**StatsSummaryCard:**\n- Grid with 4 cells: Today, Week, Month, All-Time\n- Each cell shows icon + value + label\n- Accepts `stats: StepStats` parameter\n\n**ActivityHistoryList:**\n- ListView of recent step records\n- Each item shows: count, source icon, time ago\n- Accepts `records: List<StepRecord>` parameter\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use placeholder text like \"Coming Soon\"\n- DO NOT create empty widgets without functionality\n- DO NOT hardcode colors (use Theme.of(context))\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter pub get && flutter analyze lib/features/dashboard/presentation/widgets/\n```",
+        "epicId": "epic-dashboard",
+        "priority": 6,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-dashboard-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/loading_indicator.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/dashboard/presentation/widgets/step_counter_card.dart",
+          "lib/features/dashboard/presentation/widgets/weekly_chart.dart",
+          "lib/features/dashboard/presentation/widgets/hourly_chart.dart",
+          "lib/features/dashboard/presentation/widgets/stats_summary_card.dart",
+          "lib/features/dashboard/presentation/widgets/activity_history_list.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepCounterCard with 5000/10000 steps, When rendered, Then shows animated 50% progress",
+          "Given WeeklyChart with 7 days data, When rendered, Then displays bar chart with correct labels",
+          "Given HourlyChart with hourly data, When rendered, Then displays 24-hour bar chart",
+          "Given StatsSummaryCard with stats, When rendered, Then shows 4 stat cells with values",
+          "Given pubspec.yaml, When fl_chart added, Then flutter pub get succeeds"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-7",
+        "title": "Create DashboardPage and integrate with router in lib/features/dashboard/presentation/pages/",
+        "description": "## Description\nCreate the main DashboardPage composing all widgets and integrate with app router and DI container.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/presentation/pages/login_page.dart`, `lib/core/router/app_router.dart`, `lib/core/di/injection_container.dart`\n- Modify:\n  - `lib/core/di/injection_container.dart` (register dashboard dependencies)\n  - `lib/core/router/app_router.dart` (replace placeholder with DashboardPage)\n- Create:\n  - `lib/features/dashboard/presentation/pages/dashboard_page.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow LoginPage pattern for BlocProvider/BlocBuilder usage\n- Use RefreshIndicator for pull-to-refresh\n- Use LoadingIndicator from shared widgets\n- Follow DI registration pattern from injection_container.dart\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**DashboardPage (dashboard_page.dart):**\n```dart\nclass DashboardPage extends StatelessWidget {\n  const DashboardPage({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Dashboard')),\n      body: BlocBuilder<DashboardBloc, DashboardState>(\n        builder: (context, state) {\n          return switch (state) {\n            DashboardInitial() => const LoadingIndicator(),\n            DashboardLoading() => const LoadingIndicator(),\n            DashboardError(:final message) => _ErrorView(message: message, onRetry: () => ...),\n            DashboardLoaded(:final todaySteps, :final weeklyTrend, :final hourlyPeaks, :final stats) =>\n              RefreshIndicator(\n                onRefresh: () async => context.read<DashboardBloc>().add(const DashboardRefreshRequested()),\n                child: SingleChildScrollView(\n                  padding: const EdgeInsets.all(16),\n                  child: Column(\n                    children: [\n                      StepCounterCard(steps: todaySteps, goal: 10000),\n                      const SizedBox(height: 16),\n                      if (stats != null) StatsSummaryCard(stats: stats),\n                      const SizedBox(height: 16),\n                      AppCard(child: WeeklyChart(data: weeklyTrend)),\n                      const SizedBox(height: 16),\n                      AppCard(child: HourlyChart(data: hourlyPeaks)),\n                    ],\n                  ),\n                ),\n              ),\n          };\n        },\n      ),\n    );\n  }\n}\n```\n\n**Update injection_container.dart:**\nAdd after Auth Feature section:\n```dart\n// ============================================================\n// Dashboard Feature\n// ============================================================\n\n// Data Sources\nsl.registerLazySingleton<StepsRemoteDatasource>(\n  () => StepsRemoteDatasourceImpl(client: sl<ApiClient>()),\n);\nsl.registerLazySingleton<StepsLocalDatasource>(\n  () => StepsLocalDatasourceImpl(),\n);\n\n// Repositories\nsl.registerLazySingleton<StepsRepository>(\n  () => StepsRepositoryImpl(\n    remoteDatasource: sl<StepsRemoteDatasource>(),\n    localDatasource: sl<StepsLocalDatasource>(),\n  ),\n);\n\n// Use Cases\nsl.registerLazySingleton(() => GetTodayStepsUseCase(repository: sl<StepsRepository>()));\nsl.registerLazySingleton(() => GetWeeklyTrendUseCase(repository: sl<StepsRepository>()));\nsl.registerLazySingleton(() => GetHourlyPeaksUseCase(repository: sl<StepsRepository>()));\nsl.registerLazySingleton(() => RecordStepsUseCase(repository: sl<StepsRepository>()));\n\n// Blocs\nsl.registerFactory<DashboardBloc>(\n  () => DashboardBloc(\n    getTodayStepsUseCase: sl<GetTodayStepsUseCase>(),\n    getWeeklyTrendUseCase: sl<GetWeeklyTrendUseCase>(),\n    getHourlyPeaksUseCase: sl<GetHourlyPeaksUseCase>(),\n    recordStepsUseCase: sl<RecordStepsUseCase>(),\n  ),\n);\n```\n\n**Update app_router.dart:**\nReplace dashboard placeholder route with:\n```dart\nGoRoute(\n  path: RouteNames.dashboard,\n  name: 'dashboard',\n  builder: (context, state) => BlocProvider(\n    create: (_) => sl<DashboardBloc>()..add(const DashboardLoadRequested()),\n    child: const DashboardPage(),\n  ),\n),\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT forget to add imports for new files\n- DO NOT create BLoC directly (use sl<DashboardBloc>())\n- DO NOT forget to dispatch initial load event\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-12baa90f412362136a0177ff/app-pasos-frontend-flutter && flutter analyze lib/features/dashboard/presentation/pages/ && flutter analyze lib/core/\n```",
+        "epicId": "epic-dashboard",
+        "priority": 7,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-3",
+          "epic-dashboard-story-5",
+          "epic-dashboard-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/pages/login_page.dart",
+          "lib/core/router/app_router.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/dashboard/presentation/pages/dashboard_page.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given DashboardPage, When navigating to /dashboard, Then BLoC is provided and loads data",
+          "Given DashboardPage in loaded state, When pulling down, Then RefreshIndicator triggers reload",
+          "Given injection_container.dart, When app starts, Then all dashboard dependencies are registered",
+          "Given app_router.dart, When /dashboard route accessed, Then DashboardPage renders instead of placeholder"
+        ]
+      }
+    ]
+  }
+}
