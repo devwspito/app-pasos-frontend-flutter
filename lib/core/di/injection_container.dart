@@ -17,6 +17,15 @@ import 'package:app_pasos_frontend/features/auth/domain/usecases/login_usecase.d
 import 'package:app_pasos_frontend/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:app_pasos_frontend/features/auth/domain/usecases/register_usecase.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:app_pasos_frontend/features/dashboard/data/datasources/steps_remote_datasource.dart';
+import 'package:app_pasos_frontend/features/dashboard/data/repositories/steps_repository_impl.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/repositories/steps_repository.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_hourly_peaks_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_stats_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_today_steps_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/record_steps_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 /// Global service locator instance.
@@ -116,6 +125,48 @@ Future<void> initializeDependencies() async {
       logoutUseCase: sl<LogoutUseCase>(),
       getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),
       authRepository: sl<AuthRepository>(),
+    ),
+  );
+
+  // ============================================================
+  // Dashboard Feature
+  // ============================================================
+
+  // Data Sources
+  sl.registerLazySingleton<StepsRemoteDatasource>(
+    () => StepsRemoteDatasourceImpl(client: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<StepsRepository>(
+    () => StepsRepositoryImpl(datasource: sl<StepsRemoteDatasource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetTodayStepsUseCase>(
+    () => GetTodayStepsUseCase(repository: sl<StepsRepository>()),
+  );
+  sl.registerLazySingleton<GetStatsUseCase>(
+    () => GetStatsUseCase(repository: sl<StepsRepository>()),
+  );
+  sl.registerLazySingleton<GetWeeklyTrendUseCase>(
+    () => GetWeeklyTrendUseCase(repository: sl<StepsRepository>()),
+  );
+  sl.registerLazySingleton<GetHourlyPeaksUseCase>(
+    () => GetHourlyPeaksUseCase(repository: sl<StepsRepository>()),
+  );
+  sl.registerLazySingleton<RecordStepsUseCase>(
+    () => RecordStepsUseCase(repository: sl<StepsRepository>()),
+  );
+
+  // Blocs (Factory - new instance per use)
+  sl.registerFactory<DashboardBloc>(
+    () => DashboardBloc(
+      getTodayStepsUseCase: sl<GetTodayStepsUseCase>(),
+      getStatsUseCase: sl<GetStatsUseCase>(),
+      getWeeklyTrendUseCase: sl<GetWeeklyTrendUseCase>(),
+      getHourlyPeaksUseCase: sl<GetHourlyPeaksUseCase>(),
+      recordStepsUseCase: sl<RecordStepsUseCase>(),
     ),
   );
 }

@@ -11,6 +11,9 @@ import 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:app_pasos_frontend/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/register_page.dart';
+import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
+import 'package:app_pasos_frontend/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -66,9 +69,9 @@ abstract final class AppRouter {
     GoRoute(
       path: RouteNames.dashboard,
       name: 'dashboard',
-      builder: (context, state) => const _PlaceholderScreen(
-        routeName: 'Dashboard',
-        icon: Icons.dashboard,
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<DashboardBloc>()..add(const DashboardLoadRequested()),
+        child: const DashboardPage(),
       ),
     ),
     GoRoute(
