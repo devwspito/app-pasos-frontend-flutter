@@ -1,0 +1,90 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "193cc61ae3eeaf12d20b2316",
+    "timestamp": "2026-01-27T10:41:53.646Z",
+    "phase": "techlead",
+    "epicId": "epic-platform-config",
+    "savedAt": "2026-01-27T10:41:53.646Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-platform-config",
+    "storiesCount": 3,
+    "architecture": "## Platform Configuration Architecture\n\n### Overview\nThis epic configures native iOS and Android platform permissions for health data access, specifically for step counting functionality. The architecture follows platform-specific best practices for HealthKit (iOS) and Health Connect (Android).\n\n### iOS HealthKit Configuration\n- **Entitlements File**: `ios/Runner/Runner.entitlements` declares HealthKit capability with background delivery support\n- **Info.plist**: Contains user-facing privacy descriptions (NSHealthShareUsageDescription, NSHealthUpdateUsageDescription) explaining why step data access is needed\n- **Minimum iOS Version**: 12.0 (already configured, HealthKit available since iOS 8)\n\n### Android Health Connect Configuration  \n- **Minimum SDK**: 28 (Android 9 Pie) - Required for Health Connect compatibility\n- **Permissions**: READ_STEPS, WRITE_STEPS, ACTIVITY_RECOGNITION, POST_NOTIFICATIONS\n- **Health Connect**: Modern Android health API (replaces deprecated Google Fit)\n- **MainActivity**: Extended with Health Connect initialization\n\n### Security Considerations\n- Health data requires explicit user consent on both platforms\n- iOS enforces privacy descriptions at App Store review\n- Android Health Connect shows permission rationale UI\n- No sensitive health data is stored locally without encryption\n\n### Verification Commands\n```bash\n# Flutter\nflutter pub get\nflutter analyze\n\n# iOS verification\ncd ios && pod install && cd ..\nflutter build ios --no-codesign\n\n# Android verification  \nflutter build apk --debug\n```",
+    "stories": [
+      {
+        "id": "epic-platform-config-story-1",
+        "title": "Create iOS HealthKit entitlements and update Info.plist with health usage descriptions",
+        "description": "Configure iOS HealthKit capability by creating the entitlements file and adding required privacy usage descriptions to Info.plist.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: ios/Runner/AppDelegate.swift (understand iOS structure)\n- Modify: ios/Runner/Info.plist\n- Create: ios/Runner/Runner.entitlements\n\n🔧 **PATTERNS TO USE:**\n- Follow Apple's HealthKit entitlements XML format\n- Use standard plist XML format for Info.plist additions\n- Include both read and write health share descriptions\n\n📦 **REQUIRED CONTENT:**\n\n**Runner.entitlements must contain:**\n```xml\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>com.apple.developer.healthkit</key>\n    <true/>\n    <key>com.apple.developer.healthkit.access</key>\n    <array/>\n    <key>com.apple.developer.healthkit.background-delivery</key>\n    <true/>\n</dict>\n</plist>\n```\n\n**Info.plist must add these keys BEFORE the closing </dict> tag:**\n- NSHealthShareUsageDescription: \"App Pasos needs access to read your step count data to track your daily walking activity.\"\n- NSHealthUpdateUsageDescription: \"App Pasos needs access to write step data to keep your health records synchronized.\"\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT add keys outside the main <dict> block\n- Do NOT remove existing Info.plist entries\n- Do NOT use placeholder text like \"TODO\" or \"Coming Soon\"\n- Do NOT forget the background-delivery key for step tracking\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Runner.entitlements enables HealthKit capability with background delivery\n- Info.plist provides user-facing privacy descriptions for health data access\n- Descriptions must be clear and specific about step counting purpose\n\n🧪 **VERIFICATION:**\n- Verify entitlements file is valid XML: `xmllint --noout ios/Runner/Runner.entitlements`\n- Verify Info.plist is valid: `plutil -lint ios/Runner/Info.plist`\n- Run: `cd ios && pod install && cd ..` (if applicable)\n- Run: `flutter build ios --no-codesign` to verify iOS builds",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "ios/Runner/AppDelegate.swift"
+        ],
+        "filesToModify": [
+          "ios/Runner/Info.plist"
+        ],
+        "filesToCreate": [
+          "ios/Runner/Runner.entitlements"
+        ],
+        "acceptanceCriteria": [
+          "Given the iOS project, When Runner.entitlements is created, Then it contains HealthKit capability keys including com.apple.developer.healthkit and background-delivery",
+          "Given Info.plist exists, When health usage descriptions are added, Then NSHealthShareUsageDescription and NSHealthUpdateUsageDescription keys exist with meaningful user-facing text",
+          "Given all changes are complete, When running flutter build ios --no-codesign, Then the build succeeds without errors"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-2",
+        "title": "Add Health Connect permissions and intent declarations to AndroidManifest.xml",
+        "description": "Configure Android Health Connect permissions by adding the required permission declarations and intent filters to the AndroidManifest.xml file.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: android/app/build.gradle (understand current config)\n- Modify: android/app/src/main/AndroidManifest.xml\n- Create: (none)\n\n🔧 **PATTERNS TO USE:**\n- Add permissions BEFORE the <application> tag\n- Add intent-filter INSIDE the <activity> tag for Health Connect\n- Follow Android manifest XML conventions\n\n📦 **REQUIRED CONTENT:**\n\n**Add these permissions BEFORE <application> tag:**\n```xml\n<!-- Health Connect Permissions -->\n<uses-permission android:name=\"android.permission.health.READ_STEPS\"/>\n<uses-permission android:name=\"android.permission.health.WRITE_STEPS\"/>\n<uses-permission android:name=\"android.permission.ACTIVITY_RECOGNITION\"/>\n<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>\n```\n\n**Add this intent-filter INSIDE the MainActivity <activity> tag (after existing intent-filter):**\n```xml\n<!-- Health Connect Intent -->\n<intent-filter>\n    <action android:name=\"androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE\"/>\n</intent-filter>\n<meta-data\n    android:name=\"health_permissions\"\n    android:resource=\"@array/health_permissions\"/>\n```\n\n**Create health_permissions array - Add file android/app/src/main/res/values/health_permissions.xml:**\n```xml\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n    <array name=\"health_permissions\">\n        <item>android.permission.health.READ_STEPS</item>\n        <item>android.permission.health.WRITE_STEPS</item>\n    </array>\n</resources>\n```\n\nNOTE: The health_permissions.xml file creation is an exception since it's required for the manifest meta-data reference.\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT add permissions inside the <application> tag\n- Do NOT remove existing intent-filters\n- Do NOT use deprecated Google Fit permissions\n- Do NOT forget the meta-data for health_permissions\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Health Connect read/write step permissions declared\n- Activity recognition permission for background step detection\n- Intent filter allows Health Connect to show permissions rationale\n- Health permissions array resource created for manifest reference\n\n🧪 **VERIFICATION:**\n- Verify manifest is valid XML\n- Run: `flutter build apk --debug` to verify Android builds\n- Check no duplicate permissions in manifest",
+        "epicId": "epic-platform-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "android/app/build.gradle"
+        ],
+        "filesToModify": [
+          "android/app/src/main/AndroidManifest.xml"
+        ],
+        "filesToCreate": [
+          "android/app/src/main/res/values/health_permissions.xml"
+        ],
+        "acceptanceCriteria": [
+          "Given AndroidManifest.xml exists, When health permissions are added, Then READ_STEPS, WRITE_STEPS, ACTIVITY_RECOGNITION and POST_NOTIFICATIONS permissions are declared before the application tag",
+          "Given the MainActivity activity element, When Health Connect intent is added, Then androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE action is declared",
+          "Given health_permissions.xml is created, When manifest meta-data references it, Then the resource array contains READ_STEPS and WRITE_STEPS permissions",
+          "Given all changes are complete, When running flutter build apk --debug, Then the build succeeds without errors"
+        ]
+      },
+      {
+        "id": "epic-platform-config-story-3",
+        "title": "Update Android build.gradle minSdk to 28 and configure MainActivity for Health Connect",
+        "description": "Configure Android build.gradle with minimum SDK 28 (required for Health Connect) and update MainActivity.kt with Health Connect initialization.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: android/app/src/main/AndroidManifest.xml (understand app structure)\n- Modify: android/app/build.gradle\n- Modify: android/app/src/main/kotlin/com/example/pasos/app_pasos_frontend/MainActivity.kt\n- Create: (none)\n\n🔧 **PATTERNS TO USE:**\n- Use explicit minSdk = 28 instead of flutter.minSdkVersion\n- Follow FlutterActivity extension pattern in MainActivity\n- Keep existing package declaration and imports\n\n📦 **REQUIRED CHANGES:**\n\n**build.gradle - In defaultConfig block, change:**\n```groovy\ndefaultConfig {\n    applicationId = \"com.example.pasos.app_pasos_frontend\"\n    minSdk = 28  // Changed from flutter.minSdkVersion - Required for Health Connect\n    targetSdk = flutter.targetSdkVersion\n    versionCode = flutter.versionCode\n    versionName = flutter.versionName\n}\n```\n\n**MainActivity.kt - Replace entire content with:**\n```kotlin\npackage com.example.pasos.app_pasos_frontend\n\nimport android.os.Bundle\nimport io.flutter.embedding.android.FlutterActivity\n\nclass MainActivity: FlutterActivity() {\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        // Health Connect is available on Android 14+ natively\n        // For Android 9-13, Health Connect app must be installed from Play Store\n        // The health Flutter package handles the permission flow\n    }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use minSdk below 28 (Health Connect requirement)\n- Do NOT change the package name or applicationId\n- Do NOT remove the kotlin-android plugin\n- Do NOT add deprecated Google Fit imports\n- Do NOT use minSdkVersion = flutter.minSdkVersion (it's usually 21)\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- minSdk set to 28 to support Health Connect API\n- MainActivity extends FlutterActivity properly\n- Comments explain Health Connect availability\n- No breaking changes to existing build configuration\n\n🧪 **VERIFICATION:**\n- Run: `cd android && ./gradlew assembleDebug && cd ..` to verify Gradle build\n- Run: `flutter build apk --debug` to verify Flutter build\n- Verify minSdk is 28: `grep -r \"minSdk\" android/app/build.gradle`",
+        "epicId": "epic-platform-config",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "android/app/src/main/AndroidManifest.xml"
+        ],
+        "filesToModify": [
+          "android/app/build.gradle",
+          "android/app/src/main/kotlin/com/example/pasos/app_pasos_frontend/MainActivity.kt"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given android/app/build.gradle exists, When minSdk is updated, Then the value is explicitly set to 28 (not flutter.minSdkVersion)",
+          "Given MainActivity.kt exists, When Health Connect setup is added, Then the class properly extends FlutterActivity with onCreate override",
+          "Given all changes are complete, When running flutter build apk --debug, Then the build succeeds and targets API 28+"
+        ]
+      }
+    ]
+  }
+}
