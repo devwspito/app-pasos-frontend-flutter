@@ -31,6 +31,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   dio: ^5.4.0
   equatable: ^2.0.5
+  fl_chart: ^0.68.0
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.3

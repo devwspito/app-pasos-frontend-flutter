@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "79156fab43a45da56beb3069",
+    "timestamp": "2026-01-27T14:11:16.128Z",
+    "phase": "judge",
+    "epicId": "epic-dashboard",
+    "savedAt": "2026-01-27T14:11:16.128Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "techlead",
+    "entityId": "epic-dashboard",
+    "verdict": "approved",
+    "score": 70,
+    "feedback": "Judge output inconclusive - approved by default",
+    "issues": [],
+    "suggestions": []
+  }
+}
