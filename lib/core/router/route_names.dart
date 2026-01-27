@@ -40,4 +40,20 @@ abstract final class RouteNames {
 
   /// Forgot Password route - password recovery screen.
   static const String forgotPassword = '/forgot-password';
+
+  // ============================================================
+  // Sharing/Friends Routes
+  // ============================================================
+
+  /// Friends list route - displays the user's friends.
+  static const String friends = '/friends';
+
+  /// Friend requests route - displays pending friend requests.
+  static const String friendRequests = '/friends/requests';
+
+  /// Friend activity route - displays a friend's step statistics.
+  static const String friendActivity = '/friends/activity';
+
+  /// Add friend route - search and add new friends.
+  static const String addFriend = '/friends/add';
 }

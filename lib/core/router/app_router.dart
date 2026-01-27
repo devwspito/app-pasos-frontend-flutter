@@ -14,6 +14,13 @@ import 'package:app_pasos_frontend/features/auth/presentation/pages/register_pag
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/friend_search_bloc.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_bloc.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_event.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/pages/add_friend_page.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/pages/friend_activity_page.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/pages/friend_requests_page.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/pages/friends_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -96,6 +103,48 @@ abstract final class AppRouter {
       builder: (context, state) => BlocProvider(
         create: (_) => sl<AuthBloc>(),
         child: const ForgotPasswordPage(),
+      ),
+    ),
+    // ============================================================
+    // Sharing/Friends Routes
+    // ============================================================
+    GoRoute(
+      path: RouteNames.friends,
+      name: 'friends',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<SharingBloc>()..add(const SharingLoadRequested()),
+        child: const FriendsListPage(),
+      ),
+    ),
+    GoRoute(
+      path: RouteNames.friendRequests,
+      name: 'friendRequests',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<SharingBloc>()..add(const SharingLoadRequested()),
+        child: const FriendRequestsPage(),
+      ),
+    ),
+    GoRoute(
+      path: RouteNames.friendActivity,
+      name: 'friendActivity',
+      builder: (context, state) {
+        final friendId = state.uri.queryParameters['friendId'] ?? '';
+        return FriendActivityPage(friendId: friendId);
+      },
+    ),
+    GoRoute(
+      path: RouteNames.addFriend,
+      name: 'addFriend',
+      builder: (context, state) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => sl<FriendSearchBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<SharingBloc>(),
+          ),
+        ],
+        child: const AddFriendPage(),
       ),
     ),
   ];

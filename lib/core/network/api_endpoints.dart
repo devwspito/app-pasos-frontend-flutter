@@ -171,6 +171,58 @@ abstract final class ApiEndpoints {
   static const String stepsStats = '/steps/stats';
 
   // ============================================================
+  // Sharing/Friends Endpoints
+  // ============================================================
+
+  /// GET: Get all sharing relationships for the current user.
+  ///
+  /// Requires authentication header.
+  /// Response: `{ relationships: SharingRelationship[] }`
+  static const String sharingRelationships = '/sharing/relationships';
+
+  /// POST: Send a friend request.
+  ///
+  /// Requires authentication header.
+  /// Request body: `{ toUserId: string }`
+  /// Response: `{ relationship: SharingRelationship }`
+  static const String sharingRequest = '/sharing/request';
+
+  /// POST: Accept a friend request.
+  ///
+  /// Requires authentication header.
+  /// Request body: `{ relationshipId: string }`
+  /// Response: `{ relationship: SharingRelationship }`
+  static const String sharingAccept = '/sharing/accept';
+
+  /// POST: Reject a friend request.
+  ///
+  /// Requires authentication header.
+  /// Request body: `{ relationshipId: string }`
+  /// Response: `{ success: boolean }`
+  static const String sharingReject = '/sharing/reject';
+
+  /// POST: Revoke a sharing relationship.
+  ///
+  /// Requires authentication header.
+  /// Request body: `{ relationshipId: string }`
+  /// Response: `{ success: boolean }`
+  static const String sharingRevoke = '/sharing/revoke';
+
+  /// GET: Get step statistics for a specific friend.
+  ///
+  /// Requires authentication header.
+  /// Path: `/sharing/stats/{friendId}`
+  /// Response: `{ stats: FriendStats }`
+  static const String sharingStats = '/sharing/stats';
+
+  /// GET: Search for users to add as friends.
+  ///
+  /// Requires authentication header.
+  /// Query params: `{ query: string }`
+  /// Response: `{ users: SharedUser[] }`
+  static const String sharingSearch = '/sharing/search';
+
+  // ============================================================
   // Utility Methods
   // ============================================================
 
