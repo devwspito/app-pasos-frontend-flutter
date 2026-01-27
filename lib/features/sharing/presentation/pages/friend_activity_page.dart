@@ -4,8 +4,11 @@
 /// including their activity over different time periods.
 library;
 
+import 'package:app_pasos_frontend/core/di/injection_container.dart';
+import 'package:app_pasos_frontend/core/errors/app_exceptions.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/friend_stats.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/shared_user.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/get_friend_stats_usecase.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/widgets/friend_stats_card.dart';
 import 'package:app_pasos_frontend/shared/widgets/error_widget.dart';
 import 'package:app_pasos_frontend/shared/widgets/loading_indicator.dart';
@@ -13,11 +16,8 @@ import 'package:flutter/material.dart';
 
 /// Friend activity page displaying a friend's step statistics.
 ///
-/// Features:
-/// - Friend stats card with step data
-/// - Pull-to-refresh functionality
-/// - Activity feed placeholder for future expansion
-/// - Loading and error states
+/// Uses [GetFriendStatsUseCase] to fetch real data from the API.
+/// Supports pull-to-refresh and proper loading/error states.
 ///
 /// Example usage in router:
 /// ```dart
@@ -45,51 +45,97 @@ class FriendActivityPage extends StatefulWidget {
   State<FriendActivityPage> createState() => _FriendActivityPageState();
 }
 
+/// State for [FriendActivityPage].
+///
+/// Manages loading state, error handling, and data fetching
+/// using the [GetFriendStatsUseCase].
 class _FriendActivityPageState extends State<FriendActivityPage> {
+  /// The use case for fetching friend stats from the repository.
+  late final GetFriendStatsUseCase _getFriendStatsUseCase;
+
+  /// Current loading state.
   bool _isLoading = true;
+
+  /// Whether an error occurred.
   bool _hasError = false;
+
+  /// Error message to display.
   String _errorMessage = '';
+
+  /// The fetched friend stats.
   FriendStats? _stats;
+
+  /// The friend's user data derived from stats.
   SharedUser? _friend;
 
   @override
   void initState() {
     super.initState();
+    _getFriendStatsUseCase = sl<GetFriendStatsUseCase>();
     _loadFriendData();
   }
 
-  /// Loads friend data from the repository.
+  /// Loads friend data using the [GetFriendStatsUseCase].
   ///
-  /// In production, this would use a BLoC or fetch from repository.
+  /// Fetches real data from the API and updates the UI state accordingly.
   Future<void> _loadFriendData() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _hasError = false;
+      _errorMessage = '';
     });
 
     try {
-      // Simulate loading friend data
-      // In production, this would call the GetFriendStatsUseCase
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+      // Fetch real stats using the use case
+      final stats = await _getFriendStatsUseCase(friendId: widget.friendId);
 
-      // Create placeholder data
-      // In production, this comes from the API
+      if (!mounted) return;
+
       setState(() {
+        _stats = stats;
+        // Create user representation from the stats
         _friend = SharedUser(
-          id: widget.friendId,
-          name: 'Friend ${widget.friendId.length > 4 ? widget.friendId.substring(0, 4) : widget.friendId}',
-          email: 'friend@example.com',
-        );
-        _stats = FriendStats(
-          userId: widget.friendId,
-          todaySteps: 5234,
-          weekSteps: 38500,
-          monthSteps: 165000,
-          allTimeSteps: 1250000,
+          id: stats.userId,
+          name: 'Friend',
+          email: '',
         );
         _isLoading = false;
       });
+    } on NetworkException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.isNoConnection
+            ? 'No internet connection. Please check your network.'
+            : e.isTimeout
+                ? 'Connection timed out. Please try again.'
+                : 'Network error: ${e.message}';
+      });
+    } on ServerException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.statusCode == 404
+            ? 'Friend not found.'
+            : e.statusCode == 500
+                ? 'Server error. Please try again later.'
+                : 'Error: ${e.message}';
+      });
+    } on UnauthorizedException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.isTokenExpired
+            ? 'Your session has expired. Please log in again.'
+            : 'Unauthorized: ${e.message}';
+      });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _hasError = true;
@@ -112,6 +158,7 @@ class _FriendActivityPageState extends State<FriendActivityPage> {
     );
   }
 
+  /// Builds the main body content based on current state.
   Widget _buildBody(
     BuildContext context,
     ThemeData theme,
@@ -142,78 +189,140 @@ class _FriendActivityPageState extends State<FriendActivityPage> {
         padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          // Friend stats card
+          // Friend stats card with real data
           FriendStatsCard(
             friend: _friend!,
             stats: _stats!,
           ),
           const SizedBox(height: 24),
 
-          // Activity feed section header
-          Row(
-            children: [
-              Icon(
-                Icons.history,
-                size: 20,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Recent Activity',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Activity feed placeholder
-          _buildActivityFeedPlaceholder(context, colorScheme),
+          // Activity summary section
+          _buildActivitySummary(context, theme, colorScheme),
         ],
       ),
     );
   }
 
-  /// Builds a placeholder for the activity feed.
+  /// Builds the activity summary section.
   ///
-  /// This will be replaced with actual activity data in a future story.
-  Widget _buildActivityFeedPlaceholder(
+  /// Displays a summary of the friend's step activity with real data.
+  Widget _buildActivitySummary(
     BuildContext context,
+    ThemeData theme,
     ColorScheme colorScheme,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.history,
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Activity Summary',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Step breakdown
+            _buildStepRow(
+              context,
+              'Today',
+              _stats!.todaySteps,
+              Icons.today,
+              colorScheme.primary,
+            ),
+            const Divider(height: 24),
+            _buildStepRow(
+              context,
+              'This Week',
+              _stats!.weekSteps,
+              Icons.date_range,
+              colorScheme.secondary,
+            ),
+            const Divider(height: 24),
+            _buildStepRow(
+              context,
+              'This Month',
+              _stats!.monthSteps,
+              Icons.calendar_month,
+              colorScheme.tertiary,
+            ),
+            const Divider(height: 24),
+            _buildStepRow(
+              context,
+              'All Time',
+              _stats!.allTimeSteps,
+              Icons.timeline,
+              colorScheme.primary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds a row displaying step count with icon and label.
+  Widget _buildStepRow(
+    BuildContext context,
+    String label,
+    int steps,
+    IconData icon,
+    Color iconColor,
   ) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.timeline,
-            size: 48,
-            color: colorScheme.onSurfaceVariant,
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Activity Feed',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+          child: Icon(
+            icon,
+            size: 20,
+            color: iconColor,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Detailed activity history will be available soon.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
+        ),
+        Text(
+          _formatSteps(steps),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+
+  /// Formats step count with thousand separators.
+  String _formatSteps(int steps) {
+    if (steps >= 1000000) {
+      return '${(steps / 1000000).toStringAsFixed(1)}M';
+    } else if (steps >= 1000) {
+      return '${(steps / 1000).toStringAsFixed(1)}K';
+    }
+    return steps.toString();
   }
 }
