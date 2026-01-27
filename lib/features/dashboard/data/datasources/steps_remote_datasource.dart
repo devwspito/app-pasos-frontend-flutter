@@ -153,7 +153,7 @@ class StepsRemoteDatasourceImpl implements StepsRemoteDatasource {
     }
 
     // Handle { trend: [...] } response format
-    final trendList = data['trend'] ?? data['data'] ?? [];
+    final trendList = data['trend'] ?? data['data'] ?? <dynamic>[];
     return WeeklyTrendModel.fromJsonList(trendList);
   }
 
@@ -197,7 +197,7 @@ class StepsRemoteDatasourceImpl implements StepsRemoteDatasource {
     }
 
     // Handle { peaks: [...] } response format
-    final peaksList = data['peaks'] ?? data['data'] ?? [];
+    final peaksList = data['peaks'] ?? data['data'] ?? <dynamic>[];
     return HourlyPeakModel.fromJsonList(peaksList);
   }
 
