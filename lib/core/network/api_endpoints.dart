@@ -223,6 +223,62 @@ abstract final class ApiEndpoints {
   static const String sharingSearch = '/sharing/search';
 
   // ============================================================
+  // Goals Endpoints
+  // ============================================================
+
+  /// GET/POST: List all goals or create a new goal.
+  ///
+  /// GET: Returns list of user's group goals.
+  /// POST: Creates a new group goal.
+  /// Requires authentication header.
+  /// Response: `{ goals: GroupGoal[] }` for GET
+  /// Response: `{ goal: GroupGoal }` for POST
+  static const String goals = '/goals';
+
+  /// GET: Get detailed information about a specific goal.
+  ///
+  /// Requires authentication header.
+  /// Path: `/goals/{id}`
+  /// Response: `{ goal: GroupGoal }`
+  static const String goalDetails = '/goals/{id}';
+
+  /// GET: Get progress information for a specific goal.
+  ///
+  /// Requires authentication header.
+  /// Path: `/goals/{id}/progress`
+  /// Response: `{ progress: GoalProgress }`
+  static const String goalProgress = '/goals/{id}/progress';
+
+  /// POST: Invite a user to join a goal.
+  ///
+  /// Requires authentication header.
+  /// Path: `/goals/{id}/invite`
+  /// Request body: `{ userId: string }`
+  /// Response: `{ success: boolean }`
+  static const String goalInvite = '/goals/{id}/invite';
+
+  /// POST: Join a goal that the user has been invited to.
+  ///
+  /// Requires authentication header.
+  /// Path: `/goals/{id}/join`
+  /// Response: `{ success: boolean }`
+  static const String goalJoin = '/goals/{id}/join';
+
+  /// POST: Leave a goal that the user is a member of.
+  ///
+  /// Requires authentication header.
+  /// Path: `/goals/{id}/leave`
+  /// Response: `{ success: boolean }`
+  static const String goalLeave = '/goals/{id}/leave';
+
+  /// GET: Get rankings for a specific goal.
+  ///
+  /// Requires authentication header.
+  /// Path: `/goals/{id}/rankings`
+  /// Response: `{ rankings: MemberContribution[] }`
+  static const String goalRankings = '/goals/{id}/rankings';
+
+  // ============================================================
   // Utility Methods
   // ============================================================
 

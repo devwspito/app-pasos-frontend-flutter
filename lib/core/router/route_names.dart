@@ -56,4 +56,23 @@ abstract final class RouteNames {
 
   /// Add friend route - search and add new friends.
   static const String addFriend = '/friends/add';
+
+  // ============================================================
+  // Goals Routes
+  // ============================================================
+
+  /// Goals list route - displays the user's group goals.
+  static const String goals = '/goals';
+
+  /// Goal detail route - displays detailed information about a goal.
+  static const String goalDetail = '/goals/detail';
+
+  /// Create goal route - form for creating a new group goal.
+  static const String createGoal = '/goals/create';
+
+  /// Invite members route - search and invite users to a goal.
+  static const String inviteMembers = '/goals/invite';
+
+  /// Goal rankings route - displays member leaderboard for a goal.
+  static const String goalRankings = '/goals/rankings';
 }
