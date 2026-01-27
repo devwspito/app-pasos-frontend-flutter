@@ -140,6 +140,37 @@ abstract final class ApiEndpoints {
   static const String weeklySummary = '/statistics/weekly';
 
   // ============================================================
+  // Steps Data Endpoints
+  // ============================================================
+
+  /// POST: Record new steps.
+  ///
+  /// Request body: `{ count: number, source: string }`
+  /// Response: `{ step object }`
+  static const String stepsRecord = '/steps';
+
+  /// GET: Get today's total steps.
+  ///
+  /// Response: `{ today: number }`
+  static const String stepsToday = '/steps/today';
+
+  /// GET: Get weekly step trends.
+  ///
+  /// Response: `{ trend: [{ date: string, total: number }] }`
+  static const String stepsWeekly = '/steps/weekly';
+
+  /// GET: Get hourly peak data.
+  ///
+  /// Query params: `{ date?: string }` (YYYY-MM-DD format)
+  /// Response: `{ peaks: [{ hour: number, total: number }] }`
+  static const String stepsHourlyPeaks = '/steps/hourly-peaks';
+
+  /// GET: Get step statistics.
+  ///
+  /// Response: `{ today: number, week: number, month: number, allTime: number }`
+  static const String stepsStats = '/steps/stats';
+
+  // ============================================================
   // Utility Methods
   // ============================================================
 
