@@ -1,0 +1,22 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "323317759c9c31a85f289166",
+    "timestamp": "2026-01-27T21:41:15.977Z",
+    "phase": "judge",
+    "epicId": "epic-native-integration",
+    "savedAt": "2026-01-27T21:41:15.978Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "techlead",
+    "entityId": "epic-native-integration",
+    "verdict": "approved",
+    "score": 95,
+    "feedback": "Excellent architecture plan with verified file paths, correctly identified patterns from actual codebase, complete requirement coverage, and logical story dependencies",
+    "issues": [],
+    "suggestions": [
+      "Consider adding a note that lib/features/settings/ directory will be created for the first time in Story 5"
+    ]
+  }
+}
