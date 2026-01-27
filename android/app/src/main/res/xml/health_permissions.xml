@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Health Connect permissions configuration for the Pasos app.
+    This file defines which health data types the app can access.
+-->
+<permissions>
+    <permission-group android:name="android.permission-group.HEALTH">
+        <!-- Step count permissions for primary functionality -->
+        <permission android:name="android.permission.health.READ_STEPS"/>
+        <permission android:name="android.permission.health.WRITE_STEPS"/>
+
+        <!-- Additional health metrics for comprehensive tracking -->
+        <permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED"/>
+        <permission android:name="android.permission.health.READ_DISTANCE"/>
+    </permission-group>
+</permissions>
