@@ -5,8 +5,14 @@
 library;
 
 import 'package:app_pasos_frontend/core/constants/app_constants.dart';
+import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/route_names.dart';
+import 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:app_pasos_frontend/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:app_pasos_frontend/features/auth/presentation/pages/login_page.dart';
+import 'package:app_pasos_frontend/features/auth/presentation/pages/register_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 /// Main application router configuration.
@@ -44,17 +50,17 @@ abstract final class AppRouter {
     GoRoute(
       path: RouteNames.login,
       name: 'login',
-      builder: (context, state) => const _PlaceholderScreen(
-        routeName: 'Login',
-        icon: Icons.login,
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<AuthBloc>(),
+        child: const LoginPage(),
       ),
     ),
     GoRoute(
       path: RouteNames.register,
       name: 'register',
-      builder: (context, state) => const _PlaceholderScreen(
-        routeName: 'Register',
-        icon: Icons.person_add,
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<AuthBloc>(),
+        child: const RegisterPage(),
       ),
     ),
     GoRoute(
@@ -79,6 +85,14 @@ abstract final class AppRouter {
       builder: (context, state) => const _PlaceholderScreen(
         routeName: 'Settings',
         icon: Icons.settings,
+      ),
+    ),
+    GoRoute(
+      path: RouteNames.forgotPassword,
+      name: 'forgotPassword',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<AuthBloc>(),
+        child: const ForgotPasswordPage(),
       ),
     ),
   ];
@@ -156,6 +170,8 @@ class _PlaceholderScreen extends StatelessWidget {
         return RouteNames.profile;
       case 'Settings':
         return RouteNames.settings;
+      case 'ForgotPassword':
+        return RouteNames.forgotPassword;
       default:
         return '/unknown';
     }
