@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "193cc61ae3eeaf12d20b2316",
+    "timestamp": "2026-01-27T11:28:56.417Z",
+    "phase": "judge",
+    "storyId": "epic-ui-foundation-story-5",
+    "savedAt": "2026-01-27T11:28:56.417Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-ui-foundation-story-5",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
