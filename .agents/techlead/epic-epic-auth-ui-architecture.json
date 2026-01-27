@@ -1,0 +1,172 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "193cc61ae3eeaf12d20b2316",
+    "timestamp": "2026-01-27T11:33:23.600Z",
+    "phase": "techlead",
+    "epicId": "epic-auth-ui",
+    "savedAt": "2026-01-27T11:33:23.600Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-auth-ui",
+    "storiesCount": 5,
+    "architecture": "## Architecture Overview\n\n**Pattern**: Clean Architecture with Repository Pattern\n**State Management**: Provider (ChangeNotifier)\n**Dependency Injection**: GetIt (sl global instance)\n\n### Layer Structure:\n```\nlib/features/auth/\n├── domain/                    # Business Logic Layer\n│   ├── entities/              # Pure data classes (User)\n│   └── repositories/          # Abstract interfaces (IAuthRepository)\n├── data/                      # Data Layer\n│   ├── models/                # JSON serialization (UserModel, AuthTokensModel)\n│   ├── datasources/           # API calls (AuthRemoteDatasource)\n│   └── repositories/          # Interface implementations (AuthRepository)\n└── presentation/              # UI Layer\n    ├── providers/             # State management (AuthProvider)\n    ├── screens/               # Full pages (LoginScreen, etc.)\n    └── widgets/               # Reusable components (AuthFormField)\n```\n\n### Data Flow:\n```\nUI (Screen) → Provider → Repository → Datasource → API\n     ↑            ↑           ↑            ↑\n  Widgets    ChangeNotifier  Interface   ApiClient\n```\n\n### Key Integrations:\n- **ApiClient**: `sl<ApiClient>()` for HTTP with auth interceptors\n- **SecureStorage**: `sl<SecureStorageService>()` for JWT token persistence\n- **Validators**: `Validators.email()`, `Validators.password()` for form validation\n- **GoRouter**: Navigation with `context.go(RouteNames.xxx)`\n\n### Backend Contract:\n- POST /auth/login → `{ email, password }` → `{ user: { id, username, email }, tokens: { accessToken, refreshToken } }`\n- POST /auth/register → `{ username, email, password }` → same response\n- POST /auth/forgot-password → `{ email }` → `{ success, message }`",
+    "stories": [
+      {
+        "id": "epic-auth-ui-story-1",
+        "title": "Create User entity and IAuthRepository interface in lib/features/auth/domain/",
+        "description": "**Domain Layer Implementation**\n\nCreate the domain layer entities and repository interface following Clean Architecture principles.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/errors/app_exceptions.dart`, `lib/core/storage/secure_storage_service.dart`\n- Create: `lib/features/auth/domain/entities/user.dart`, `lib/features/auth/domain/repositories/i_auth_repository.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `equatable` package for entity equality (already in pubspec.yaml)\n- Use sealed `AppException` types for error handling from `lib/core/errors/app_exceptions.dart`\n- Follow existing code style with library declarations and documentation\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**User Entity** (`lib/features/auth/domain/entities/user.dart`):\n```dart\n/// User domain entity with id, username, email\n/// Extend Equatable for value equality\n/// Properties: id (String), username (String), email (String)\n```\n\n**IAuthRepository Interface** (`lib/features/auth/domain/repositories/i_auth_repository.dart`):\n```dart\n/// Abstract interface defining auth operations\n/// Methods:\n/// - Future<User> login(String email, String password)\n/// - Future<User> register(String username, String email, String password)\n/// - Future<void> logout()\n/// - Future<void> forgotPassword(String email)\n/// - Future<User?> getCurrentUser()\n/// - Future<bool> isAuthenticated()\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT include data-layer concerns (JSON parsing) in domain entities\n- Do NOT use concrete implementations in the interface\n- Do NOT import Flutter dependencies in domain layer\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/domain/\nflutter test --no-pub\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/errors/app_exceptions.dart",
+          "lib/core/storage/secure_storage_service.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/auth/domain/repositories/i_auth_repository.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the domain layer, when User entity is created, then it extends Equatable with id, username, email properties",
+          "Given IAuthRepository interface, when defined, then it has login, register, logout, forgotPassword, getCurrentUser, isAuthenticated methods",
+          "Given domain layer, when analyzed, then flutter analyze passes with no errors"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-2",
+        "title": "Create UserModel and AuthTokensModel in lib/features/auth/data/models/",
+        "description": "**Data Layer Models Implementation**\n\nCreate data models that handle JSON serialization/deserialization for API communication.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/domain/entities/user.dart` (from Story 1), `lib/core/network/api_endpoints.dart`\n- Create: `lib/features/auth/data/models/user_model.dart`, `lib/features/auth/data/models/auth_tokens_model.dart`\n\n🔧 **PATTERNS TO USE:**\n- Extend domain entity for UserModel\n- Use factory constructors `fromJson` and method `toJson`\n- Follow backend contract: `{ user: { id, username, email }, tokens: { accessToken, refreshToken } }`\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**UserModel** (`lib/features/auth/data/models/user_model.dart`):\n```dart\n/// Data model extending User entity\n/// factory UserModel.fromJson(Map<String, dynamic> json)\n/// Map<String, dynamic> toJson()\n/// factory UserModel.fromEntity(User user)\n```\n\n**AuthTokensModel** (`lib/features/auth/data/models/auth_tokens_model.dart`):\n```dart\n/// Model for JWT tokens with equatable\n/// Properties: accessToken (String), refreshToken (String)\n/// factory AuthTokensModel.fromJson(Map<String, dynamic> json)\n/// Map<String, dynamic> toJson()\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use dynamic types - specify concrete types\n- Do NOT hardcode field names - use constants if needed\n- Field names MUST match backend: `id` (not `_id`), `accessToken`, `refreshToken`\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/data/models/\nflutter test --no-pub\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-auth-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/core/network/api_endpoints.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/data/models/user_model.dart",
+          "lib/features/auth/data/models/auth_tokens_model.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given UserModel, when fromJson is called with API response, then it correctly parses id, username, email",
+          "Given AuthTokensModel, when fromJson is called, then it correctly parses accessToken and refreshToken",
+          "Given models, when toJson is called, then output matches expected API format"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-3",
+        "title": "Create AuthRemoteDatasource and AuthRepository in lib/features/auth/data/",
+        "description": "**Data Layer Implementation - Datasource and Repository**\n\nImplement the remote datasource for API calls and repository that implements domain interface.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/core/network/api_client.dart`, `lib/core/network/api_endpoints.dart`, `lib/core/storage/secure_storage_service.dart`, `lib/core/di/injection_container.dart`, `lib/features/auth/domain/repositories/i_auth_repository.dart`, `lib/features/auth/data/models/user_model.dart`, `lib/features/auth/data/models/auth_tokens_model.dart`\n- Create: `lib/features/auth/data/datasources/auth_remote_datasource.dart`, `lib/features/auth/data/repositories/auth_repository.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `ApiClient` from DI: `sl<ApiClient>()` for HTTP requests\n- Use `SecureStorageService` from DI: `sl<SecureStorageService>()` for token storage\n- Use `ApiEndpoints.login`, `ApiEndpoints.register`, `ApiEndpoints.forgotPassword` for endpoints\n- Throw `AppException` subtypes on errors (ServerException, NetworkException, etc.)\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**AuthRemoteDatasource** (`lib/features/auth/data/datasources/auth_remote_datasource.dart`):\n```dart\n/// Interface + Implementation for remote auth operations\n/// Uses ApiClient for HTTP calls\n/// Methods: login, register, forgotPassword returning models\n/// Handles Dio errors and converts to AppException\n```\n\n**AuthRepository** (`lib/features/auth/data/repositories/auth_repository.dart`):\n```dart\n/// Implements IAuthRepository from domain layer\n/// Coordinates between datasource and storage\n/// On login/register: save tokens to SecureStorage\n/// On logout: clear tokens from SecureStorage\n/// getCurrentUser: load from storage, isAuthenticated: check token exists\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT instantiate ApiClient directly - use `sl<ApiClient>()`\n- Do NOT catch generic Exception - use specific AppException types\n- Do NOT store raw password anywhere\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/data/\nflutter test --no-pub\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-1",
+          "epic-auth-ui-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/api_client.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/di/injection_container.dart",
+          "lib/features/auth/domain/repositories/i_auth_repository.dart",
+          "lib/features/auth/data/models/user_model.dart",
+          "lib/features/auth/data/models/auth_tokens_model.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+          "lib/features/auth/data/repositories/auth_repository.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AuthRemoteDatasource, when login called with valid credentials, then it calls POST /auth/login and returns UserModel + tokens",
+          "Given AuthRepository, when login succeeds, then tokens are saved to SecureStorageService",
+          "Given AuthRepository, when logout called, then tokens are cleared from SecureStorageService",
+          "Given flutter analyze, when run on data layer, then no errors reported"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-4",
+        "title": "Create AuthProvider and auth widgets in lib/features/auth/presentation/",
+        "description": "**Presentation Layer - State Management and Reusable Widgets**\n\nImplement AuthProvider for state management and custom auth widgets.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/domain/repositories/i_auth_repository.dart`, `lib/features/auth/domain/entities/user.dart`, `lib/shared/widgets/app_text_field.dart`, `lib/shared/widgets/app_button.dart`, `lib/core/utils/validators.dart`\n- Create: `lib/features/auth/presentation/providers/auth_provider.dart`, `lib/features/auth/presentation/widgets/auth_form_field.dart`, `lib/features/auth/presentation/widgets/social_login_button.dart`\n\n🔧 **PATTERNS TO USE:**\n- Extend `ChangeNotifier` for AuthProvider (Provider pattern)\n- Use `IAuthRepository` (interface) for dependency injection\n- Wrap `AppTextField` for auth-specific field behavior\n- Use `AppButton` patterns for social login buttons\n- Use `Validators.email()`, `Validators.password()` from `lib/core/utils/validators.dart`\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**AuthProvider** (`lib/features/auth/presentation/providers/auth_provider.dart`):\n```dart\n/// ChangeNotifier for auth state management\n/// Properties: user (User?), isLoading (bool), errorMessage (String?), isAuthenticated (bool)\n/// Methods: login(email, password), register(username, email, password), logout(), forgotPassword(email), checkAuthStatus()\n/// Notifies listeners on state changes\n```\n\n**AuthFormField** (`lib/features/auth/presentation/widgets/auth_form_field.dart`):\n```dart\n/// Specialized form field for auth screens\n/// Wraps AppTextField with auth-specific styling\n/// Variants: email, password (with visibility toggle), username\n/// Built-in validation using Validators class\n```\n\n**SocialLoginButton** (`lib/features/auth/presentation/widgets/social_login_button.dart`):\n```dart\n/// Button for social login providers (Google, Apple)\n/// Properties: provider (enum), onPressed, isLoading\n/// Displays provider logo and text\n/// Uses AppButton.outline variant as base\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use setState in Provider - use notifyListeners()\n- Do NOT expose internal state directly - use getters\n- Do NOT put business logic in widgets - delegate to provider\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/presentation/providers/\nflutter analyze lib/features/auth/presentation/widgets/\nflutter test --no-pub\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-1",
+          "epic-auth-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/repositories/i_auth_repository.dart",
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/core/utils/validators.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/presentation/providers/auth_provider.dart",
+          "lib/features/auth/presentation/widgets/auth_form_field.dart",
+          "lib/features/auth/presentation/widgets/social_login_button.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AuthProvider, when login called, then isLoading becomes true, API is called, and user is set on success",
+          "Given AuthProvider, when error occurs, then errorMessage is set and isLoading becomes false",
+          "Given AuthFormField with password variant, then visibility toggle icon is present and functional",
+          "Given SocialLoginButton, when rendered, then shows provider icon and name correctly"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-5",
+        "title": "Create auth screens and update AppRouter in lib/features/auth/presentation/screens/",
+        "description": "**Presentation Layer - Auth Screens and Router Integration**\n\nImplement all authentication screens with full UI and integrate with GoRouter.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: `lib/features/auth/presentation/providers/auth_provider.dart`, `lib/features/auth/presentation/widgets/auth_form_field.dart`, `lib/features/auth/presentation/widgets/social_login_button.dart`, `lib/shared/widgets/app_button.dart`, `lib/shared/widgets/loading_indicator.dart`, `lib/core/router/route_names.dart`, `lib/core/theme/app_colors.dart`\n- Modify: `lib/core/router/app_router.dart`\n- Create: `lib/features/auth/presentation/screens/login_screen.dart`, `lib/features/auth/presentation/screens/register_screen.dart`, `lib/features/auth/presentation/screens/forgot_password_screen.dart`, `lib/features/auth/presentation/screens/splash_screen.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `context.read<AuthProvider>()` and `context.watch<AuthProvider>()` for state\n- Use `Form` with `GlobalKey<FormState>` for validation\n- Use `context.go(RouteNames.dashboard)` for navigation on success\n- Use existing `AppButton` with `isLoading` prop during submission\n- Use `AuthFormField` widgets for email/password/username inputs\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**SplashScreen** (`lib/features/auth/presentation/screens/splash_screen.dart`):\n```dart\n/// Initial screen checking auth status\n/// Shows app logo with loading indicator\n/// On init: check isAuthenticated, navigate to dashboard or login\n/// Animated fade-in for logo\n```\n\n**LoginScreen** (`lib/features/auth/presentation/screens/login_screen.dart`):\n```dart\n/// Full login form with:\n/// - Email AuthFormField with validation\n/// - Password AuthFormField with visibility toggle\n/// - 'Login' AppButton (primary, fullWidth, isLoading during submission)\n/// - 'Forgot Password?' TextButton → navigates to /forgot-password\n/// - 'Create Account' TextButton → navigates to /register\n/// - SocialLoginButton for Google (optional - show but disable if not configured)\n/// - Error display using SnackBar\n/// - Form validation before submit\n```\n\n**RegisterScreen** (`lib/features/auth/presentation/screens/register_screen.dart`):\n```dart\n/// Full registration form with:\n/// - Username AuthFormField with minLength validation\n/// - Email AuthFormField with email validation\n/// - Password AuthFormField with password strength validation\n/// - Confirm Password field with match validation\n/// - 'Create Account' AppButton (primary, fullWidth, isLoading)\n/// - 'Already have an account? Login' TextButton → /login\n/// - Error display using SnackBar\n```\n\n**ForgotPasswordScreen** (`lib/features/auth/presentation/screens/forgot_password_screen.dart`):\n```dart\n/// Password recovery form with:\n/// - Instructional text explaining the flow\n/// - Email AuthFormField with validation\n/// - 'Send Reset Link' AppButton (primary, fullWidth, isLoading)\n/// - Success state showing confirmation message\n/// - 'Back to Login' TextButton → /login\n```\n\n**AppRouter Update** (`lib/core/router/app_router.dart`):\n```dart\n/// Update routes to use real screens:\n/// - '/' → SplashScreen (replace FoundationReadyScreen)\n/// - '/login' → LoginScreen (replace _PlaceholderScreen)\n/// - '/register' → RegisterScreen (replace _PlaceholderScreen)\n/// - Add '/forgot-password' → ForgotPasswordScreen\n/// - Keep other routes as placeholders for now\n/// - Add redirect logic: if authenticated, skip login/register\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use 'Coming Soon' or placeholder text\n- Do NOT create empty onPressed handlers - all buttons must be functional\n- Do NOT hardcode colors - use Theme.of(context).colorScheme\n- Do NOT skip form validation before API calls\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All form fields have real validation that shows errors\n- All buttons have working handlers that call AuthProvider\n- Navigation works correctly between all auth screens\n- Loading states show during async operations\n- Errors display via SnackBar\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/presentation/screens/\nflutter analyze lib/core/router/app_router.dart\nflutter build apk --debug 2>&1 | head -50\nflutter test --no-pub\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 5,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-auth-ui-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/providers/auth_provider.dart",
+          "lib/features/auth/presentation/widgets/auth_form_field.dart",
+          "lib/features/auth/presentation/widgets/social_login_button.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/core/router/route_names.dart",
+          "lib/core/theme/app_colors.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/auth/presentation/screens/login_screen.dart",
+          "lib/features/auth/presentation/screens/register_screen.dart",
+          "lib/features/auth/presentation/screens/forgot_password_screen.dart",
+          "lib/features/auth/presentation/screens/splash_screen.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given LoginScreen, when email and password entered and Login pressed, then AuthProvider.login is called with form values",
+          "Given LoginScreen, when login fails, then SnackBar displays error message",
+          "Given RegisterScreen, when passwords don't match, then validation error is shown",
+          "Given ForgotPasswordScreen, when valid email submitted, then success message is displayed",
+          "Given SplashScreen, when user is authenticated, then navigation goes to /dashboard",
+          "Given AppRouter, when navigating to /login, then LoginScreen is rendered (not placeholder)",
+          "Given flutter build apk, when run, then build completes without errors"
+        ]
+      }
+    ]
+  }
+}
