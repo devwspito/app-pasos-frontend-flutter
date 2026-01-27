@@ -1,0 +1,201 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "cdbc860ca421a8660ccc0e0c",
+    "timestamp": "2026-01-27T00:49:24.348Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-27T00:49:24.348Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 7,
+    "architecture": "## UI Foundation Architecture\n\n### Design System Structure\n```\nlib/\n├── core/\n│   ├── theme/\n│   │   ├── app_theme.dart      # Main ThemeData (light/dark)\n│   │   ├── app_colors.dart     # Color constants\n│   │   ├── app_text_styles.dart # Typography\n│   │   └── app_spacing.dart    # Spacing constants\n│   └── router/\n│       ├── app_router.dart     # GoRouter configuration\n│       └── route_names.dart    # Route constants\n├── shared/\n│   ├── widgets/\n│   │   ├── app_button.dart     # Primary button component\n│   │   ├── app_text_field.dart # Form input component\n│   │   ├── app_card.dart       # Card container\n│   │   ├── app_loading.dart    # Loading indicators\n│   │   ├── app_error.dart      # Error display\n│   │   ├── app_empty_state.dart # Empty state\n│   │   ├── step_counter_display.dart # Step count widget\n│   │   └── progress_ring.dart  # Circular progress\n│   └── layouts/\n│       ├── app_scaffold.dart   # Base scaffold\n│       └── bottom_nav_layout.dart # Bottom navigation\n└── main.dart                   # App entry point\n```\n\n### Material Design 3 Theming\n- **Color Scheme**: Generated using ColorScheme.fromSeed() for consistent M3 colors\n- **Typography**: System fonts with Material 3 type scale\n- **Spacing**: Consistent 4px/8px grid system\n- **Components**: All widgets use Theme.of(context) for styling\n\n### Navigation Architecture\n- **go_router**: Declarative routing with type-safe route names\n- **ShellRoute**: Persistent bottom navigation across main sections\n- **Auth Guards**: Redirect to login when unauthenticated\n- **Deep Linking**: URL-based navigation ready\n\n### Widget Patterns\n- **Stateless by default**: Most widgets are StatelessWidget\n- **Theme-aware**: All widgets use Theme.of(context)\n- **Composable**: Small, focused widgets that compose together\n- **Accessible**: Support for screen readers and large fonts\n\n### Verification Commands\n- `flutter analyze` - Static analysis\n- `flutter test` - Run unit tests\n- `flutter build apk --debug` - Verify compilation",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Create Material Design 3 theme files in lib/core/theme/",
+        "description": "Create the complete theming system with Material Design 3 color schemes, typography, and spacing.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: None (fresh project)\n- Modify: None\n- Create: lib/core/theme/app_theme.dart, lib/core/theme/app_colors.dart, lib/core/theme/app_text_styles.dart, lib/core/theme/app_spacing.dart\n\n🔧 **PATTERNS TO USE:**\n- Use ThemeData.light() and ThemeData.dark() as base\n- Use ColorScheme.fromSeed() for Material 3 color generation\n- Use Google Fonts or system fonts with TextTheme\n- Export all theme components from app_theme.dart\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**app_colors.dart:**\n- Primary color: Health/fitness green (#4CAF50 or similar)\n- Secondary color: Energetic orange for achievements\n- Error, surface, background colors\n- Light and dark variants\n- Static const Color definitions\n\n**app_text_styles.dart:**\n- displayLarge, displayMedium, displaySmall\n- headlineLarge, headlineMedium, headlineSmall\n- titleLarge, titleMedium, titleSmall\n- bodyLarge, bodyMedium, bodySmall\n- labelLarge, labelMedium, labelSmall\n\n**app_spacing.dart:**\n- xs: 4.0, sm: 8.0, md: 16.0, lg: 24.0, xl: 32.0, xxl: 48.0\n- Padding helpers: paddingAll, paddingHorizontal, paddingVertical\n- BorderRadius constants\n\n**app_theme.dart:**\n- AppTheme class with static lightTheme and darkTheme getters\n- Complete ThemeData configuration using Material 3\n- useMaterial3: true\n- Import and use AppColors, AppTextStyles, AppSpacing\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded colors in widgets - use AppColors\n- Magic numbers for spacing - use AppSpacing\n- Inline TextStyle definitions - use AppTextStyles\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/core/theme/\n- All files compile without errors\n- Theme classes are properly exported",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_text_styles.dart",
+          "lib/core/theme/app_spacing.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the theme files exist, When imported in main.dart, Then lightTheme and darkTheme are accessible",
+          "Given AppColors is defined, When used in widgets, Then consistent colors are applied",
+          "Given AppTextStyles is defined, When text is styled, Then consistent typography is applied",
+          "Given AppSpacing is defined, When padding/margins are set, Then consistent spacing is applied"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Create go_router navigation in lib/core/router/",
+        "description": "Set up go_router with all app routes, authentication guards, and nested navigation for bottom tabs.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: None\n- Modify: None\n- Create: lib/core/router/app_router.dart, lib/core/router/route_names.dart\n\n🔧 **PATTERNS TO USE:**\n- Use GoRouter for declarative routing\n- Use ShellRoute for bottom navigation shell\n- Use redirect for auth guards\n- Use route_names.dart for type-safe route constants\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**route_names.dart:**\n```dart\nabstract class RouteNames {\n  static const String splash = '/';\n  static const String login = '/login';\n  static const String register = '/register';\n  static const String forgotPassword = '/forgot-password';\n  static const String dashboard = '/dashboard';\n  static const String history = '/history';\n  static const String statistics = '/statistics';\n  static const String friends = '/friends';\n  static const String friendRequests = '/friend-requests';\n  static const String addFriend = '/add-friend';\n  static const String goals = '/goals';\n  static const String createGoal = '/create-goal';\n  static const String settings = '/settings';\n  static const String healthPermissions = '/health-permissions';\n}\n```\n\n**app_router.dart:**\n- AppRouter class with static GoRouter router getter\n- navigatorKey for global navigation\n- Redirect logic checking auth state (stub for now - return null)\n- ShellRoute with BottomNavLayout for main app sections\n- Routes for: splash, auth (login, register, forgot-password), main tabs (dashboard, friends, goals, settings)\n- GoRoute with path and builder for each screen\n- Use placeholder Container() for screens not yet implemented\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded route strings - use RouteNames constants\n- Navigator.push() - use context.go() or context.push()\n- Missing error handling for unknown routes\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/core/router/\n- Router compiles and can be instantiated\n- All route names are defined as constants",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/router/app_router.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppRouter is configured, When app starts, Then splash route is shown",
+          "Given RouteNames constants exist, When navigating, Then type-safe route names are used",
+          "Given ShellRoute is configured, When on main screens, Then bottom navigation persists",
+          "Given auth redirect is configured, When user is not logged in, Then redirect to login works"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create AppButton and AppTextField widgets in lib/shared/widgets/",
+        "description": "Build reusable form widgets with consistent styling, loading states, and validation support.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart (for styling reference)\n- Modify: None\n- Create: lib/shared/widgets/app_button.dart, lib/shared/widgets/app_text_field.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Theme.of(context) to access theme colors\n- Use StatelessWidget for simple widgets\n- Use required and optional parameters with defaults\n- Use enums for button variants\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**app_button.dart:**\n```dart\nenum AppButtonVariant { primary, secondary, outline, text }\nenum AppButtonSize { small, medium, large }\n\nclass AppButton extends StatelessWidget {\n  final String label;\n  final VoidCallback? onPressed;\n  final AppButtonVariant variant;\n  final AppButtonSize size;\n  final bool isLoading;\n  final bool isFullWidth;\n  final IconData? icon;\n  \n  // Constructor with defaults\n  // Build method returning appropriate button type\n  // Loading state shows CircularProgressIndicator\n  // Disabled state when onPressed is null or isLoading\n}\n```\n\n**app_text_field.dart:**\n```dart\nclass AppTextField extends StatelessWidget {\n  final String? label;\n  final String? hint;\n  final TextEditingController? controller;\n  final String? Function(String?)? validator;\n  final bool obscureText;\n  final TextInputType keyboardType;\n  final IconData? prefixIcon;\n  final Widget? suffixIcon;\n  final bool enabled;\n  final int maxLines;\n  final void Function(String)? onChanged;\n  final void Function(String)? onSubmitted;\n  \n  // Constructor with defaults\n  // Build method returning TextFormField with InputDecoration\n  // Proper styling using theme\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded colors - use Theme.of(context)\n- Missing null safety for callbacks\n- Buttons without loading state support\n- TextFields without validation support\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/widgets/app_button.dart\n- flutter analyze lib/shared/widgets/app_text_field.dart\n- Widgets compile and can be instantiated with required params",
+        "epicId": "epic-ui-foundation",
+        "priority": 3,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_text_field.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppButton with isLoading=true, When rendered, Then CircularProgressIndicator is shown",
+          "Given AppButton with onPressed=null, When rendered, Then button is disabled",
+          "Given AppTextField with validator, When form validates, Then validation runs",
+          "Given AppTextField with obscureText=true, When rendered, Then text is hidden"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Create AppCard, AppLoading, AppError, AppEmptyState widgets in lib/shared/widgets/",
+        "description": "Build reusable display widgets for consistent UI patterns across the app.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, lib/core/theme/app_spacing.dart\n- Modify: None\n- Create: lib/shared/widgets/app_card.dart, lib/shared/widgets/app_loading.dart, lib/shared/widgets/app_error.dart, lib/shared/widgets/app_empty_state.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Card widget with theme elevation\n- Use consistent padding from AppSpacing\n- Use Lottie or simple animations for loading\n- Use meaningful error messages with retry actions\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**app_card.dart:**\n```dart\nclass AppCard extends StatelessWidget {\n  final Widget child;\n  final EdgeInsetsGeometry? padding;\n  final EdgeInsetsGeometry? margin;\n  final Color? color;\n  final double? elevation;\n  final VoidCallback? onTap;\n  final BorderRadius? borderRadius;\n  \n  // Build Card with InkWell if onTap provided\n}\n```\n\n**app_loading.dart:**\n```dart\nclass AppLoading extends StatelessWidget {\n  final String? message;\n  final double size;\n  final Color? color;\n  \n  // Build centered CircularProgressIndicator with optional message\n}\n\nclass AppLoadingOverlay extends StatelessWidget {\n  final bool isLoading;\n  final Widget child;\n  \n  // Stack with child and conditional loading overlay\n}\n```\n\n**app_error.dart:**\n```dart\nclass AppError extends StatelessWidget {\n  final String message;\n  final String? details;\n  final VoidCallback? onRetry;\n  final IconData icon;\n  \n  // Build error display with icon, message, and retry button\n}\n```\n\n**app_empty_state.dart:**\n```dart\nclass AppEmptyState extends StatelessWidget {\n  final String title;\n  final String? subtitle;\n  final IconData icon;\n  final String? actionLabel;\n  final VoidCallback? onAction;\n  \n  // Build empty state with icon, text, and optional action button\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Empty Container() - always show meaningful content\n- Missing retry functionality on errors\n- Hardcoded strings - accept as parameters\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/widgets/app_card.dart\n- flutter analyze lib/shared/widgets/app_loading.dart\n- flutter analyze lib/shared/widgets/app_error.dart\n- flutter analyze lib/shared/widgets/app_empty_state.dart",
+        "epicId": "epic-ui-foundation",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/theme/app_spacing.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/app_loading.dart",
+          "lib/shared/widgets/app_error.dart",
+          "lib/shared/widgets/app_empty_state.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppCard with onTap, When tapped, Then callback is invoked",
+          "Given AppLoading with message, When rendered, Then message is displayed below spinner",
+          "Given AppError with onRetry, When retry tapped, Then callback is invoked",
+          "Given AppEmptyState with actionLabel, When action tapped, Then onAction is invoked"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-5",
+        "title": "Create StepCounterDisplay and ProgressRing widgets in lib/shared/widgets/",
+        "description": "Build step-specific widgets for visualizing step counts and progress toward goals.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_text_styles.dart\n- Modify: None\n- Create: lib/shared/widgets/step_counter_display.dart, lib/shared/widgets/progress_ring.dart\n\n🔧 **PATTERNS TO USE:**\n- Use CustomPainter for circular progress ring\n- Use AnimatedSwitcher for step count transitions\n- Use NumberFormat for step count formatting (10,000 not 10000)\n- Use percentage calculation: (current / goal * 100)\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**step_counter_display.dart:**\n```dart\nclass StepCounterDisplay extends StatelessWidget {\n  final int stepCount;\n  final int goalSteps;\n  final bool showGoal;\n  final TextStyle? stepTextStyle;\n  final TextStyle? goalTextStyle;\n  \n  // Large animated step count number\n  // \"of {goal} steps\" subtitle when showGoal is true\n  // Use NumberFormat.decimalPattern() for formatting\n  // AnimatedSwitcher for smooth number transitions\n}\n```\n\n**progress_ring.dart:**\n```dart\nclass ProgressRing extends StatelessWidget {\n  final double progress; // 0.0 to 1.0\n  final double size;\n  final double strokeWidth;\n  final Color? progressColor;\n  final Color? backgroundColor;\n  final Widget? child; // Center content (e.g., step count)\n  final bool animate;\n  \n  // Circular progress indicator using CustomPaint\n  // Background ring + progress arc\n  // Optional child widget in center\n  // Gradient option for progress color\n}\n\nclass _ProgressRingPainter extends CustomPainter {\n  final double progress;\n  final Color progressColor;\n  final Color backgroundColor;\n  final double strokeWidth;\n  \n  // Paint background circle\n  // Paint progress arc from top (-90 degrees)\n  // Use StrokeCap.round for rounded ends\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Unformatted numbers (10000 instead of 10,000)\n- Progress > 1.0 causing visual bugs - clamp value\n- Missing animation for number changes\n- Hardcoded sizes - accept as parameters\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/widgets/step_counter_display.dart\n- flutter analyze lib/shared/widgets/progress_ring.dart\n- Widgets render correctly with test values",
+        "epicId": "epic-ui-foundation",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_text_styles.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/step_counter_display.dart",
+          "lib/shared/widgets/progress_ring.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepCounterDisplay with 10000 steps, When rendered, Then displays '10,000'",
+          "Given StepCounterDisplay with showGoal=true, When rendered, Then goal subtitle is shown",
+          "Given ProgressRing with progress=0.75, When rendered, Then 75% of ring is filled",
+          "Given ProgressRing with progress=1.5, When rendered, Then clamped to 100%"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-6",
+        "title": "Create AppScaffold and BottomNavLayout in lib/shared/layouts/",
+        "description": "Build layout components for consistent app structure with bottom navigation.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, lib/core/router/route_names.dart\n- Modify: None\n- Create: lib/shared/layouts/app_scaffold.dart, lib/shared/layouts/bottom_nav_layout.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Scaffold with consistent AppBar styling\n- Use NavigationBar (Material 3) for bottom nav\n- Use go_router's StatefulShellRoute navigation\n- Use Icons for navigation items\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**app_scaffold.dart:**\n```dart\nclass AppScaffold extends StatelessWidget {\n  final String? title;\n  final Widget body;\n  final List<Widget>? actions;\n  final Widget? floatingActionButton;\n  final bool showBackButton;\n  final VoidCallback? onBackPressed;\n  final Widget? bottomNavigationBar;\n  final Color? backgroundColor;\n  final PreferredSizeWidget? customAppBar;\n  \n  // Build Scaffold with:\n  // - AppBar with title, actions, back button\n  // - SafeArea wrapped body\n  // - Optional FAB\n  // - Optional bottom nav\n}\n```\n\n**bottom_nav_layout.dart:**\n```dart\nclass BottomNavLayout extends StatelessWidget {\n  final StatefulNavigationShell navigationShell;\n  \n  // Bottom navigation with 4 tabs:\n  // 1. Dashboard (home icon) - /dashboard\n  // 2. Friends (people icon) - /friends  \n  // 3. Goals (flag icon) - /goals\n  // 4. Settings (settings icon) - /settings\n  \n  // Use NavigationBar (Material 3)\n  // Use navigationShell.goBranch(index) for navigation\n  // Highlight current tab based on navigationShell.currentIndex\n}\n\nenum BottomNavItem {\n  dashboard,\n  friends,\n  goals,\n  settings;\n  \n  String get label => ...;\n  IconData get icon => ...;\n  IconData get selectedIcon => ...;\n  String get route => ...;\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- BottomNavigationBar (old) - use NavigationBar (Material 3)\n- Rebuilding navigation on every frame\n- Missing SafeArea causing notch/home indicator overlap\n- Hardcoded navigation indices\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/shared/layouts/app_scaffold.dart\n- flutter analyze lib/shared/layouts/bottom_nav_layout.dart\n- Layouts render with proper structure",
+        "epicId": "epic-ui-foundation",
+        "priority": 6,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1",
+          "epic-ui-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/layouts/app_scaffold.dart",
+          "lib/shared/layouts/bottom_nav_layout.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppScaffold with title, When rendered, Then AppBar shows title",
+          "Given AppScaffold with showBackButton=true, When rendered, Then back button is shown",
+          "Given BottomNavLayout, When tab is tapped, Then navigationShell.goBranch is called",
+          "Given BottomNavLayout, When on dashboard, Then dashboard tab is highlighted"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-7",
+        "title": "Update lib/main.dart with theme and router configuration",
+        "description": "Configure MaterialApp.router with theme provider and go_router integration.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, lib/core/router/app_router.dart\n- Modify: lib/main.dart\n- Create: None\n\n🔧 **PATTERNS TO USE:**\n- Use MaterialApp.router() for go_router integration\n- Use ChangeNotifierProvider for theme state (if dynamic switching needed)\n- Use routerConfig from AppRouter\n- Initialize with WidgetsFlutterBinding.ensureInitialized()\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**lib/main.dart:**\n```dart\nimport 'package:flutter/material.dart';\nimport 'core/theme/app_theme.dart';\nimport 'core/router/app_router.dart';\n\nvoid main() {\n  WidgetsFlutterBinding.ensureInitialized();\n  runApp(const PasosApp());\n}\n\nclass PasosApp extends StatelessWidget {\n  const PasosApp({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp.router(\n      title: 'Pasos',\n      debugShowCheckedModeBanner: false,\n      theme: AppTheme.lightTheme,\n      darkTheme: AppTheme.darkTheme,\n      themeMode: ThemeMode.system, // Follow system theme\n      routerConfig: AppRouter.router,\n    );\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- MaterialApp() without .router - breaks go_router\n- Missing WidgetsFlutterBinding.ensureInitialized()\n- Hardcoded theme without dark mode support\n- Missing debugShowCheckedModeBanner: false for release\n\n🧪 **VERIFICATION:**\n- flutter analyze lib/main.dart\n- flutter build apk --debug (should compile)\n- App launches with correct theme applied",
+        "epicId": "epic-ui-foundation",
+        "priority": 7,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-ui-foundation-story-1",
+          "epic-ui-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given app starts, When system theme is light, Then light theme is applied",
+          "Given app starts, When system theme is dark, Then dark theme is applied",
+          "Given app starts, When router is configured, Then splash route is shown",
+          "Given app is built, When analyzed, Then no errors are reported"
+        ]
+      }
+    ]
+  }
+}
