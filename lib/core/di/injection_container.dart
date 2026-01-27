@@ -26,6 +26,19 @@ import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_today_
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/record_steps_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/data/datasources/goals_remote_datasource.dart';
+import 'package:app_pasos_frontend/features/goals/data/repositories/goals_repository_impl.dart';
+import 'package:app_pasos_frontend/features/goals/domain/repositories/goals_repository.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/create_goal_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/get_goal_details_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/get_goal_progress_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/get_user_goals_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/invite_user_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/join_goal_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/leave_goal_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/create_goal_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/data/datasources/sharing_remote_datasource.dart';
 import 'package:app_pasos_frontend/features/sharing/data/repositories/sharing_repository_impl.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/repositories/sharing_repository.dart';
@@ -233,6 +246,63 @@ Future<void> initializeDependencies() async {
   sl.registerFactory<FriendSearchBloc>(
     () => FriendSearchBloc(
       searchUsersUseCase: sl<SearchUsersUseCase>(),
+    ),
+  );
+
+  // ============================================================
+  // Goals Feature
+  // ============================================================
+
+  // Data Sources
+  sl.registerLazySingleton<GoalsRemoteDatasource>(
+    () => GoalsRemoteDatasourceImpl(client: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<GoalsRepository>(
+    () => GoalsRepositoryImpl(datasource: sl<GoalsRemoteDatasource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetUserGoalsUseCase>(
+    () => GetUserGoalsUseCase(repository: sl<GoalsRepository>()),
+  );
+  sl.registerLazySingleton<CreateGoalUseCase>(
+    () => CreateGoalUseCase(repository: sl<GoalsRepository>()),
+  );
+  sl.registerLazySingleton<GetGoalDetailsUseCase>(
+    () => GetGoalDetailsUseCase(repository: sl<GoalsRepository>()),
+  );
+  sl.registerLazySingleton<GetGoalProgressUseCase>(
+    () => GetGoalProgressUseCase(repository: sl<GoalsRepository>()),
+  );
+  sl.registerLazySingleton<InviteUserUseCase>(
+    () => InviteUserUseCase(repository: sl<GoalsRepository>()),
+  );
+  sl.registerLazySingleton<JoinGoalUseCase>(
+    () => JoinGoalUseCase(repository: sl<GoalsRepository>()),
+  );
+  sl.registerLazySingleton<LeaveGoalUseCase>(
+    () => LeaveGoalUseCase(repository: sl<GoalsRepository>()),
+  );
+
+  // Blocs (Factory - new instance per use)
+  sl.registerFactory<GoalsListBloc>(
+    () => GoalsListBloc(
+      getUserGoalsUseCase: sl<GetUserGoalsUseCase>(),
+    ),
+  );
+  sl.registerFactory<GoalDetailBloc>(
+    () => GoalDetailBloc(
+      getGoalDetailsUseCase: sl<GetGoalDetailsUseCase>(),
+      getGoalProgressUseCase: sl<GetGoalProgressUseCase>(),
+      inviteUserUseCase: sl<InviteUserUseCase>(),
+      leaveGoalUseCase: sl<LeaveGoalUseCase>(),
+    ),
+  );
+  sl.registerFactory<CreateGoalBloc>(
+    () => CreateGoalBloc(
+      createGoalUseCase: sl<CreateGoalUseCase>(),
     ),
   );
 }
