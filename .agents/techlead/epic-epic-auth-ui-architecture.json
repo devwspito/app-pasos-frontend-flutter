@@ -1,0 +1,194 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "12baa90f412362136a0177ff",
+    "timestamp": "2026-01-27T11:55:00.511Z",
+    "phase": "techlead",
+    "epicId": "epic-auth-ui",
+    "savedAt": "2026-01-27T11:55:00.511Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-auth-ui",
+    "storiesCount": 5,
+    "architecture": "## Authentication UI Module Architecture\n\n### Clean Architecture Layers\n\n```\nlib/features/auth/\n├── data/                          # Data Layer\n│   ├── datasources/\n│   │   └── auth_remote_datasource.dart   # API calls via ApiClient\n│   ├── models/\n│   │   ├── user_model.dart               # JSON serialization\n│   │   └── auth_response_model.dart      # API response model\n│   └── repositories/\n│       └── auth_repository_impl.dart     # Implementation + token storage\n├── domain/                        # Domain Layer (Business Logic)\n│   ├── entities/\n│   │   └── user.dart                     # Core User entity\n│   ├── repositories/\n│   │   └── auth_repository.dart          # Abstract interface\n│   └── usecases/\n│       ├── login_usecase.dart\n│       ├── register_usecase.dart\n│       ├── logout_usecase.dart\n│       └── get_current_user_usecase.dart\n└── presentation/                  # Presentation Layer (UI)\n    ├── bloc/\n    │   ├── auth_bloc.dart               # BLoC state management\n    │   ├── auth_event.dart              # Input events\n    │   └── auth_state.dart              # Output states\n    ├── pages/\n    │   ├── login_page.dart\n    │   ├── register_page.dart\n    │   └── forgot_password_page.dart\n    └── widgets/\n        ├── password_field.dart          # Reusable password input\n        └── auth_form.dart               # Reusable auth form\n```\n\n### Dependency Flow (SOLID Compliant)\n\n```\nPages → BLoC → UseCases → Repository(Interface) ← RepositoryImpl → Datasource → ApiClient\n                              ↓\n                      SecureStorageService\n```\n\n### Integration Points\n\n1. **DI Container** (`injection_container.dart`):\n   - Registers all auth services following order: Datasources → Repositories → UseCases → Blocs\n   - AuthBloc uses registerFactory (new instance per page)\n   - Other services use registerLazySingleton\n\n2. **Router** (`app_router.dart`):\n   - Auth pages wrapped with BlocProvider<AuthBloc>\n   - Uses sl<AuthBloc>() from DI container\n\n3. **Existing Services Used**:\n   - `ApiClient` for HTTP requests\n   - `SecureStorageService` for token persistence\n   - `Validators` for form validation\n   - `AppTextField`, `AppButton` for consistent UI\n   - `AppException` hierarchy for error handling\n\n### State Management Flow\n\n```\nUser Action → AuthEvent → AuthBloc → UseCase → Repository → State Emission\n                                         ↓\n                                    API Call + Token Storage\n```\n\n### Security Considerations\n- Tokens stored in SecureStorageService (encrypted)\n- Password fields use obscureText with visibility toggle\n- Form validation prevents invalid submissions\n- Error messages don't expose sensitive information",
+    "stories": [
+      {
+        "id": "epic-auth-ui-story-1",
+        "title": "Create Auth Domain Layer (User entity, AuthRepository interface) and Data Layer (Models, Datasource, Repository Implementation)",
+        "description": "## Description\nCreate the foundation domain and data layers for authentication following Clean Architecture.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- **Read**: `lib/core/network/api_client.dart`, `lib/core/storage/secure_storage_service.dart`, `lib/core/network/api_endpoints.dart`, `lib/core/errors/app_exceptions.dart`\n- **Modify**: None\n- **Create**:\n  - `lib/features/auth/domain/entities/user.dart`\n  - `lib/features/auth/domain/repositories/auth_repository.dart`\n  - `lib/features/auth/data/models/user_model.dart`\n  - `lib/features/auth/data/models/auth_response_model.dart`\n  - `lib/features/auth/data/datasources/auth_remote_datasource.dart`\n  - `lib/features/auth/data/repositories/auth_repository_impl.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `equatable` package for entity equality (already in pubspec.yaml)\n- Use `ApiClient.post<Map<String, dynamic>>()` for API calls - see api_client.dart lines 165-187\n- Use `SecureStorageService.saveAuthToken()`, `saveRefreshToken()`, `saveUserId()` for token storage\n- Use `ApiEndpoints.login`, `ApiEndpoints.register`, `ApiEndpoints.logout` constants\n- Use `AppException` hierarchy for error handling (NetworkException, ServerException, UnauthorizedException)\n\n📦 **REQUIRED STRUCTURE:**\n\n**User Entity** (user.dart):\n```dart\nclass User extends Equatable {\n  final String id;\n  final String email;\n  final String name;\n  final DateTime? createdAt;\n  // Equatable props\n}\n```\n\n**AuthRepository Interface** (auth_repository.dart):\n```dart\nabstract interface class AuthRepository {\n  Future<User> login({required String email, required String password});\n  Future<User> register({required String email, required String password, required String name});\n  Future<void> logout();\n  Future<User?> getCurrentUser();\n  Future<void> forgotPassword({required String email});\n  Future<bool> isAuthenticated();\n}\n```\n\n**UserModel** (user_model.dart):\n```dart\nclass UserModel extends User {\n  // fromJson factory constructor\n  // toJson method\n  // copyWith method\n}\n```\n\n**AuthResponseModel** (auth_response_model.dart):\n```dart\nclass AuthResponseModel {\n  final String token;\n  final String refreshToken;\n  final UserModel user;\n  // fromJson factory\n}\n```\n\n**AuthRemoteDatasource** (auth_remote_datasource.dart):\n```dart\nabstract interface class AuthRemoteDatasource {\n  Future<AuthResponseModel> login({required String email, required String password});\n  Future<AuthResponseModel> register({...});\n  Future<void> logout();\n  Future<UserModel> getCurrentUser();\n  Future<void> forgotPassword({required String email});\n}\n\nclass AuthRemoteDatasourceImpl implements AuthRemoteDatasource {\n  AuthRemoteDatasourceImpl({required ApiClient client}) : _client = client;\n  final ApiClient _client;\n  // Implement methods using _client.post(), _client.get()\n}\n```\n\n**AuthRepositoryImpl** (auth_repository_impl.dart):\n```dart\nclass AuthRepositoryImpl implements AuthRepository {\n  AuthRepositoryImpl({\n    required AuthRemoteDatasource datasource,\n    required SecureStorageService storage,\n  });\n  // Implement all methods, handle token storage on login/register\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT create `Dio` instances directly - use `ApiClient` from DI\n- Do NOT hardcode API URLs - use `ApiEndpoints` constants\n- Do NOT store tokens manually - use `SecureStorageService` methods\n- Do NOT throw generic exceptions - use `AppException` subclasses\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/\nflutter pub get\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/api_client.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/errors/app_exceptions.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/auth/domain/repositories/auth_repository.dart",
+          "lib/features/auth/data/models/user_model.dart",
+          "lib/features/auth/data/models/auth_response_model.dart",
+          "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+          "lib/features/auth/data/repositories/auth_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given User entity is created, When comparing two User objects with same id, Then they should be equal (Equatable)",
+          "Given AuthRepository interface exists, When implementing AuthRepositoryImpl, Then all methods must be implemented",
+          "Given AuthRemoteDatasource, When calling login(), Then it should use ApiClient.post() with ApiEndpoints.login",
+          "Given AuthRepositoryImpl, When login succeeds, Then tokens must be saved using SecureStorageService",
+          "Given flutter analyze runs, When checking lib/features/auth/, Then no errors should be found"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-2",
+        "title": "Create Auth Use Cases (LoginUseCase, RegisterUseCase, LogoutUseCase, GetCurrentUserUseCase)",
+        "description": "## Description\nCreate use cases following Clean Architecture pattern for authentication business logic.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- **Read**: `lib/features/auth/domain/repositories/auth_repository.dart`, `lib/features/auth/domain/entities/user.dart`\n- **Modify**: None\n- **Create**:\n  - `lib/features/auth/domain/usecases/login_usecase.dart`\n  - `lib/features/auth/domain/usecases/register_usecase.dart`\n  - `lib/features/auth/domain/usecases/logout_usecase.dart`\n  - `lib/features/auth/domain/usecases/get_current_user_usecase.dart`\n\n🔧 **PATTERNS TO USE:**\n- Each use case should have a single `call()` method (callable class pattern)\n- Use `AuthRepository` interface, NOT `AuthRepositoryImpl`\n- Use `User` entity from domain layer for return types\n- Use `Equatable` for parameter classes if needed\n\n📦 **REQUIRED STRUCTURE:**\n\n**LoginUseCase** (login_usecase.dart):\n```dart\nclass LoginParams extends Equatable {\n  const LoginParams({required this.email, required this.password});\n  final String email;\n  final String password;\n  @override\n  List<Object?> get props => [email, password];\n}\n\nclass LoginUseCase {\n  LoginUseCase({required AuthRepository repository}) : _repository = repository;\n  final AuthRepository _repository;\n\n  Future<User> call(LoginParams params) async {\n    return _repository.login(email: params.email, password: params.password);\n  }\n}\n```\n\n**RegisterUseCase** (register_usecase.dart):\n```dart\nclass RegisterParams extends Equatable {\n  const RegisterParams({required this.email, required this.password, required this.name});\n  final String email;\n  final String password;\n  final String name;\n  @override\n  List<Object?> get props => [email, password, name];\n}\n\nclass RegisterUseCase {\n  RegisterUseCase({required AuthRepository repository}) : _repository = repository;\n  final AuthRepository _repository;\n\n  Future<User> call(RegisterParams params) async {\n    return _repository.register(email: params.email, password: params.password, name: params.name);\n  }\n}\n```\n\n**LogoutUseCase** (logout_usecase.dart):\n```dart\nclass LogoutUseCase {\n  LogoutUseCase({required AuthRepository repository}) : _repository = repository;\n  final AuthRepository _repository;\n\n  Future<void> call() async {\n    return _repository.logout();\n  }\n}\n```\n\n**GetCurrentUserUseCase** (get_current_user_usecase.dart):\n```dart\nclass GetCurrentUserUseCase {\n  GetCurrentUserUseCase({required AuthRepository repository}) : _repository = repository;\n  final AuthRepository _repository;\n\n  Future<User?> call() async {\n    return _repository.getCurrentUser();\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT inject `AuthRepositoryImpl` - depend on `AuthRepository` interface (DIP)\n- Do NOT add business logic here - that belongs in repository\n- Do NOT call SecureStorageService directly - repository handles that\n- Do NOT mix multiple operations in one use case - Single Responsibility\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/domain/usecases/\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-auth-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/repositories/auth_repository.dart",
+          "lib/features/auth/domain/entities/user.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/domain/usecases/login_usecase.dart",
+          "lib/features/auth/domain/usecases/register_usecase.dart",
+          "lib/features/auth/domain/usecases/logout_usecase.dart",
+          "lib/features/auth/domain/usecases/get_current_user_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given LoginUseCase, When call(LoginParams) is invoked, Then it delegates to repository.login()",
+          "Given RegisterUseCase, When call(RegisterParams) is invoked, Then it delegates to repository.register()",
+          "Given LogoutUseCase, When call() is invoked, Then it delegates to repository.logout()",
+          "Given GetCurrentUserUseCase, When call() is invoked, Then it returns User? from repository.getCurrentUser()",
+          "Given flutter analyze runs, When checking usecases/, Then no errors should be found"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-3",
+        "title": "Create AuthBloc with AuthEvent and AuthState using flutter_bloc",
+        "description": "## Description\nCreate the BLoC layer for authentication state management using flutter_bloc package.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- **Read**: `lib/features/auth/domain/usecases/login_usecase.dart`, `lib/features/auth/domain/usecases/register_usecase.dart`, `lib/features/auth/domain/usecases/logout_usecase.dart`, `lib/features/auth/domain/usecases/get_current_user_usecase.dart`, `lib/features/auth/domain/entities/user.dart`\n- **Modify**: `pubspec.yaml` (add flutter_bloc: ^8.1.3 dependency)\n- **Create**:\n  - `lib/features/auth/presentation/bloc/auth_event.dart`\n  - `lib/features/auth/presentation/bloc/auth_state.dart`\n  - `lib/features/auth/presentation/bloc/auth_bloc.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `flutter_bloc: ^8.1.3` (add to pubspec.yaml dependencies section)\n- Use `Equatable` for events and states\n- Use sealed class pattern for events and states (Dart 3 feature)\n- Follow existing project pattern of using `library;` directive\n\n📦 **REQUIRED STRUCTURE:**\n\n**AuthEvent** (auth_event.dart):\n```dart\nsealed class AuthEvent extends Equatable {\n  const AuthEvent();\n}\n\nfinal class AuthLoginRequested extends AuthEvent {\n  const AuthLoginRequested({required this.email, required this.password});\n  final String email;\n  final String password;\n  @override\n  List<Object?> get props => [email, password];\n}\n\nfinal class AuthRegisterRequested extends AuthEvent {\n  const AuthRegisterRequested({required this.email, required this.password, required this.name});\n  final String email;\n  final String password;\n  final String name;\n  @override\n  List<Object?> get props => [email, password, name];\n}\n\nfinal class AuthLogoutRequested extends AuthEvent {\n  const AuthLogoutRequested();\n  @override\n  List<Object?> get props => [];\n}\n\nfinal class AuthCheckStatusRequested extends AuthEvent {\n  const AuthCheckStatusRequested();\n  @override\n  List<Object?> get props => [];\n}\n\nfinal class AuthForgotPasswordRequested extends AuthEvent {\n  const AuthForgotPasswordRequested({required this.email});\n  final String email;\n  @override\n  List<Object?> get props => [email];\n}\n```\n\n**AuthState** (auth_state.dart):\n```dart\nsealed class AuthState extends Equatable {\n  const AuthState();\n}\n\nfinal class AuthInitial extends AuthState {\n  const AuthInitial();\n  @override\n  List<Object?> get props => [];\n}\n\nfinal class AuthLoading extends AuthState {\n  const AuthLoading();\n  @override\n  List<Object?> get props => [];\n}\n\nfinal class AuthAuthenticated extends AuthState {\n  const AuthAuthenticated({required this.user});\n  final User user;\n  @override\n  List<Object?> get props => [user];\n}\n\nfinal class AuthUnauthenticated extends AuthState {\n  const AuthUnauthenticated();\n  @override\n  List<Object?> get props => [];\n}\n\nfinal class AuthError extends AuthState {\n  const AuthError({required this.message});\n  final String message;\n  @override\n  List<Object?> get props => [message];\n}\n\nfinal class AuthForgotPasswordSuccess extends AuthState {\n  const AuthForgotPasswordSuccess({required this.message});\n  final String message;\n  @override\n  List<Object?> get props => [message];\n}\n```\n\n**AuthBloc** (auth_bloc.dart):\n```dart\nclass AuthBloc extends Bloc<AuthEvent, AuthState> {\n  AuthBloc({\n    required LoginUseCase loginUseCase,\n    required RegisterUseCase registerUseCase,\n    required LogoutUseCase logoutUseCase,\n    required GetCurrentUserUseCase getCurrentUserUseCase,\n    required AuthRepository authRepository,\n  }) : _loginUseCase = loginUseCase,\n       _registerUseCase = registerUseCase,\n       _logoutUseCase = logoutUseCase,\n       _getCurrentUserUseCase = getCurrentUserUseCase,\n       _authRepository = authRepository,\n       super(const AuthInitial()) {\n    on<AuthLoginRequested>(_onLoginRequested);\n    on<AuthRegisterRequested>(_onRegisterRequested);\n    on<AuthLogoutRequested>(_onLogoutRequested);\n    on<AuthCheckStatusRequested>(_onCheckStatusRequested);\n    on<AuthForgotPasswordRequested>(_onForgotPasswordRequested);\n  }\n  // Implement handlers using use cases and AppException handling\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT emit states without handling exceptions properly\n- Do NOT call repository methods directly - use use cases\n- Do NOT use `dynamic` types - use proper typed states\n- Do NOT forget to add flutter_bloc to pubspec.yaml\n\n🧪 **VERIFICATION:**\n```bash\nflutter pub get\nflutter analyze lib/features/auth/presentation/bloc/\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/usecases/login_usecase.dart",
+          "lib/features/auth/domain/usecases/register_usecase.dart",
+          "lib/features/auth/domain/usecases/logout_usecase.dart",
+          "lib/features/auth/domain/usecases/get_current_user_usecase.dart",
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/auth/domain/repositories/auth_repository.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/auth/presentation/bloc/auth_event.dart",
+          "lib/features/auth/presentation/bloc/auth_state.dart",
+          "lib/features/auth/presentation/bloc/auth_bloc.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given flutter_bloc: ^8.1.3 is added to pubspec.yaml, When flutter pub get runs, Then package is installed",
+          "Given AuthBloc receives AuthLoginRequested, When login succeeds, Then AuthAuthenticated state is emitted with User",
+          "Given AuthBloc receives AuthLoginRequested, When login fails, Then AuthError state is emitted with error message",
+          "Given AuthBloc receives AuthLogoutRequested, When logout succeeds, Then AuthUnauthenticated state is emitted",
+          "Given flutter analyze runs, When checking bloc/, Then no errors should be found"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-4",
+        "title": "Create Auth Widgets (PasswordField, AuthForm) and Pages (LoginPage, RegisterPage, ForgotPasswordPage)",
+        "description": "## Description\nCreate reusable auth widgets and complete auth pages using existing shared widgets and BLoC.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- **Read**: `lib/shared/widgets/app_text_field.dart`, `lib/shared/widgets/app_button.dart`, `lib/core/utils/validators.dart`, `lib/features/auth/presentation/bloc/auth_bloc.dart`, `lib/features/auth/presentation/bloc/auth_event.dart`, `lib/features/auth/presentation/bloc/auth_state.dart`, `lib/core/router/route_names.dart`\n- **Modify**: None\n- **Create**:\n  - `lib/features/auth/presentation/widgets/password_field.dart`\n  - `lib/features/auth/presentation/widgets/auth_form.dart`\n  - `lib/features/auth/presentation/pages/login_page.dart`\n  - `lib/features/auth/presentation/pages/register_page.dart`\n  - `lib/features/auth/presentation/pages/forgot_password_page.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use `AppTextField` from `lib/shared/widgets/app_text_field.dart` - see constructor params: controller, labelText, hintText, prefixIcon, obscureText, validator, suffixIcon\n- Use `AppButton` from `lib/shared/widgets/app_button.dart` - see constructor params: text, onPressed, variant, isLoading, fullWidth\n- Use `Validators.email()`, `Validators.password()`, `Validators.compose()` from `lib/core/utils/validators.dart`\n- Use `BlocBuilder<AuthBloc, AuthState>` and `BlocListener<AuthBloc, AuthState>` for state management\n- Use `context.go(RouteNames.dashboard)` for navigation on success\n- Use `ScaffoldMessenger.of(context).showSnackBar()` for error messages\n\n📦 **REQUIRED STRUCTURE:**\n\n**PasswordField** (password_field.dart):\n```dart\nclass PasswordField extends StatefulWidget {\n  const PasswordField({\n    super.key,\n    this.controller,\n    this.labelText = 'Password',\n    this.hintText,\n    this.validator,\n    this.textInputAction,\n    this.onEditingComplete,\n  });\n  // Uses AppTextField internally with visibility toggle (IconButton as suffixIcon)\n  // State manages _obscureText boolean\n}\n```\n\n**AuthForm** (auth_form.dart):\n```dart\nenum AuthFormType { login, register }\n\nclass AuthForm extends StatefulWidget {\n  const AuthForm({\n    super.key,\n    required this.formType,\n    required this.onSubmit,\n    this.isLoading = false,\n  });\n  // Contains Form with email field, password field(s), optional name field\n  // Uses AppTextField, PasswordField, AppButton\n  // Validates using Validators class\n}\n```\n\n**LoginPage** (login_page.dart):\n```dart\nclass LoginPage extends StatelessWidget {\n  const LoginPage({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Login')),\n      body: BlocConsumer<AuthBloc, AuthState>(\n        listener: (context, state) {\n          if (state is AuthAuthenticated) {\n            context.go(RouteNames.dashboard);\n          } else if (state is AuthError) {\n            ScaffoldMessenger.of(context).showSnackBar(\n              SnackBar(content: Text(state.message)),\n            );\n          }\n        },\n        builder: (context, state) {\n          return SingleChildScrollView(\n            padding: const EdgeInsets.all(24),\n            child: AuthForm(\n              formType: AuthFormType.login,\n              isLoading: state is AuthLoading,\n              onSubmit: (email, password, _) {\n                context.read<AuthBloc>().add(\n                  AuthLoginRequested(email: email, password: password),\n                );\n              },\n            ),\n          );\n          // Include: \"Forgot Password?\" TextButton -> RouteNames.forgotPassword\n          // Include: \"Create Account\" TextButton -> RouteNames.register\n        },\n      ),\n    );\n  }\n}\n```\n\n**RegisterPage** (register_page.dart):\n- Similar to LoginPage but uses AuthFormType.register\n- Includes name field\n- \"Already have an account?\" TextButton -> RouteNames.login\n\n**ForgotPasswordPage** (forgot_password_page.dart):\n- Email field only\n- Submit button triggers AuthForgotPasswordRequested event\n- Success message via BlocListener on AuthForgotPasswordSuccess state\n- \"Back to Login\" TextButton -> RouteNames.login\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use TextField directly - use AppTextField\n- Do NOT use ElevatedButton directly - use AppButton\n- Do NOT hardcode validation messages - use Validators class\n- Do NOT forget to wrap pages with BlocConsumer for state handling\n- Do NOT use Navigator.push - use context.go() from go_router\n- Do NOT use placeholder text like \"Coming Soon\" - FORBIDDEN\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- LoginPage: Email field, Password field with visibility toggle, Login button, Forgot Password link, Create Account link\n- RegisterPage: Name field, Email field, Password field, Confirm Password field, Register button, Login link\n- ForgotPasswordPage: Email field, Submit button, Back to Login link\n- All forms must validate before submission\n- Loading state must disable form and show button loading indicator\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/features/auth/presentation/\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-auth-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/app_button.dart",
+          "lib/core/utils/validators.dart",
+          "lib/features/auth/presentation/bloc/auth_bloc.dart",
+          "lib/features/auth/presentation/bloc/auth_event.dart",
+          "lib/features/auth/presentation/bloc/auth_state.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/presentation/widgets/password_field.dart",
+          "lib/features/auth/presentation/widgets/auth_form.dart",
+          "lib/features/auth/presentation/pages/login_page.dart",
+          "lib/features/auth/presentation/pages/register_page.dart",
+          "lib/features/auth/presentation/pages/forgot_password_page.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given PasswordField widget, When user taps visibility icon, Then password text toggles between obscured and visible",
+          "Given LoginPage, When user enters invalid email, Then Validators.email() error message is shown",
+          "Given LoginPage, When user submits valid credentials, Then AuthLoginRequested event is dispatched to AuthBloc",
+          "Given LoginPage in AuthLoading state, When builder runs, Then AppButton shows loading indicator and form is disabled",
+          "Given LoginPage receives AuthAuthenticated state, When listener runs, Then user is navigated to dashboard",
+          "Given RegisterPage, When password and confirm password don't match, Then validation error is shown",
+          "Given ForgotPasswordPage receives AuthForgotPasswordSuccess, When listener runs, Then success message is shown via SnackBar"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-5",
+        "title": "Integrate Auth Module into DI Container, Router, and Route Names",
+        "description": "## Description\nRegister all auth services in DI container and update router to use real auth pages.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- **Read**: `lib/features/auth/data/datasources/auth_remote_datasource.dart`, `lib/features/auth/data/repositories/auth_repository_impl.dart`, `lib/features/auth/domain/usecases/login_usecase.dart`, `lib/features/auth/domain/usecases/register_usecase.dart`, `lib/features/auth/domain/usecases/logout_usecase.dart`, `lib/features/auth/domain/usecases/get_current_user_usecase.dart`, `lib/features/auth/presentation/bloc/auth_bloc.dart`, `lib/features/auth/presentation/pages/login_page.dart`, `lib/features/auth/presentation/pages/register_page.dart`, `lib/features/auth/presentation/pages/forgot_password_page.dart`\n- **Modify**:\n  - `lib/core/di/injection_container.dart`\n  - `lib/core/router/app_router.dart`\n  - `lib/core/router/route_names.dart`\n- **Create**: None\n\n🔧 **PATTERNS TO USE:**\n- Follow existing DI pattern in `injection_container.dart`: `sl.registerLazySingleton<T>()`\n- Follow existing router pattern: `GoRoute(path: RouteNames.xxx, name: 'xxx', builder: ...)`\n- Use `BlocProvider` from flutter_bloc to provide AuthBloc to pages\n- Registration order: Datasources -> Repositories -> UseCases -> Blocs\n\n📦 **REQUIRED CHANGES:**\n\n**injection_container.dart** - Add after Network Services section:\n```dart\n// ============================================================\n// Auth Feature\n// ============================================================\n\n// Data Sources\nsl.registerLazySingleton<AuthRemoteDatasource>(\n  () => AuthRemoteDatasourceImpl(client: sl<ApiClient>()),\n);\n\n// Repositories\nsl.registerLazySingleton<AuthRepository>(\n  () => AuthRepositoryImpl(\n    datasource: sl<AuthRemoteDatasource>(),\n    storage: sl<SecureStorageService>(),\n  ),\n);\n\n// Use Cases\nsl.registerLazySingleton<LoginUseCase>(\n  () => LoginUseCase(repository: sl<AuthRepository>()),\n);\nsl.registerLazySingleton<RegisterUseCase>(\n  () => RegisterUseCase(repository: sl<AuthRepository>()),\n);\nsl.registerLazySingleton<LogoutUseCase>(\n  () => LogoutUseCase(repository: sl<AuthRepository>()),\n);\nsl.registerLazySingleton<GetCurrentUserUseCase>(\n  () => GetCurrentUserUseCase(repository: sl<AuthRepository>()),\n);\n\n// Blocs (Factory - new instance per use)\nsl.registerFactory<AuthBloc>(\n  () => AuthBloc(\n    loginUseCase: sl<LoginUseCase>(),\n    registerUseCase: sl<RegisterUseCase>(),\n    logoutUseCase: sl<LogoutUseCase>(),\n    getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),\n    authRepository: sl<AuthRepository>(),\n  ),\n);\n```\n\n**route_names.dart** - Add:\n```dart\n/// Forgot Password route - password recovery screen.\nstatic const String forgotPassword = '/forgot-password';\n```\n\n**app_router.dart** - Update imports and routes:\n```dart\n// Add imports at top:\nimport 'package:app_pasos_frontend/core/di/injection_container.dart';\nimport 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dart';\nimport 'package:app_pasos_frontend/features/auth/presentation/pages/login_page.dart';\nimport 'package:app_pasos_frontend/features/auth/presentation/pages/register_page.dart';\nimport 'package:app_pasos_frontend/features/auth/presentation/pages/forgot_password_page.dart';\nimport 'package:flutter_bloc/flutter_bloc.dart';\n\n// Replace placeholder routes with real pages:\nGoRoute(\n  path: RouteNames.login,\n  name: 'login',\n  builder: (context, state) => BlocProvider(\n    create: (_) => sl<AuthBloc>(),\n    child: const LoginPage(),\n  ),\n),\nGoRoute(\n  path: RouteNames.register,\n  name: 'register',\n  builder: (context, state) => BlocProvider(\n    create: (_) => sl<AuthBloc>(),\n    child: const RegisterPage(),\n  ),\n),\nGoRoute(\n  path: RouteNames.forgotPassword,\n  name: 'forgotPassword',\n  builder: (context, state) => BlocProvider(\n    create: (_) => sl<AuthBloc>(),\n    child: const ForgotPasswordPage(),\n  ),\n),\n```\n\n**Also update _PlaceholderScreen._getRoutePath()** to include forgotPassword case.\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT register AuthBloc as singleton - use registerFactory for new instance per page\n- Do NOT forget to import all auth feature files\n- Do NOT leave _PlaceholderScreen for auth routes - replace with real pages\n- Do NOT forget to wrap pages with BlocProvider\n\n🧪 **VERIFICATION:**\n```bash\nflutter pub get\nflutter analyze lib/\nflutter build apk --debug --target-platform android-arm64\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-1",
+          "epic-auth-ui-story-3",
+          "epic-auth-ui-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+          "lib/features/auth/data/repositories/auth_repository_impl.dart",
+          "lib/features/auth/domain/usecases/login_usecase.dart",
+          "lib/features/auth/domain/usecases/register_usecase.dart",
+          "lib/features/auth/domain/usecases/logout_usecase.dart",
+          "lib/features/auth/domain/usecases/get_current_user_usecase.dart",
+          "lib/features/auth/presentation/bloc/auth_bloc.dart",
+          "lib/features/auth/presentation/pages/login_page.dart",
+          "lib/features/auth/presentation/pages/register_page.dart",
+          "lib/features/auth/presentation/pages/forgot_password_page.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/router/app_router.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given initializeDependencies() is called, When app starts, Then sl<AuthBloc>() returns valid instance",
+          "Given sl<AuthRepository>() is called, When resolving, Then AuthRepositoryImpl is returned with all dependencies",
+          "Given user navigates to /login, When route is resolved, Then LoginPage is rendered with BlocProvider<AuthBloc>",
+          "Given user navigates to /register, When route is resolved, Then RegisterPage is rendered with BlocProvider<AuthBloc>",
+          "Given user navigates to /forgot-password, When route is resolved, Then ForgotPasswordPage is rendered with BlocProvider<AuthBloc>",
+          "Given flutter analyze runs on entire lib/, When checking all files, Then no errors should be found",
+          "Given flutter build apk runs, When building debug APK, Then build completes successfully"
+        ]
+      }
+    ]
+  }
+}
