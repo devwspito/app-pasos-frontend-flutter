@@ -1,0 +1,143 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'goal_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+GroupGoalModel _$GroupGoalModelFromJson(Map<String, dynamic> json) =>
+    GroupGoalModel(
+      id: json['_id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      targetSteps: (json['targetSteps'] as num).toInt(),
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+      creatorId: json['creatorId'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      creator: json['creator'] == null
+          ? null
+          : UserModel.fromJson(json['creator'] as Map<String, dynamic>),
+      members: (json['members'] as List<dynamic>?)
+          ?.map((e) =>
+              GroupGoalMembershipModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$GroupGoalModelToJson(GroupGoalModel instance) =>
+    <String, dynamic>{
+      '_id': instance.id,
+      'title': instance.title,
+      'description': instance.description,
+      'targetSteps': instance.targetSteps,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
+      'creatorId': instance.creatorId,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
+      if (instance.creator case final value?) 'creator': value,
+      if (instance.members case final value?) 'members': value,
+    };
+
+GroupGoalMembershipModel _$GroupGoalMembershipModelFromJson(
+        Map<String, dynamic> json) =>
+    GroupGoalMembershipModel(
+      id: json['_id'] as String,
+      goalId: json['goalId'] as String,
+      userId: json['userId'] as String,
+      joinedAt: DateTime.parse(json['joinedAt'] as String),
+      status: $enumDecode(_$MembershipStatusEnumMap, json['status']),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      user: json['user'] == null
+          ? null
+          : UserModel.fromJson(json['user'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$GroupGoalMembershipModelToJson(
+        GroupGoalMembershipModel instance) =>
+    <String, dynamic>{
+      '_id': instance.id,
+      'goalId': instance.goalId,
+      'userId': instance.userId,
+      'joinedAt': instance.joinedAt.toIso8601String(),
+      'status': _$MembershipStatusEnumMap[instance.status]!,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
+      if (instance.user case final value?) 'user': value,
+    };
+
+const _$MembershipStatusEnumMap = {
+  MembershipStatus.pending: 'pending',
+  MembershipStatus.active: 'active',
+  MembershipStatus.left: 'left',
+};
+
+CreateGoalRequest _$CreateGoalRequestFromJson(Map<String, dynamic> json) =>
+    CreateGoalRequest(
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      targetSteps: (json['targetSteps'] as num).toInt(),
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+    );
+
+Map<String, dynamic> _$CreateGoalRequestToJson(CreateGoalRequest instance) =>
+    <String, dynamic>{
+      'title': instance.title,
+      'description': instance.description,
+      'targetSteps': instance.targetSteps,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
+    };
+
+InviteToGoalRequest _$InviteToGoalRequestFromJson(Map<String, dynamic> json) =>
+    InviteToGoalRequest(
+      userId: json['userId'] as String,
+    );
+
+Map<String, dynamic> _$InviteToGoalRequestToJson(
+        InviteToGoalRequest instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+    };
+
+GoalProgressResponse _$GoalProgressResponseFromJson(
+        Map<String, dynamic> json) =>
+    GoalProgressResponse(
+      goalId: json['goalId'] as String,
+      targetSteps: (json['targetSteps'] as num).toInt(),
+      totalSteps: (json['totalSteps'] as num).toInt(),
+      progressPercentage: (json['progressPercentage'] as num).toDouble(),
+      memberProgress: (json['memberProgress'] as List<dynamic>)
+          .map((e) => MemberProgress.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$GoalProgressResponseToJson(
+        GoalProgressResponse instance) =>
+    <String, dynamic>{
+      'goalId': instance.goalId,
+      'targetSteps': instance.targetSteps,
+      'totalSteps': instance.totalSteps,
+      'progressPercentage': instance.progressPercentage,
+      'memberProgress': instance.memberProgress,
+    };
+
+MemberProgress _$MemberProgressFromJson(Map<String, dynamic> json) =>
+    MemberProgress(
+      userId: json['userId'] as String,
+      username: json['username'] as String,
+      steps: (json['steps'] as num).toInt(),
+      contribution: (json['contribution'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$MemberProgressToJson(MemberProgress instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'username': instance.username,
+      'steps': instance.steps,
+      'contribution': instance.contribution,
+    };
