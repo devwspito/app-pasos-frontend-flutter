@@ -37,4 +37,7 @@ abstract final class RouteNames {
 
   /// Settings route - application settings screen.
   static const String settings = '/settings';
+
+  /// Forgot Password route - password recovery screen.
+  static const String forgotPassword = '/forgot-password';
 }
