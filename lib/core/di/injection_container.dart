@@ -26,6 +26,18 @@ import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_today_
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/record_steps_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:app_pasos_frontend/features/sharing/data/datasources/sharing_remote_datasource.dart';
+import 'package:app_pasos_frontend/features/sharing/data/repositories/sharing_repository_impl.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/repositories/sharing_repository.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/accept_request_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/get_friend_stats_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/get_relationships_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/reject_request_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/revoke_sharing_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/search_users_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/usecases/send_request_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/friend_search_bloc.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 /// Global service locator instance.
@@ -167,6 +179,60 @@ Future<void> initializeDependencies() async {
       getWeeklyTrendUseCase: sl<GetWeeklyTrendUseCase>(),
       getHourlyPeaksUseCase: sl<GetHourlyPeaksUseCase>(),
       recordStepsUseCase: sl<RecordStepsUseCase>(),
+    ),
+  );
+
+  // ============================================================
+  // Sharing Feature
+  // ============================================================
+
+  // Data Sources
+  sl.registerLazySingleton<SharingRemoteDatasource>(
+    () => SharingRemoteDatasourceImpl(client: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<SharingRepository>(
+    () => SharingRepositoryImpl(datasource: sl<SharingRemoteDatasource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetRelationshipsUseCase>(
+    () => GetRelationshipsUseCase(repository: sl<SharingRepository>()),
+  );
+  sl.registerLazySingleton<SendRequestUseCase>(
+    () => SendRequestUseCase(repository: sl<SharingRepository>()),
+  );
+  sl.registerLazySingleton<AcceptRequestUseCase>(
+    () => AcceptRequestUseCase(repository: sl<SharingRepository>()),
+  );
+  sl.registerLazySingleton<RejectRequestUseCase>(
+    () => RejectRequestUseCase(repository: sl<SharingRepository>()),
+  );
+  sl.registerLazySingleton<RevokeSharingUseCase>(
+    () => RevokeSharingUseCase(repository: sl<SharingRepository>()),
+  );
+  sl.registerLazySingleton<GetFriendStatsUseCase>(
+    () => GetFriendStatsUseCase(repository: sl<SharingRepository>()),
+  );
+  sl.registerLazySingleton<SearchUsersUseCase>(
+    () => SearchUsersUseCase(repository: sl<SharingRepository>()),
+  );
+
+  // Blocs (Factory - new instance per use)
+  sl.registerFactory<SharingBloc>(
+    () => SharingBloc(
+      getRelationshipsUseCase: sl<GetRelationshipsUseCase>(),
+      sendRequestUseCase: sl<SendRequestUseCase>(),
+      acceptRequestUseCase: sl<AcceptRequestUseCase>(),
+      rejectRequestUseCase: sl<RejectRequestUseCase>(),
+      revokeSharingUseCase: sl<RevokeSharingUseCase>(),
+      getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),
+    ),
+  );
+  sl.registerFactory<FriendSearchBloc>(
+    () => FriendSearchBloc(
+      searchUsersUseCase: sl<SearchUsersUseCase>(),
     ),
   );
 }
