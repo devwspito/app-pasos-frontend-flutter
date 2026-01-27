@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "323317759c9c31a85f289166",
+    "timestamp": "2026-01-27T21:36:10.883Z",
+    "phase": "judge",
+    "storyId": "epic-goals-ui-story-7",
+    "savedAt": "2026-01-27T21:36:10.883Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-goals-ui-story-7",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}

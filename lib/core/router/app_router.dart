@@ -14,6 +14,16 @@ import 'package:app_pasos_frontend/features/auth/presentation/pages/register_pag
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/create_goal_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_event.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_event.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/pages/create_goal_page.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/pages/goal_detail_page.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/pages/goal_rankings_page.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/pages/goals_list_page.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/pages/invite_members_page.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/bloc/friend_search_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_event.dart';
@@ -146,6 +156,67 @@ abstract final class AppRouter {
         ],
         child: const AddFriendPage(),
       ),
+    ),
+    // ============================================================
+    // Goals Routes
+    // ============================================================
+    GoRoute(
+      path: RouteNames.goals,
+      name: 'goals',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<GoalsListBloc>()..add(const GoalsListLoadRequested()),
+        child: const GoalsListPage(),
+      ),
+    ),
+    GoRoute(
+      path: RouteNames.goalDetail,
+      name: 'goalDetail',
+      builder: (context, state) {
+        final goalId = state.uri.queryParameters['goalId'] ?? '';
+        return BlocProvider(
+          create: (_) => sl<GoalDetailBloc>()
+            ..add(GoalDetailLoadRequested(goalId: goalId)),
+          child: GoalDetailPage(goalId: goalId),
+        );
+      },
+    ),
+    GoRoute(
+      path: RouteNames.createGoal,
+      name: 'createGoal',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<CreateGoalBloc>(),
+        child: const CreateGoalPage(),
+      ),
+    ),
+    GoRoute(
+      path: RouteNames.inviteMembers,
+      name: 'inviteMembers',
+      builder: (context, state) {
+        final goalId = state.uri.queryParameters['goalId'] ?? '';
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => sl<FriendSearchBloc>(),
+            ),
+            BlocProvider(
+              create: (_) => sl<GoalDetailBloc>(),
+            ),
+          ],
+          child: InviteMembersPage(goalId: goalId),
+        );
+      },
+    ),
+    GoRoute(
+      path: RouteNames.goalRankings,
+      name: 'goalRankings',
+      builder: (context, state) {
+        final goalId = state.uri.queryParameters['goalId'] ?? '';
+        return BlocProvider(
+          create: (_) => sl<GoalDetailBloc>()
+            ..add(GoalDetailLoadRequested(goalId: goalId)),
+          child: GoalRankingsPage(goalId: goalId),
+        );
+      },
     ),
   ];
 
