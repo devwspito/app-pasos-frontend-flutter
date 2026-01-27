@@ -1,0 +1,253 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "323317759c9c31a85f289166",
+    "timestamp": "2026-01-27T19:54:15.863Z",
+    "phase": "techlead",
+    "epicId": "epic-goals-ui",
+    "savedAt": "2026-01-27T19:54:15.864Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-goals-ui",
+    "storiesCount": 7,
+    "architecture": "## Goals UI Architecture\n\n### Clean Architecture Layers\n\n**Domain Layer (lib/features/goals/domain/)**\n- Entities: GroupGoal, GoalMembership, GoalProgress, MemberContribution\n- Repository Interface: GoalsRepository (abstract interface class)\n- Use Cases: GetUserGoals, CreateGoal, GetGoalDetails, InviteUser, JoinGoal, LeaveGoal, GetGoalProgress\n\n**Data Layer (lib/features/goals/data/)**\n- Models: GroupGoalModel, GoalMembershipModel, GoalProgressModel, MemberContributionModel\n- Datasource: GoalsRemoteDatasource (interface + implementation)\n- Repository Implementation: GoalsRepositoryImpl\n\n**Presentation Layer (lib/features/goals/presentation/)**\n- BLoCs: GoalsListBloc, GoalDetailBloc, CreateGoalBloc\n- Pages: GoalsListPage, GoalDetailPage, CreateGoalPage, InviteMembersPage, GoalRankingsPage\n- Widgets: GoalCard, GoalProgressIndicator, MemberContributionTile, RankingListItem, GoalForm\n\n### SOLID Compliance\n- **SRP**: Each BLoC handles one screen, each UseCase one action\n- **OCP**: New goal types can be added via entity extension\n- **LSP**: All models properly extend their entity base classes\n- **ISP**: GoalsRepository interface contains only goal-related methods\n- **DIP**: BLoCs depend on use case abstractions, not implementations\n\n### Dependency Flow\nPresentation (BLoCs) → Domain (UseCases, Repository Interface) → Data (Repository Impl, Datasource)\n\n### State Management\n- Sealed classes for exhaustive pattern matching\n- Equatable for efficient state comparison\n- Loading/Loaded/Error states for async operations\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Typecheck: `dart analyze lib/`\n- Build: `flutter build web --release`\n- Test: `flutter test`",
+    "stories": [
+      {
+        "id": "epic-goals-ui-story-1",
+        "title": "Create Goals domain layer entities in lib/features/goals/domain/entities/",
+        "description": "Create all domain entities for the Goals feature following the exact pattern from User and SharedUser entities.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed in filesToCreate\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/domain/entities/user.dart, lib/features/sharing/domain/entities/shared_user.dart, lib/features/sharing/domain/entities/sharing_relationship.dart\n- Create: lib/features/goals/domain/entities/group_goal.dart, lib/features/goals/domain/entities/goal_membership.dart, lib/features/goals/domain/entities/goal_progress.dart, lib/features/goals/domain/entities/member_contribution.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `class GroupGoal extends Equatable` pattern from User entity\n- Include `factory GroupGoal.empty()` for initial states\n- Add helper getters like `bool get isEmpty => id.isEmpty`\n- Include comprehensive documentation with examples\n- All properties in `props` getter for equality\n\n📦 **REQUIRED ENTITY FIELDS:**\n\n**GroupGoal:**\n- id: String (required)\n- name: String (required)\n- description: String (optional)\n- targetSteps: int (required)\n- startDate: DateTime (required)\n- endDate: DateTime (required)\n- creatorId: String (required)\n- status: String ('active', 'completed', 'cancelled')\n- createdAt: DateTime\n- Helper getters: isActive, isCompleted, isCancelled, isEmpty\n\n**GoalMembership:**\n- id: String\n- goalId: String\n- userId: String\n- role: String ('creator', 'admin', 'member')\n- joinedAt: DateTime\n- status: String ('active', 'invited', 'left')\n- Helper getters: isCreator, isAdmin, isMember, isActive\n\n**GoalProgress:**\n- id: String\n- goalId: String\n- currentSteps: int\n- targetSteps: int\n- progressPercentage: double\n- lastUpdated: DateTime\n- Helper getters: isCompleted (currentSteps >= targetSteps), progressRatio\n\n**MemberContribution:**\n- id: String\n- goalId: String\n- userId: String\n- userName: String\n- totalSteps: int\n- contributionPercentage: double\n- rank: int\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use mutable fields - all fields must be `final`\n- DO NOT skip Equatable - extend it always\n- DO NOT forget the empty() factory constructor\n- DO NOT forget helper getters for common status checks\n\n**VERIFICATION:**\n- Run: `dart analyze lib/features/goals/domain/entities/`\n- All files must have no analysis errors\n- Check Equatable props includes all fields",
+        "epicId": "epic-goals-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/sharing/domain/entities/shared_user.dart",
+          "lib/features/sharing/domain/entities/sharing_relationship.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/domain/entities/group_goal.dart",
+          "lib/features/goals/domain/entities/goal_membership.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart",
+          "lib/features/goals/domain/entities/member_contribution.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the GroupGoal entity exists, When instantiated with required fields, Then all fields are accessible and immutable",
+          "Given an empty GroupGoal is needed, When GroupGoal.empty() is called, Then an entity with empty id is returned",
+          "Given two GroupGoal instances with same data, When compared with ==, Then they are equal due to Equatable",
+          "Given GoalProgress entity, When currentSteps >= targetSteps, Then isCompleted returns true",
+          "Given MemberContribution entity, When rank is 1, Then it represents the top contributor"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-2",
+        "title": "Create Goals data layer models in lib/features/goals/data/models/",
+        "description": "Create all data models for the Goals feature following the exact pattern from UserModel and SharedUserModel.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed in filesToCreate\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/data/models/user_model.dart, lib/features/sharing/data/models/shared_user_model.dart, lib/features/sharing/data/models/sharing_relationship_model.dart\n- Create: lib/features/goals/data/models/group_goal_model.dart, lib/features/goals/data/models/goal_membership_model.dart, lib/features/goals/data/models/goal_progress_model.dart, lib/features/goals/data/models/member_contribution_model.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `class GroupGoalModel extends GroupGoal` pattern\n- Include `factory GroupGoalModel.fromJson(Map<String, dynamic> json)`\n- Include `factory GroupGoalModel.fromEntity(GroupGoal entity)`\n- Include `Map<String, dynamic> toJson()` method\n- Include `GroupGoalModel copyWith(...)` method\n- Include `static List<GroupGoalModel> fromJsonList(dynamic jsonList)` method\n- Handle both `_id` and `id` in JSON parsing (MongoDB compatibility)\n\n📦 **JSON STRUCTURE EXPECTATIONS:**\n\n**GroupGoalModel:**\n```json\n{\n  \"_id\": \"string\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"targetSteps\": 50000,\n  \"startDate\": \"2024-01-01T00:00:00.000Z\",\n  \"endDate\": \"2024-01-31T00:00:00.000Z\",\n  \"creatorId\": \"string\",\n  \"status\": \"active\",\n  \"createdAt\": \"2024-01-01T00:00:00.000Z\"\n}\n```\n\n**GoalProgressModel:**\n```json\n{\n  \"_id\": \"string\",\n  \"goalId\": \"string\",\n  \"currentSteps\": 25000,\n  \"targetSteps\": 50000,\n  \"progressPercentage\": 50.0,\n  \"lastUpdated\": \"2024-01-15T00:00:00.000Z\"\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `json['id']` only - always check `json['_id'] ?? json['id']`\n- DO NOT forget null safety with `as String?` casts\n- DO NOT skip the fromJsonList static method\n- DO NOT skip the fromEntity factory constructor\n\n**VERIFICATION:**\n- Run: `dart analyze lib/features/goals/data/models/`\n- All files must have no analysis errors",
+        "epicId": "epic-goals-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/data/models/user_model.dart",
+          "lib/features/sharing/data/models/shared_user_model.dart",
+          "lib/features/sharing/data/models/sharing_relationship_model.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/data/models/group_goal_model.dart",
+          "lib/features/goals/data/models/goal_membership_model.dart",
+          "lib/features/goals/data/models/goal_progress_model.dart",
+          "lib/features/goals/data/models/member_contribution_model.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given valid JSON, When GroupGoalModel.fromJson() is called, Then a valid model is returned",
+          "Given a GroupGoal entity, When GroupGoalModel.fromEntity() is called, Then a model with same data is returned",
+          "Given a GroupGoalModel, When toJson() is called, Then a valid JSON map is returned",
+          "Given a JSON list, When GroupGoalModel.fromJsonList() is called, Then a List<GroupGoalModel> is returned",
+          "Given JSON with _id field, When parsing, Then id is correctly extracted"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-3",
+        "title": "Create Goals repository interface, implementation, datasource, and use cases",
+        "description": "Create the complete data layer infrastructure and use cases for the Goals feature.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/domain/repositories/sharing_repository.dart, lib/features/sharing/data/repositories/sharing_repository_impl.dart, lib/features/sharing/data/datasources/sharing_remote_datasource.dart, lib/features/sharing/domain/usecases/get_relationships_usecase.dart, lib/core/network/api_endpoints.dart\n- Create: lib/features/goals/domain/repositories/goals_repository.dart, lib/features/goals/data/datasources/goals_remote_datasource.dart, lib/features/goals/data/repositories/goals_repository_impl.dart, lib/features/goals/domain/usecases/get_user_goals_usecase.dart, lib/features/goals/domain/usecases/create_goal_usecase.dart, lib/features/goals/domain/usecases/get_goal_details_usecase.dart, lib/features/goals/domain/usecases/invite_user_usecase.dart, lib/features/goals/domain/usecases/join_goal_usecase.dart, lib/features/goals/domain/usecases/leave_goal_usecase.dart, lib/features/goals/domain/usecases/get_goal_progress_usecase.dart\n- Modify: lib/core/network/api_endpoints.dart\n\n🔧 **PATTERNS TO USE:**\n\n**Repository Interface (goals_repository.dart):**\n```dart\nabstract interface class GoalsRepository {\n  Future<List<GroupGoal>> getUserGoals();\n  Future<GroupGoal> createGoal({required String name, ...});\n  Future<GroupGoal> getGoalDetails({required String goalId});\n  Future<GoalProgress> getGoalProgress({required String goalId});\n  Future<void> inviteUser({required String goalId, required String userId});\n  Future<void> joinGoal({required String goalId});\n  Future<void> leaveGoal({required String goalId});\n}\n```\n\n**Datasource Implementation Pattern:**\n```dart\nclass GoalsRemoteDatasourceImpl implements GoalsRemoteDatasource {\n  GoalsRemoteDatasourceImpl({required ApiClient client}) : _client = client;\n  final ApiClient _client;\n  \n  static const String _goalsEndpoint = '/goals';\n  \n  @override\n  Future<List<GroupGoalModel>> getUserGoals() async {\n    final response = await _client.get<Map<String, dynamic>>(_goalsEndpoint);\n    // Handle response...\n  }\n}\n```\n\n**UseCase Pattern:**\n```dart\nclass GetUserGoalsUseCase {\n  GetUserGoalsUseCase({required GoalsRepository repository})\n      : _repository = repository;\n  final GoalsRepository _repository;\n  \n  Future<List<GroupGoal>> call() async {\n    return _repository.getUserGoals();\n  }\n}\n```\n\n📦 **API ENDPOINTS TO ADD:**\nAdd to ApiEndpoints class:\n```dart\n// Goals Endpoints\nstatic const String goals = '/goals';\nstatic const String goalDetails = '/goals/{id}';\nstatic const String goalProgress = '/goals/{id}/progress';\nstatic const String goalInvite = '/goals/{id}/invite';\nstatic const String goalJoin = '/goals/{id}/join';\nstatic const String goalLeave = '/goals/{id}/leave';\nstatic const String goalRankings = '/goals/{id}/rankings';\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT implement business logic in repository - just delegate to datasource\n- DO NOT use direct API paths in datasource - use constants\n- DO NOT skip exception documentation in repository interface\n- DO NOT create multiple actions in a single UseCase\n\n**VERIFICATION:**\n- Run: `dart analyze lib/features/goals/`\n- All files must have no analysis errors",
+        "epicId": "epic-goals-ui",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-ui-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/domain/repositories/sharing_repository.dart",
+          "lib/features/sharing/data/repositories/sharing_repository_impl.dart",
+          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
+          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
+          "lib/core/network/api_endpoints.dart"
+        ],
+        "filesToModify": [
+          "lib/core/network/api_endpoints.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/domain/repositories/goals_repository.dart",
+          "lib/features/goals/data/datasources/goals_remote_datasource.dart",
+          "lib/features/goals/data/repositories/goals_repository_impl.dart",
+          "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
+          "lib/features/goals/domain/usecases/create_goal_usecase.dart",
+          "lib/features/goals/domain/usecases/get_goal_details_usecase.dart",
+          "lib/features/goals/domain/usecases/invite_user_usecase.dart",
+          "lib/features/goals/domain/usecases/join_goal_usecase.dart",
+          "lib/features/goals/domain/usecases/leave_goal_usecase.dart",
+          "lib/features/goals/domain/usecases/get_goal_progress_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalsRepository interface exists, When implemented, Then all methods return correct entity types",
+          "Given GoalsRemoteDatasource, When getUserGoals() called, Then it uses ApiClient.get() with correct endpoint",
+          "Given GetUserGoalsUseCase, When call() is invoked, Then it delegates to repository.getUserGoals()",
+          "Given ApiEndpoints, When goals endpoints added, Then they follow existing naming convention",
+          "Given CreateGoalUseCase, When called with name, targetSteps, dates, Then new goal is created via repository"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-4",
+        "title": "Create Goals BLoCs (goals_list, goal_detail, create_goal) in lib/features/goals/presentation/bloc/",
+        "description": "Create all BLoCs for the Goals feature following the exact pattern from SharingBloc.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed in filesToCreate\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/bloc/sharing_bloc.dart, lib/features/sharing/presentation/bloc/sharing_event.dart, lib/features/sharing/presentation/bloc/sharing_state.dart, lib/features/dashboard/presentation/bloc/dashboard_bloc.dart\n- Create: lib/features/goals/presentation/bloc/goals_list_bloc.dart, lib/features/goals/presentation/bloc/goals_list_event.dart, lib/features/goals/presentation/bloc/goals_list_state.dart, lib/features/goals/presentation/bloc/goal_detail_bloc.dart, lib/features/goals/presentation/bloc/goal_detail_event.dart, lib/features/goals/presentation/bloc/goal_detail_state.dart, lib/features/goals/presentation/bloc/create_goal_bloc.dart, lib/features/goals/presentation/bloc/create_goal_event.dart, lib/features/goals/presentation/bloc/create_goal_state.dart\n\n🔧 **PATTERNS TO USE:**\n\n**Event Pattern (sealed class):**\n```dart\nsealed class GoalsListEvent extends Equatable {\n  const GoalsListEvent();\n}\n\nfinal class GoalsListLoadRequested extends GoalsListEvent {\n  const GoalsListLoadRequested();\n  @override\n  List<Object?> get props => [];\n}\n```\n\n**State Pattern (sealed class):**\n```dart\nsealed class GoalsListState extends Equatable {\n  const GoalsListState();\n}\n\nfinal class GoalsListInitial extends GoalsListState {...}\nfinal class GoalsListLoading extends GoalsListState {...}\nfinal class GoalsListLoaded extends GoalsListState {\n  const GoalsListLoaded({required this.goals});\n  final List<GroupGoal> goals;\n  ...\n}\nfinal class GoalsListError extends GoalsListState {\n  const GoalsListError({required this.message});\n  final String message;\n  ...\n}\n```\n\n**BLoC Pattern:**\n```dart\nclass GoalsListBloc extends Bloc<GoalsListEvent, GoalsListState> {\n  GoalsListBloc({\n    required GetUserGoalsUseCase getUserGoalsUseCase,\n  }) : _getUserGoalsUseCase = getUserGoalsUseCase,\n       super(const GoalsListInitial()) {\n    on<GoalsListLoadRequested>(_onLoadRequested);\n    on<GoalsListRefreshRequested>(_onRefreshRequested);\n  }\n  ...\n}\n```\n\n📦 **REQUIRED EVENTS:**\n\n**GoalsListBloc:**\n- GoalsListLoadRequested\n- GoalsListRefreshRequested\n\n**GoalDetailBloc:**\n- GoalDetailLoadRequested(goalId)\n- GoalDetailRefreshRequested(goalId)\n- GoalDetailInviteUserRequested(goalId, userId)\n- GoalDetailLeaveRequested(goalId)\n\n**CreateGoalBloc:**\n- CreateGoalSubmitted(name, description, targetSteps, startDate, endDate)\n- CreateGoalReset\n\n📦 **REQUIRED STATES:**\n\n**GoalsListState:** Initial, Loading, Loaded(goals), Error(message)\n**GoalDetailState:** Initial, Loading, Loaded(goal, progress, members), Error(message), ActionSuccess(message)\n**CreateGoalState:** Initial, Submitting, Success(goal), Error(message)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use abstract class - use `sealed class` for Events and States\n- DO NOT forget `final class` for concrete events/states\n- DO NOT skip the error message handling with `_getErrorMessage` helper\n- DO NOT use non-sealed base classes\n\n**VERIFICATION:**\n- Run: `dart analyze lib/features/goals/presentation/bloc/`\n- All files must have no analysis errors",
+        "epicId": "epic-goals-ui",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/presentation/bloc/sharing_event.dart",
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/bloc/goals_list_bloc.dart",
+          "lib/features/goals/presentation/bloc/goals_list_event.dart",
+          "lib/features/goals/presentation/bloc/goals_list_state.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_state.dart",
+          "lib/features/goals/presentation/bloc/create_goal_bloc.dart",
+          "lib/features/goals/presentation/bloc/create_goal_event.dart",
+          "lib/features/goals/presentation/bloc/create_goal_state.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalsListBloc, When GoalsListLoadRequested is added, Then it emits Loading then Loaded/Error",
+          "Given GoalDetailBloc, When GoalDetailLoadRequested(goalId) added, Then goal details with progress are loaded",
+          "Given CreateGoalBloc, When CreateGoalSubmitted event added, Then it emits Submitting then Success/Error",
+          "Given any BLoC state, When switch statement used, Then all cases are exhaustively handled due to sealed class",
+          "Given an error occurs, When _getErrorMessage is called, Then user-friendly message is returned"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-5",
+        "title": "Create Goals widgets (goal_card, goal_progress_indicator, member_contribution_tile, ranking_list_item, goal_form)",
+        "description": "Create all reusable widgets for the Goals feature following existing widget patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed in filesToCreate\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/widgets/friend_card.dart, lib/features/dashboard/presentation/widgets/weekly_chart.dart, lib/features/auth/presentation/widgets/auth_form.dart, lib/shared/widgets/app_card.dart, lib/shared/widgets/app_button.dart\n- Create: lib/features/goals/presentation/widgets/goal_card.dart, lib/features/goals/presentation/widgets/goal_progress_indicator.dart, lib/features/goals/presentation/widgets/member_contribution_tile.dart, lib/features/goals/presentation/widgets/ranking_list_item.dart, lib/features/goals/presentation/widgets/goal_form.dart\n\n🔧 **PATTERNS TO USE:**\n\n**GoalCard (following FriendCard pattern):**\n```dart\nclass GoalCard extends StatelessWidget {\n  const GoalCard({\n    required this.goal,\n    required this.onTap,\n    this.progress,\n    super.key,\n  });\n  \n  final GroupGoal goal;\n  final GoalProgress? progress;\n  final VoidCallback onTap;\n  \n  @override\n  Widget build(BuildContext context) {\n    return AppCard(\n      onTap: onTap,\n      child: Row(...),\n    );\n  }\n}\n```\n\n**GoalProgressIndicator (following WeeklyChart pattern):**\n- Circular progress indicator showing goal completion\n- Uses fl_chart or custom painter\n- Shows percentage in center\n- Color changes based on progress (green > 80%, yellow 50-80%, red < 50%)\n\n**MemberContributionTile:**\n- Avatar, name, steps contributed, percentage bar\n- Similar layout to FriendCard but horizontal bar\n\n**RankingListItem:**\n- Rank number, avatar, name, steps, medal icon for top 3\n- Trophy icons: 🥇 🥈 🥉 for positions 1-3\n\n**GoalForm (following AuthForm pattern):**\n```dart\nclass GoalForm extends StatefulWidget {\n  const GoalForm({\n    required this.onSubmit,\n    this.isLoading = false,\n    super.key,\n  });\n  \n  final void Function(String name, String? description, int targetSteps, DateTime startDate, DateTime endDate) onSubmit;\n  final bool isLoading;\n  ...\n}\n```\n- Name TextField (required, max 50 chars)\n- Description TextField (optional, multiline)\n- Target Steps TextField (required, numeric, min 1000)\n- Start Date DatePicker\n- End Date DatePicker\n- Submit button using AppButton\n- Form validation\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use StatefulWidget when StatelessWidget suffices\n- DO NOT hardcode colors - use `Theme.of(context).colorScheme`\n- DO NOT skip `super.key` in constructors\n- DO NOT use placeholder text like \"Coming Soon\"\n\n**VERIFICATION:**\n- Run: `dart analyze lib/features/goals/presentation/widgets/`\n- All files must have no analysis errors",
+        "epicId": "epic-goals-ui",
+        "priority": 5,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/dashboard/presentation/widgets/weekly_chart.dart",
+          "lib/features/auth/presentation/widgets/auth_form.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/app_button.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/widgets/goal_card.dart",
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/member_contribution_tile.dart",
+          "lib/features/goals/presentation/widgets/ranking_list_item.dart",
+          "lib/features/goals/presentation/widgets/goal_form.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalCard widget, When rendered with goal and progress, Then shows goal name, target, and progress indicator",
+          "Given GoalProgressIndicator, When progress is 75%, Then circular indicator shows 75% with yellow color",
+          "Given MemberContributionTile, When rendered, Then shows avatar, name, steps, and percentage bar",
+          "Given RankingListItem with rank 1, When rendered, Then shows gold medal icon",
+          "Given GoalForm, When submitted with valid data, Then onSubmit callback is called with all fields"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-6",
+        "title": "Create Goals pages (goals_list_page, goal_detail_page, create_goal_page, invite_members_page, goal_rankings_page)",
+        "description": "Create all pages for the Goals feature following the FriendsListPage pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed in filesToCreate\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/pages/friends_list_page.dart, lib/features/sharing/presentation/pages/add_friend_page.dart, lib/features/dashboard/presentation/pages/dashboard_page.dart\n- Create: lib/features/goals/presentation/pages/goals_list_page.dart, lib/features/goals/presentation/pages/goal_detail_page.dart, lib/features/goals/presentation/pages/create_goal_page.dart, lib/features/goals/presentation/pages/invite_members_page.dart, lib/features/goals/presentation/pages/goal_rankings_page.dart\n\n🔧 **PATTERNS TO USE:**\n\n**GoalsListPage (following FriendsListPage):**\n```dart\nclass GoalsListPage extends StatelessWidget {\n  const GoalsListPage({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(\n        title: const Text('My Goals'),\n        actions: [\n          IconButton(\n            icon: const Icon(Icons.add),\n            onPressed: () => context.push(RouteNames.createGoal),\n          ),\n        ],\n      ),\n      body: BlocBuilder<GoalsListBloc, GoalsListState>(\n        builder: (context, state) {\n          return switch (state) {\n            GoalsListInitial() => _buildInitialState(context),\n            GoalsListLoading() => const LoadingIndicator(),\n            GoalsListLoaded(:final goals) => _buildLoadedState(context, goals),\n            GoalsListError(:final message) => AppErrorWidget(message: message),\n          };\n        },\n      ),\n      floatingActionButton: FloatingActionButton(\n        onPressed: () => context.push(RouteNames.createGoal),\n        child: const Icon(Icons.add),\n      ),\n    );\n  }\n}\n```\n\n**GoalDetailPage:**\n- AppBar with goal name\n- Hero section with GoalProgressIndicator\n- Section: Goal Info (target, dates, status)\n- Section: Members List with MemberContributionTile widgets\n- Action buttons: Invite (if creator), Leave, View Rankings\n\n**CreateGoalPage:**\n- AppBar: \"Create Goal\"\n- GoalForm widget\n- BlocListener for success/error handling\n\n**InviteMembersPage:**\n- Search field for finding users\n- List of search results with invite button\n- Similar to AddFriendPage\n\n**GoalRankingsPage:**\n- AppBar: \"Rankings\"\n- List of RankingListItem widgets sorted by contribution\n- Pull-to-refresh\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use BlocListener when BlocBuilder is sufficient\n- DO NOT forget RefreshIndicator for pull-to-refresh\n- DO NOT forget EmptyState widget when list is empty\n- DO NOT use placeholder screens - all UI must be functional\n\n**VERIFICATION:**\n- Run: `dart analyze lib/features/goals/presentation/pages/`\n- All files must have no analysis errors",
+        "epicId": "epic-goals-ui",
+        "priority": 6,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-ui-story-4",
+          "epic-goals-ui-story-5"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/pages/friends_list_page.dart",
+          "lib/features/sharing/presentation/pages/add_friend_page.dart",
+          "lib/features/dashboard/presentation/pages/dashboard_page.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/goals/presentation/pages/goals_list_page.dart",
+          "lib/features/goals/presentation/pages/goal_detail_page.dart",
+          "lib/features/goals/presentation/pages/create_goal_page.dart",
+          "lib/features/goals/presentation/pages/invite_members_page.dart",
+          "lib/features/goals/presentation/pages/goal_rankings_page.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalsListPage, When no goals exist, Then EmptyState with 'Create your first goal' message is shown",
+          "Given GoalsListPage, When goals exist, Then GoalCard widgets are rendered in a RefreshIndicator ListView",
+          "Given GoalDetailPage, When loaded, Then shows progress indicator, goal info, and member list",
+          "Given CreateGoalPage, When form submitted successfully, Then navigates back to goals list",
+          "Given GoalRankingsPage, When loaded, Then shows members sorted by contribution with rank positions"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-7",
+        "title": "Integrate Goals feature into router and dependency injection in lib/core/",
+        "description": "Register all Goals dependencies and add routes to complete the feature integration.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed in filesToModify\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/di/injection_container.dart, lib/core/router/app_router.dart, lib/core/router/route_names.dart\n- Modify: lib/core/di/injection_container.dart, lib/core/router/app_router.dart, lib/core/router/route_names.dart\n\n🔧 **PATTERNS TO USE:**\n\n**RouteNames additions:**\n```dart\n// Goals Routes\nstatic const String goals = '/goals';\nstatic const String goalDetail = '/goals/detail';\nstatic const String createGoal = '/goals/create';\nstatic const String inviteMembers = '/goals/invite';\nstatic const String goalRankings = '/goals/rankings';\n```\n\n**AppRouter additions (following existing pattern):**\n```dart\nGoRoute(\n  path: RouteNames.goals,\n  name: 'goals',\n  builder: (context, state) => BlocProvider(\n    create: (_) => sl<GoalsListBloc>()..add(const GoalsListLoadRequested()),\n    child: const GoalsListPage(),\n  ),\n),\nGoRoute(\n  path: RouteNames.goalDetail,\n  name: 'goalDetail',\n  builder: (context, state) {\n    final goalId = state.uri.queryParameters['goalId'] ?? '';\n    return BlocProvider(\n      create: (_) => sl<GoalDetailBloc>()..add(GoalDetailLoadRequested(goalId: goalId)),\n      child: GoalDetailPage(goalId: goalId),\n    );\n  },\n),\n...\n```\n\n**Injection Container additions (following existing pattern):**\n```dart\n// ============================================================\n// Goals Feature\n// ============================================================\n\n// Data Sources\nsl.registerLazySingleton<GoalsRemoteDatasource>(\n  () => GoalsRemoteDatasourceImpl(client: sl<ApiClient>()),\n);\n\n// Repositories\nsl.registerLazySingleton<GoalsRepository>(\n  () => GoalsRepositoryImpl(datasource: sl<GoalsRemoteDatasource>()),\n);\n\n// Use Cases\nsl.registerLazySingleton<GetUserGoalsUseCase>(\n  () => GetUserGoalsUseCase(repository: sl<GoalsRepository>()),\n);\nsl.registerLazySingleton<CreateGoalUseCase>(\n  () => CreateGoalUseCase(repository: sl<GoalsRepository>()),\n);\n// ... more use cases\n\n// Blocs (Factory - new instance per use)\nsl.registerFactory<GoalsListBloc>(\n  () => GoalsListBloc(\n    getUserGoalsUseCase: sl<GetUserGoalsUseCase>(),\n  ),\n);\nsl.registerFactory<GoalDetailBloc>(\n  () => GoalDetailBloc(\n    getGoalDetailsUseCase: sl<GetGoalDetailsUseCase>(),\n    getGoalProgressUseCase: sl<GetGoalProgressUseCase>(),\n    inviteUserUseCase: sl<InviteUserUseCase>(),\n    leaveGoalUseCase: sl<LeaveGoalUseCase>(),\n  ),\n);\nsl.registerFactory<CreateGoalBloc>(\n  () => CreateGoalBloc(\n    createGoalUseCase: sl<CreateGoalUseCase>(),\n  ),\n);\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT register BLoCs as singletons - use `registerFactory`\n- DO NOT forget to add imports at the top of each file\n- DO NOT skip the query parameter handling for goalId\n- DO NOT forget to trigger initial events in route builder\n\n**VERIFICATION:**\n- Run: `flutter analyze`\n- Run: `flutter build web --release` (should compile without errors)\n- All imports must resolve correctly",
+        "epicId": "epic-goals-ui",
+        "priority": 7,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-ui-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/router/app_router.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/router/app_router.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given app starts, When navigating to /goals, Then GoalsListPage is rendered with BLoC provided",
+          "Given GoalsListBloc, When sl<GoalsListBloc>() called, Then new instance is created (Factory pattern)",
+          "Given route /goals/detail?goalId=123, When navigated, Then GoalDetailPage receives goalId parameter",
+          "Given all imports added, When flutter analyze runs, Then no import errors occur",
+          "Given flutter build web, When executed, Then build completes successfully"
+        ]
+      }
+    ]
+  }
+}
