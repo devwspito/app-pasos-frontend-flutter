@@ -1,259 +1,92 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "9aec590bfd9a6e18aff3c21a",
-    "timestamp": "2026-01-27T16:59:27.758Z",
+    "taskId": "323317759c9c31a85f289166",
+    "timestamp": "2026-01-27T17:43:41.526Z",
     "phase": "planning",
-    "savedAt": "2026-01-27T16:59:27.758Z",
+    "savedAt": "2026-01-27T17:43:41.526Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "FNN452NN",
+    "taskTitle": "FFNNN21",
     "taskDescription": "Descripción de tareas para completar el frontend en Flutter\n\nCompletar los 6 epics del frontend de la aplicación \"Pasos\" (contador de pasos social) usando Flutter.\n\n================================================================================\n\nCONTEXTO\n\n================================================================================\n\nEl backend ya está completo en: project-app-pasos-backend\n\nUsar Flutter para aplicación móvil nativa multiplataforma (iOS/Android/web)\n\n================================================================================\n\nEPICS A IMPLEMENTAR\n\n================================================================================\n\nSHARING UI\n\nLista de amigos\n\nGestión de compartir datos con amigos\n\nSolicitudes de amistad\n\nVista de actividad de amigos\n\nGOALS UI\n\nGrupos y metas compartidas\n\nCreación y edición de metas\n\nProgreso de grupos\n\nRankings\n\nNATIVE INTEGRATION\n\nIntegración con podómetro nativo usando health package\n\nLectura de pasos desde HealthKit (iOS)\n\nLectura de pasos desde Google Fit/Health Connect (Android)\n\nBackground sync de datos\n\nREAL-TIME CLIENT\n\nIntegración WebSocket con web_socket_channel\n\nActualizaciones en tiempo real\n\nNotificaciones push (firebase_messaging)\n\nManejo de reconexión",
     "epicsCount": 4,
     "epics": [
       {
         "id": "epic-sharing-ui",
-        "title": "Sharing UI - Friend Management and Activity View",
-        "description": "Implement complete friend management UI including friends list, friend requests (send/receive/accept/reject), and friend activity feed showing real-time step updates from friends.",
+        "title": "Sharing UI - Friend Management System",
+        "description": "Complete friend management system with friends list, friendship requests, sharing management, and friends activity view. Includes sending/accepting/rejecting requests, viewing friend step activity, and managing sharing relationships.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
         "filesToModify": [
-          "lib/core/di/injection_container.dart",
-          "lib/core/router/app_router.dart",
           "lib/core/router/route_names.dart",
-          "lib/core/network/api_endpoints.dart"
+          "lib/core/router/app_router.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/di/injection_container.dart"
         ],
         "filesToCreate": [
           "lib/features/sharing/domain/entities/sharing_relationship.dart",
-          "lib/features/sharing/domain/entities/friend.dart",
+          "lib/features/sharing/domain/entities/shared_user.dart",
+          "lib/features/sharing/domain/entities/friend_stats.dart",
           "lib/features/sharing/domain/repositories/sharing_repository.dart",
-          "lib/features/sharing/domain/usecases/get_friends_usecase.dart",
-          "lib/features/sharing/domain/usecases/get_pending_requests_usecase.dart",
-          "lib/features/sharing/domain/usecases/send_friend_request_usecase.dart",
+          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
+          "lib/features/sharing/domain/usecases/send_request_usecase.dart",
           "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
           "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
           "lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart",
           "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart",
+          "lib/features/sharing/domain/usecases/search_users_usecase.dart",
           "lib/features/sharing/data/models/sharing_relationship_model.dart",
-          "lib/features/sharing/data/models/friend_model.dart",
+          "lib/features/sharing/data/models/shared_user_model.dart",
+          "lib/features/sharing/data/models/friend_stats_model.dart",
           "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
           "lib/features/sharing/data/repositories/sharing_repository_impl.dart",
           "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
           "lib/features/sharing/presentation/bloc/sharing_event.dart",
           "lib/features/sharing/presentation/bloc/sharing_state.dart",
-          "lib/features/sharing/presentation/bloc/friend_activity_bloc.dart",
-          "lib/features/sharing/presentation/bloc/friend_activity_event.dart",
-          "lib/features/sharing/presentation/bloc/friend_activity_state.dart",
+          "lib/features/sharing/presentation/bloc/friend_search_bloc.dart",
+          "lib/features/sharing/presentation/bloc/friend_search_event.dart",
+          "lib/features/sharing/presentation/bloc/friend_search_state.dart",
           "lib/features/sharing/presentation/pages/friends_list_page.dart",
           "lib/features/sharing/presentation/pages/friend_requests_page.dart",
           "lib/features/sharing/presentation/pages/friend_activity_page.dart",
           "lib/features/sharing/presentation/pages/add_friend_page.dart",
           "lib/features/sharing/presentation/widgets/friend_card.dart",
           "lib/features/sharing/presentation/widgets/friend_request_card.dart",
-          "lib/features/sharing/presentation/widgets/friend_activity_item.dart",
-          "lib/features/sharing/presentation/widgets/friend_stats_card.dart"
+          "lib/features/sharing/presentation/widgets/friend_stats_card.dart",
+          "lib/features/sharing/presentation/widgets/user_search_result_tile.dart"
         ],
         "filesToRead": [
-          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
-          "lib/features/dashboard/domain/repositories/steps_repository.dart",
-          "lib/features/auth/presentation/bloc/auth_bloc.dart"
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/dashboard/domain/entities/step_stats.dart",
+          "lib/core/network/api_client.dart"
         ],
         "estimatedComplexity": "high",
         "dependencies": [],
         "executionOrder": 1,
         "followsPatterns": [
           "Clean Architecture with domain/data/presentation layers",
-          "BLoC pattern matching existing DashboardBloc structure",
-          "Datasource pattern matching StepsRemoteDatasource",
-          "Repository impl pattern matching StepsRepositoryImpl"
-        ],
-        "stories": [
-          {
-            "id": "sharing-story-1",
-            "title": "Create sharing domain layer (entities, repository interface, use cases)",
-            "description": "Create SharingRelationship and Friend entities, SharingRepository interface, and all use cases for friend operations",
-            "filesToModify": [],
-            "filesToCreate": [
-              "lib/features/sharing/domain/entities/sharing_relationship.dart",
-              "lib/features/sharing/domain/entities/friend.dart",
-              "lib/features/sharing/domain/repositories/sharing_repository.dart",
-              "lib/features/sharing/domain/usecases/get_friends_usecase.dart",
-              "lib/features/sharing/domain/usecases/get_pending_requests_usecase.dart",
-              "lib/features/sharing/domain/usecases/send_friend_request_usecase.dart",
-              "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
-              "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
-              "lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart",
-              "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart"
-            ],
-            "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "SharingRelationship entity has id, requesterId, targetId, status (pending|accepted|bidirectional|rejected), createdAt, acceptedAt fields",
-              "Friend entity has userId, username, email, currentSteps, lastUpdated fields",
-              "SharingRepository interface defines getFriends(), getPendingRequests(), sendRequest(targetId), acceptRequest(id), rejectRequest(id), revokeSharing(id), getFriendStats(userId)",
-              "Each use case class follows pattern from GetStatsUseCase with call() method"
-            ]
-          },
-          {
-            "id": "sharing-story-2",
-            "title": "Create sharing data layer (models, datasource, repository implementation)",
-            "description": "Create data models with JSON serialization, remote datasource consuming /sharing API endpoints, and repository implementation",
-            "filesToModify": [
-              "lib/core/network/api_endpoints.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/sharing/data/models/sharing_relationship_model.dart",
-              "lib/features/sharing/data/models/friend_model.dart",
-              "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
-              "lib/features/sharing/data/repositories/sharing_repository_impl.dart"
-            ],
-            "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "SharingRelationshipModel extends SharingRelationship with fromJson/toJson methods",
-              "FriendModel extends Friend with fromJson/toJson methods",
-              "ApiEndpoints updated with sharing endpoints: /sharing, /sharing/request, /sharing/:id/accept, /sharing/:id/reject, /sharing/:userId/stats",
-              "SharingRemoteDatasource makes HTTP calls using ApiClient following StepsRemoteDatasource pattern",
-              "SharingRepositoryImpl implements SharingRepository using datasource"
-            ]
-          },
-          {
-            "id": "sharing-story-3",
-            "title": "Create SharingBloc for friend list and request management",
-            "description": "Create BLoC with events/states for loading friends, managing requests, sending/accepting/rejecting friend requests",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
-              "lib/features/sharing/presentation/bloc/sharing_event.dart",
-              "lib/features/sharing/presentation/bloc/sharing_state.dart"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "SharingEvent includes LoadFriends, LoadPendingRequests, SendFriendRequest, AcceptRequest, RejectRequest, RevokeSharing",
-              "SharingState includes SharingInitial, SharingLoading, SharingLoaded(friends, pendingRequests), SharingError",
-              "SharingBloc handles all events and emits appropriate states",
-              "DI container registers SharingBloc and all dependencies"
-            ]
-          },
-          {
-            "id": "sharing-story-4",
-            "title": "Create friends list page and friend card widget",
-            "description": "Create FriendsListPage showing list of accepted friends with their step counts and status, using FriendCard widget",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/sharing/presentation/pages/friends_list_page.dart",
-              "lib/features/sharing/presentation/widgets/friend_card.dart"
-            ],
-            "priority": 4,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "FriendsListPage uses BlocProvider with SharingBloc",
-              "Shows loading indicator while fetching friends",
-              "Displays list of FriendCard widgets when loaded",
-              "FriendCard shows avatar, username, today's step count, last active time",
-              "Empty state shown when no friends exist",
-              "Pull-to-refresh triggers SharingLoadRequested event",
-              "Route /friends added to RouteNames and AppRouter"
-            ]
-          },
-          {
-            "id": "sharing-story-5",
-            "title": "Create friend requests page with accept/reject actions",
-            "description": "Create FriendRequestsPage showing pending incoming requests with accept/reject buttons",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/sharing/presentation/pages/friend_requests_page.dart",
-              "lib/features/sharing/presentation/widgets/friend_request_card.dart"
-            ],
-            "priority": 5,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "FriendRequestsPage shows list of pending incoming requests",
-              "FriendRequestCard displays requester info with Accept and Reject buttons",
-              "Tapping Accept dispatches AcceptRequest event and shows success feedback",
-              "Tapping Reject dispatches RejectRequest event and shows confirmation dialog",
-              "Loading state shown while processing request",
-              "Route /friend-requests added to router"
-            ]
-          },
-          {
-            "id": "sharing-story-6",
-            "title": "Create add friend page with user search",
-            "description": "Create AddFriendPage with search functionality to find users by username and send friend requests",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart",
-              "lib/core/network/api_endpoints.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/sharing/presentation/pages/add_friend_page.dart"
-            ],
-            "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "AddFriendPage has search text field for username",
-              "Debounced search calls GET /users/search?username=query endpoint",
-              "Search results displayed as list with Send Request button",
-              "Send Request button dispatches SendFriendRequest event",
-              "Success/error feedback shown after request sent",
-              "Route /add-friend added to router"
-            ]
-          },
-          {
-            "id": "sharing-story-7",
-            "title": "Create friend activity page showing real-time updates",
-            "description": "Create FriendActivityPage showing feed of friend step activities, integrated with real-time updates from WebSocket",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/sharing/presentation/bloc/friend_activity_bloc.dart",
-              "lib/features/sharing/presentation/bloc/friend_activity_event.dart",
-              "lib/features/sharing/presentation/bloc/friend_activity_state.dart",
-              "lib/features/sharing/presentation/pages/friend_activity_page.dart",
-              "lib/features/sharing/presentation/widgets/friend_activity_item.dart",
-              "lib/features/sharing/presentation/widgets/friend_stats_card.dart"
-            ],
-            "priority": 7,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "FriendActivityBloc manages list of recent friend activities",
-              "FriendActivityPage shows chronological feed of friend step updates",
-              "FriendActivityItem displays friend avatar, name, step count, timestamp",
-              "FriendStatsCard shows detailed stats when tapping on a friend",
-              "Route /friend-activity added to router",
-              "Page will integrate with WebSocket service in epic-realtime-client"
-            ]
-          }
+          "BLoC pattern matching existing dashboard_bloc structure",
+          "Uses existing ApiClient and error handling patterns",
+          "Entities extend Equatable for value equality"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-goals-ui",
-        "title": "Goals UI - Group Challenges and Rankings",
-        "description": "Implement complete goals management UI including goals list, goal creation form, goal detail page with member progress and rankings.",
+        "title": "Goals UI - Group Goals Management System",
+        "description": "Complete group goals system with goals list, goal creation/editing, group progress tracking, member management, and rankings. Users can create goals, invite friends, track collective progress, and view leaderboards.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
         "filesToModify": [
-          "lib/core/di/injection_container.dart",
-          "lib/core/router/app_router.dart",
           "lib/core/router/route_names.dart",
-          "lib/core/network/api_endpoints.dart"
+          "lib/core/router/app_router.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/di/injection_container.dart"
         ],
         "filesToCreate": [
           "lib/features/goals/domain/entities/group_goal.dart",
@@ -262,8 +95,8 @@
           "lib/features/goals/domain/entities/member_contribution.dart",
           "lib/features/goals/domain/repositories/goals_repository.dart",
           "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
-          "lib/features/goals/domain/usecases/get_goal_details_usecase.dart",
           "lib/features/goals/domain/usecases/create_goal_usecase.dart",
+          "lib/features/goals/domain/usecases/get_goal_details_usecase.dart",
           "lib/features/goals/domain/usecases/invite_user_usecase.dart",
           "lib/features/goals/domain/usecases/join_goal_usecase.dart",
           "lib/features/goals/domain/usecases/leave_goal_usecase.dart",
@@ -274,25 +107,30 @@
           "lib/features/goals/data/models/member_contribution_model.dart",
           "lib/features/goals/data/datasources/goals_remote_datasource.dart",
           "lib/features/goals/data/repositories/goals_repository_impl.dart",
-          "lib/features/goals/presentation/bloc/goals_bloc.dart",
-          "lib/features/goals/presentation/bloc/goals_event.dart",
-          "lib/features/goals/presentation/bloc/goals_state.dart",
+          "lib/features/goals/presentation/bloc/goals_list_bloc.dart",
+          "lib/features/goals/presentation/bloc/goals_list_event.dart",
+          "lib/features/goals/presentation/bloc/goals_list_state.dart",
           "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
           "lib/features/goals/presentation/bloc/goal_detail_event.dart",
           "lib/features/goals/presentation/bloc/goal_detail_state.dart",
+          "lib/features/goals/presentation/bloc/create_goal_bloc.dart",
+          "lib/features/goals/presentation/bloc/create_goal_event.dart",
+          "lib/features/goals/presentation/bloc/create_goal_state.dart",
           "lib/features/goals/presentation/pages/goals_list_page.dart",
           "lib/features/goals/presentation/pages/goal_detail_page.dart",
           "lib/features/goals/presentation/pages/create_goal_page.dart",
           "lib/features/goals/presentation/pages/invite_members_page.dart",
+          "lib/features/goals/presentation/pages/goal_rankings_page.dart",
           "lib/features/goals/presentation/widgets/goal_card.dart",
-          "lib/features/goals/presentation/widgets/goal_progress_bar.dart",
-          "lib/features/goals/presentation/widgets/member_ranking_list.dart",
-          "lib/features/goals/presentation/widgets/member_contribution_card.dart",
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/member_contribution_tile.dart",
+          "lib/features/goals/presentation/widgets/ranking_list_item.dart",
           "lib/features/goals/presentation/widgets/goal_form.dart"
         ],
         "filesToRead": [
-          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
-          "lib/features/sharing/domain/repositories/sharing_repository.dart"
+          "lib/features/auth/domain/entities/user.dart",
+          "lib/features/sharing/domain/entities/shared_user.dart",
+          "lib/core/network/api_client.dart"
         ],
         "estimatedComplexity": "high",
         "dependencies": [
@@ -301,208 +139,16 @@
         "executionOrder": 2,
         "followsPatterns": [
           "Clean Architecture with domain/data/presentation layers",
-          "BLoC pattern with separate detail BLoC for complex screens",
-          "Form validation using lib/core/utils/validators.dart pattern"
-        ],
-        "stories": [
-          {
-            "id": "goals-story-1",
-            "title": "Create goals domain layer (entities, repository interface, use cases)",
-            "description": "Create GroupGoal, GoalMembership, GoalProgress, MemberContribution entities, GoalsRepository interface, and all use cases",
-            "filesToModify": [],
-            "filesToCreate": [
-              "lib/features/goals/domain/entities/group_goal.dart",
-              "lib/features/goals/domain/entities/goal_membership.dart",
-              "lib/features/goals/domain/entities/goal_progress.dart",
-              "lib/features/goals/domain/entities/member_contribution.dart",
-              "lib/features/goals/domain/repositories/goals_repository.dart",
-              "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
-              "lib/features/goals/domain/usecases/get_goal_details_usecase.dart",
-              "lib/features/goals/domain/usecases/create_goal_usecase.dart",
-              "lib/features/goals/domain/usecases/invite_user_usecase.dart",
-              "lib/features/goals/domain/usecases/join_goal_usecase.dart",
-              "lib/features/goals/domain/usecases/leave_goal_usecase.dart",
-              "lib/features/goals/domain/usecases/get_goal_progress_usecase.dart"
-            ],
-            "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "GroupGoal entity has id, title, description, targetSteps, startDate, endDate, creatorId, createdAt fields",
-              "GoalMembership entity has id, goalId, userId, status (pending|active|left), joinedAt fields",
-              "GoalProgress entity has goalId, currentSteps, targetSteps, progressPercentage, isCompleted, memberContributions fields",
-              "MemberContribution entity has userId, username, steps, percentage, rank fields",
-              "GoalsRepository interface defines getUserGoals(), getGoalDetails(id), createGoal(params), inviteUser(goalId, userId), joinGoal(id), leaveGoal(id), getGoalProgress(id)"
-            ]
-          },
-          {
-            "id": "goals-story-2",
-            "title": "Create goals data layer (models, datasource, repository implementation)",
-            "description": "Create data models with JSON serialization, remote datasource consuming /goals API endpoints, and repository implementation",
-            "filesToModify": [
-              "lib/core/network/api_endpoints.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/data/models/group_goal_model.dart",
-              "lib/features/goals/data/models/goal_membership_model.dart",
-              "lib/features/goals/data/models/goal_progress_model.dart",
-              "lib/features/goals/data/models/member_contribution_model.dart",
-              "lib/features/goals/data/datasources/goals_remote_datasource.dart",
-              "lib/features/goals/data/repositories/goals_repository_impl.dart"
-            ],
-            "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All models extend their entities with fromJson/toJson methods",
-              "ApiEndpoints updated with: /goals, /goals/:id, /goals/:id/invite, /goals/:id/join, /goals/:id/leave, /goals/:id/progress",
-              "GoalsRemoteDatasource makes HTTP calls using ApiClient",
-              "GoalsRepositoryImpl implements GoalsRepository using datasource"
-            ]
-          },
-          {
-            "id": "goals-story-3",
-            "title": "Create GoalsBloc for goals list management",
-            "description": "Create BLoC with events/states for loading user goals, creating goals, handling invitations",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/presentation/bloc/goals_bloc.dart",
-              "lib/features/goals/presentation/bloc/goals_event.dart",
-              "lib/features/goals/presentation/bloc/goals_state.dart"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "GoalsEvent includes LoadGoals, CreateGoal, JoinGoal, LeaveGoal",
-              "GoalsState includes GoalsInitial, GoalsLoading, GoalsLoaded(activeGoals, completedGoals, pendingInvitations), GoalsError",
-              "GoalsBloc handles all events and emits appropriate states",
-              "DI container registers GoalsBloc and all dependencies"
-            ]
-          },
-          {
-            "id": "goals-story-4",
-            "title": "Create goals list page with goal cards",
-            "description": "Create GoalsListPage showing active goals, completed goals tabs, and pending invitations with GoalCard widget",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/presentation/pages/goals_list_page.dart",
-              "lib/features/goals/presentation/widgets/goal_card.dart",
-              "lib/features/goals/presentation/widgets/goal_progress_bar.dart"
-            ],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "GoalsListPage has TabBar with Active, Completed, Invitations tabs",
-              "GoalCard shows title, progress bar, dates, member count",
-              "GoalProgressBar displays currentSteps/targetSteps with percentage",
-              "Active tab shows in-progress goals sorted by end date",
-              "Completed tab shows finished goals",
-              "Invitations tab shows pending goal invitations with Join button",
-              "FAB navigates to create goal page",
-              "Route /goals added to router"
-            ]
-          },
-          {
-            "id": "goals-story-5",
-            "title": "Create goal creation page with form validation",
-            "description": "Create CreateGoalPage with form for title, description, target steps, date range with validation",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/presentation/pages/create_goal_page.dart",
-              "lib/features/goals/presentation/widgets/goal_form.dart"
-            ],
-            "priority": 5,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "CreateGoalPage uses GoalForm widget for input",
-              "GoalForm has fields: title (required, max 100 chars), description (optional, max 500 chars), targetSteps (required, min 1), startDate (required), endDate (required, must be after start)",
-              "Form validation shows inline errors following existing AppTextField pattern",
-              "Submit button dispatches CreateGoal event",
-              "Success navigates back to goals list with success snackbar",
-              "Route /goals/create added to router"
-            ]
-          },
-          {
-            "id": "goals-story-6",
-            "title": "Create GoalDetailBloc for goal detail and progress management",
-            "description": "Create separate BLoC for goal detail page handling progress loading, member management, real-time updates",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
-              "lib/features/goals/presentation/bloc/goal_detail_event.dart",
-              "lib/features/goals/presentation/bloc/goal_detail_state.dart"
-            ],
-            "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "GoalDetailEvent includes LoadGoalDetail, LoadProgress, InviteUser, LeaveGoal, ProgressUpdated (for real-time)",
-              "GoalDetailState includes GoalDetailInitial, GoalDetailLoading, GoalDetailLoaded(goal, progress, members), GoalDetailError",
-              "GoalDetailBloc handles all events including real-time progress updates",
-              "Factory registration in DI container (new instance per use)"
-            ]
-          },
-          {
-            "id": "goals-story-7",
-            "title": "Create goal detail page with rankings and progress",
-            "description": "Create GoalDetailPage showing goal info, overall progress, member rankings with contributions",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/presentation/pages/goal_detail_page.dart",
-              "lib/features/goals/presentation/widgets/member_ranking_list.dart",
-              "lib/features/goals/presentation/widgets/member_contribution_card.dart"
-            ],
-            "priority": 7,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "GoalDetailPage shows goal title, description, date range at top",
-              "Large progress indicator shows overall goal progress (currentSteps/targetSteps)",
-              "MemberRankingList shows sorted list of members by contribution",
-              "MemberContributionCard shows rank, avatar, username, steps contributed, percentage of total",
-              "Current user highlighted in ranking",
-              "Leave Goal button for non-creators, Invite button for creator",
-              "Route /goals/:id added to router with path parameter"
-            ]
-          },
-          {
-            "id": "goals-story-8",
-            "title": "Create invite members page",
-            "description": "Create InviteMembersPage allowing goal creator to search and invite users to the goal",
-            "filesToModify": [
-              "lib/core/router/app_router.dart",
-              "lib/core/router/route_names.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/goals/presentation/pages/invite_members_page.dart"
-            ],
-            "priority": 8,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "InviteMembersPage has search field for username",
-              "Shows list of friends (from sharing relationships) as suggestions",
-              "Invite button next to each user dispatches InviteUser event",
-              "Already invited/joined users shown with disabled state",
-              "Success feedback shown after invitation sent",
-              "Route /goals/:id/invite added to router"
-            ]
-          }
+          "Multiple BLoCs for different screens (list, detail, create)",
+          "Uses existing form patterns from auth feature",
+          "Progress indicators follow dashboard chart patterns"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-native-integration",
-        "title": "Native Health Integration - Pedometer with HealthKit and Google Fit",
-        "description": "Implement native pedometer integration using health package for reading steps from HealthKit (iOS), Health Connect/Google Fit (Android), with background sync capability.",
+        "title": "Native Integration - Health Package Pedometer",
+        "description": "Integrate native pedometer using health package to read steps from HealthKit (iOS) and Google Fit/Health Connect (Android). Includes permission handling, step reading, and background sync to upload steps to backend periodically.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -512,22 +158,28 @@
           "lib/core/di/injection_container.dart",
           "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
           "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
-          "lib/features/dashboard/presentation/pages/dashboard_page.dart",
+          "lib/features/dashboard/domain/repositories/steps_repository.dart",
+          "lib/features/dashboard/data/repositories/steps_repository_impl.dart",
           "android/app/src/main/AndroidManifest.xml",
           "ios/Runner/Info.plist"
         ],
         "filesToCreate": [
           "lib/core/services/health_service.dart",
-          "lib/core/services/health_service_impl.dart",
           "lib/core/services/background_sync_service.dart",
           "lib/core/services/permission_service.dart",
           "lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart",
-          "lib/features/dashboard/presentation/widgets/health_permission_card.dart",
-          "lib/features/dashboard/presentation/widgets/sync_status_indicator.dart"
+          "lib/features/dashboard/domain/usecases/get_native_steps_usecase.dart",
+          "lib/features/dashboard/domain/entities/health_data_point.dart",
+          "lib/features/dashboard/data/datasources/health_local_datasource.dart",
+          "lib/features/dashboard/data/models/health_data_point_model.dart",
+          "lib/features/settings/presentation/pages/health_permissions_page.dart",
+          "lib/features/settings/presentation/widgets/health_connection_status.dart",
+          "lib/features/settings/presentation/widgets/sync_settings_card.dart"
         ],
         "filesToRead": [
-          "lib/features/dashboard/domain/repositories/steps_repository.dart",
-          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart"
+          "lib/features/dashboard/domain/entities/step_record.dart",
+          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
+          "lib/core/storage/secure_storage_service.dart"
         ],
         "estimatedComplexity": "high",
         "dependencies": [
@@ -535,169 +187,17 @@
         ],
         "executionOrder": 2,
         "followsPatterns": [
-          "Service abstraction pattern for platform-specific code",
-          "Permission handling with user-friendly prompts",
-          "Background task integration following platform guidelines"
-        ],
-        "stories": [
-          {
-            "id": "native-story-1",
-            "title": "Add health package dependency and configure platform permissions",
-            "description": "Add health package to pubspec.yaml, configure AndroidManifest.xml for Health Connect permissions, configure Info.plist for HealthKit permissions",
-            "filesToModify": [
-              "pubspec.yaml",
-              "android/app/src/main/AndroidManifest.xml",
-              "ios/Runner/Info.plist"
-            ],
-            "filesToCreate": [],
-            "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "health: ^10.0.0 added to pubspec.yaml dependencies",
-              "AndroidManifest.xml has Health Connect permissions: android.permission.health.READ_STEPS, android.permission.health.WRITE_STEPS",
-              "AndroidManifest.xml has activity recognition permission: android.permission.ACTIVITY_RECOGNITION",
-              "Info.plist has NSHealthShareUsageDescription with user-friendly message",
-              "Info.plist has NSHealthUpdateUsageDescription with user-friendly message",
-              "Info.plist has HealthKit entitlement configured",
-              "flutter pub get runs without errors"
-            ]
-          },
-          {
-            "id": "native-story-2",
-            "title": "Create HealthService abstraction and implementation",
-            "description": "Create abstract HealthService interface and HealthServiceImpl using health package for reading/writing step data",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [
-              "lib/core/services/health_service.dart",
-              "lib/core/services/health_service_impl.dart"
-            ],
-            "priority": 2,
-            "complexity": "high",
-            "acceptanceCriteria": [
-              "HealthService interface defines: isAvailable(), requestPermissions(), hasPermissions(), getTodaySteps(), getStepsForDateRange(start, end), writeSteps(count, timestamp)",
-              "HealthServiceImpl implements interface using health package",
-              "getTodaySteps() returns int from HealthKit/Health Connect",
-              "getStepsForDateRange() returns List of step records with timestamps",
-              "writeSteps() records steps to health platform (optional, for syncing)",
-              "Proper error handling for permission denied, platform not supported",
-              "DI container registers HealthService as lazy singleton"
-            ]
-          },
-          {
-            "id": "native-story-3",
-            "title": "Create PermissionService for health permissions UI flow",
-            "description": "Create PermissionService to manage permission request flow with user-friendly UI prompts",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [
-              "lib/core/services/permission_service.dart"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "PermissionService checks current permission status",
-              "requestHealthPermissions() triggers native permission dialog",
-              "Returns PermissionStatus enum: granted, denied, permanentlyDenied, restricted",
-              "openAppSettings() opens system settings when permanently denied",
-              "DI container registers PermissionService"
-            ]
-          },
-          {
-            "id": "native-story-4",
-            "title": "Create SyncNativeStepsUseCase for step synchronization",
-            "description": "Create use case that reads native steps, calculates delta, and syncs to backend API",
-            "filesToModify": [],
-            "filesToCreate": [
-              "lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart"
-            ],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "SyncNativeStepsUseCase depends on HealthService and StepsRepository",
-              "call() method reads today's native steps",
-              "Calculates new steps since last sync (stores lastSyncedCount in SecureStorage)",
-              "If delta > 0, calls recordSteps() with source=native",
-              "Returns SyncResult with nativeSteps, syncedSteps, lastSyncTime",
-              "Handles HealthService errors gracefully"
-            ]
-          },
-          {
-            "id": "native-story-5",
-            "title": "Create BackgroundSyncService for periodic step synchronization",
-            "description": "Create service for background sync using workmanager (Android) and background_fetch (iOS)",
-            "filesToModify": [
-              "pubspec.yaml",
-              "lib/core/di/injection_container.dart",
-              "lib/main.dart"
-            ],
-            "filesToCreate": [
-              "lib/core/services/background_sync_service.dart"
-            ],
-            "priority": 5,
-            "complexity": "high",
-            "acceptanceCriteria": [
-              "workmanager: ^0.5.2 added to pubspec.yaml",
-              "background_fetch: ^1.2.1 added to pubspec.yaml (for iOS)",
-              "BackgroundSyncService.initialize() sets up periodic background task",
-              "Background task runs every 15 minutes when app is backgrounded",
-              "Task reads native steps and syncs to backend if user is authenticated",
-              "Handles wake locks and battery optimization properly",
-              "Background sync can be enabled/disabled by user"
-            ]
-          },
-          {
-            "id": "native-story-6",
-            "title": "Update DashboardBloc to integrate native step sync",
-            "description": "Add native step sync events and states to DashboardBloc, trigger sync on dashboard load",
-            "filesToModify": [
-              "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
-              "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
-              "lib/features/dashboard/presentation/bloc/dashboard_state.dart",
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [],
-            "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "DashboardSyncNativeStepsRequested event added",
-              "DashboardBloc handles sync event using SyncNativeStepsUseCase",
-              "Sync triggered automatically when dashboard loads (if permissions granted)",
-              "DashboardLoaded state updated to include lastSyncTime and syncStatus",
-              "Error handling for sync failures doesn't break dashboard load"
-            ]
-          },
-          {
-            "id": "native-story-7",
-            "title": "Create health permission and sync status UI components",
-            "description": "Create HealthPermissionCard for requesting permissions and SyncStatusIndicator showing last sync time",
-            "filesToModify": [
-              "lib/features/dashboard/presentation/pages/dashboard_page.dart"
-            ],
-            "filesToCreate": [
-              "lib/features/dashboard/presentation/widgets/health_permission_card.dart",
-              "lib/features/dashboard/presentation/widgets/sync_status_indicator.dart"
-            ],
-            "priority": 7,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "HealthPermissionCard shown when permissions not granted",
-              "Card explains why health access needed with 'Enable' button",
-              "Button triggers permission request flow",
-              "SyncStatusIndicator shows last sync time and status (syncing, synced, error)",
-              "Tap on indicator triggers manual sync",
-              "Both widgets integrated into DashboardPage"
-            ]
-          }
+          "Service classes registered as lazy singletons in DI container",
+          "Permission handling with clear user feedback",
+          "Background tasks follow platform best practices",
+          "Native configuration in appropriate platform files"
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-realtime-client",
-        "title": "Real-Time Client - WebSocket and Push Notifications",
-        "description": "Implement WebSocket client using web_socket_channel for real-time step and goal updates, plus Firebase Cloud Messaging for push notifications.",
+        "title": "Real-time Client - WebSocket & Push Notifications",
+        "description": "Implement WebSocket client for real-time updates using web_socket_channel, integrate firebase_messaging for push notifications. Includes connection management, automatic reconnection, event handling, and notification display.",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
@@ -705,27 +205,37 @@
         "filesToModify": [
           "pubspec.yaml",
           "lib/core/di/injection_container.dart",
-          "lib/core/network/api_endpoints.dart",
-          "lib/features/sharing/presentation/bloc/friend_activity_bloc.dart",
-          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
           "lib/main.dart",
+          "lib/app.dart",
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
           "android/app/build.gradle",
+          "android/build.gradle",
           "ios/Runner/Info.plist"
         ],
         "filesToCreate": [
           "lib/core/services/websocket_service.dart",
-          "lib/core/services/websocket_service_impl.dart",
+          "lib/core/services/websocket_event_handler.dart",
           "lib/core/services/push_notification_service.dart",
-          "lib/core/services/push_notification_service_impl.dart",
-          "lib/core/network/socket_events.dart",
+          "lib/core/services/notification_handler.dart",
+          "lib/core/models/socket_events.dart",
+          "lib/core/models/socket_payloads.dart",
+          "lib/features/notifications/domain/entities/app_notification.dart",
+          "lib/features/notifications/domain/repositories/notification_repository.dart",
+          "lib/features/notifications/data/repositories/notification_repository_impl.dart",
+          "lib/features/notifications/presentation/bloc/notification_bloc.dart",
+          "lib/features/notifications/presentation/bloc/notification_event.dart",
+          "lib/features/notifications/presentation/bloc/notification_state.dart",
+          "lib/features/notifications/presentation/widgets/notification_badge.dart",
+          "lib/features/notifications/presentation/pages/notifications_page.dart",
           "android/app/google-services.json",
           "ios/Runner/GoogleService-Info.plist",
-          "ios/firebase_app_id_file.json"
+          "firebase_options.dart"
         ],
         "filesToRead": [
-          "project-app-pasos-backend/src/socket/types.ts",
-          "project-app-pasos-backend/src/socket/handlers/sharing.handler.ts",
-          "project-app-pasos-backend/src/socket/handlers/goals.handler.ts"
+          "lib/core/network/api_client.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "project-app-pasos-backend/src/socket/types.ts"
         ],
         "estimatedComplexity": "high",
         "dependencies": [
@@ -733,194 +243,12 @@
           "epic-goals-ui",
           "epic-native-integration"
         ],
-        "executionOrder": 2,
+        "executionOrder": 3,
         "followsPatterns": [
-          "Service abstraction for WebSocket connection",
-          "StreamController for distributing events to BLoCs",
-          "Automatic reconnection with exponential backoff"
-        ],
-        "stories": [
-          {
-            "id": "realtime-story-1",
-            "title": "Add WebSocket and push notification dependencies",
-            "description": "Add web_socket_channel, socket_io_client, and firebase_messaging packages to pubspec.yaml",
-            "filesToModify": [
-              "pubspec.yaml"
-            ],
-            "filesToCreate": [],
-            "priority": 1,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "web_socket_channel: ^2.4.0 added to dependencies",
-              "socket_io_client: ^2.0.3 added to dependencies (Socket.IO client)",
-              "firebase_messaging: ^14.7.0 added to dependencies",
-              "firebase_core: ^2.24.0 added to dependencies",
-              "flutter pub get runs successfully"
-            ]
-          },
-          {
-            "id": "realtime-story-2",
-            "title": "Create socket events definitions matching backend",
-            "description": "Create SocketEvents class with event names and payload types matching backend socket/types.ts",
-            "filesToModify": [],
-            "filesToCreate": [
-              "lib/core/network/socket_events.dart"
-            ],
-            "priority": 2,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "SocketEvents class defines event name constants: stepsUpdated, sharingJoined, goalProgress, goalJoined, goalMemberJoined, error",
-              "StepsUpdatedPayload class with userId, steps, timestamp fields",
-              "SharingJoinedPayload class with roomId, partnerId fields",
-              "GoalProgressPayload class with goalId, currentSteps, targetSteps, progressPercentage, isCompleted fields",
-              "GoalJoinedPayload class with goalId, title fields",
-              "GoalMemberJoinedPayload class with goalId, userId fields",
-              "All payloads have fromJson factory constructors"
-            ]
-          },
-          {
-            "id": "realtime-story-3",
-            "title": "Create WebSocketService abstraction and Socket.IO implementation",
-            "description": "Create WebSocketService interface and implementation using socket_io_client with authentication and reconnection",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart",
-              "lib/core/network/api_endpoints.dart"
-            ],
-            "filesToCreate": [
-              "lib/core/services/websocket_service.dart",
-              "lib/core/services/websocket_service_impl.dart"
-            ],
-            "priority": 3,
-            "complexity": "high",
-            "acceptanceCriteria": [
-              "WebSocketService interface defines: connect(), disconnect(), isConnected, onStepsUpdated Stream, onGoalProgress Stream, onSharingJoined Stream, emitStepsUpdated(payload), emitGoalProgress(payload)",
-              "WebSocketServiceImpl uses socket_io_client matching backend Socket.IO server",
-              "connect() authenticates using JWT token from SecureStorage",
-              "Automatic reconnection with exponential backoff (1s, 2s, 4s, max 30s)",
-              "Handles token expiry by refreshing before reconnect",
-              "StreamControllers broadcast received events",
-              "disconnect() cleanly closes connection and controllers",
-              "ApiEndpoints.socketUrl added pointing to backend WebSocket endpoint",
-              "DI container registers WebSocketService as lazy singleton"
-            ]
-          },
-          {
-            "id": "realtime-story-4",
-            "title": "Integrate WebSocket with FriendActivityBloc",
-            "description": "Update FriendActivityBloc to subscribe to WebSocket stepsUpdated events for real-time friend activity",
-            "filesToModify": [
-              "lib/features/sharing/presentation/bloc/friend_activity_bloc.dart",
-              "lib/features/sharing/presentation/bloc/friend_activity_event.dart",
-              "lib/features/sharing/presentation/bloc/friend_activity_state.dart",
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "FriendActivityBloc takes WebSocketService as dependency",
-              "Subscribes to onStepsUpdated stream on creation",
-              "StepsUpdatedReceived event added for handling WebSocket events",
-              "When stepsUpdated received, updates activity feed in real-time",
-              "New activities appear at top of feed with animation",
-              "Unsubscribes from stream on bloc close"
-            ]
-          },
-          {
-            "id": "realtime-story-5",
-            "title": "Integrate WebSocket with GoalDetailBloc",
-            "description": "Update GoalDetailBloc to subscribe to WebSocket goalProgress events for real-time goal updates",
-            "filesToModify": [
-              "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
-              "lib/features/goals/presentation/bloc/goal_detail_event.dart",
-              "lib/features/goals/presentation/bloc/goal_detail_state.dart",
-              "lib/core/di/injection_container.dart"
-            ],
-            "filesToCreate": [],
-            "priority": 5,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "GoalDetailBloc takes WebSocketService as dependency",
-              "Subscribes to onGoalProgress stream filtered by current goalId",
-              "GoalProgressReceived event added for handling WebSocket events",
-              "When goalProgress received, updates progress bar and rankings in real-time",
-              "Member contributions update with smooth animation",
-              "Unsubscribes from stream on bloc close"
-            ]
-          },
-          {
-            "id": "realtime-story-6",
-            "title": "Create PushNotificationService with Firebase Messaging",
-            "description": "Create push notification service for handling FCM tokens and incoming notifications",
-            "filesToModify": [
-              "lib/core/di/injection_container.dart",
-              "lib/main.dart"
-            ],
-            "filesToCreate": [
-              "lib/core/services/push_notification_service.dart",
-              "lib/core/services/push_notification_service_impl.dart"
-            ],
-            "priority": 6,
-            "complexity": "high",
-            "acceptanceCriteria": [
-              "PushNotificationService interface defines: initialize(), requestPermission(), getToken(), onTokenRefresh Stream, onMessage Stream, onBackgroundMessage handler",
-              "PushNotificationServiceImpl uses firebase_messaging",
-              "initialize() configures FCM and requests permissions",
-              "getToken() returns FCM registration token",
-              "Token sent to backend for storage (requires backend endpoint - document as TODO)",
-              "onMessage handles foreground notifications",
-              "Background message handler registered in main.dart",
-              "Local notification shown for foreground messages using flutter_local_notifications",
-              "DI container registers PushNotificationService"
-            ]
-          },
-          {
-            "id": "realtime-story-7",
-            "title": "Configure Firebase for Android and iOS",
-            "description": "Set up Firebase project configuration files for both platforms",
-            "filesToModify": [
-              "android/app/build.gradle",
-              "ios/Runner/Info.plist",
-              "lib/main.dart"
-            ],
-            "filesToCreate": [
-              "android/app/google-services.json",
-              "ios/Runner/GoogleService-Info.plist",
-              "ios/firebase_app_id_file.json"
-            ],
-            "priority": 7,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "google-services.json placeholder created with instructions for Firebase setup",
-              "GoogleService-Info.plist placeholder created with instructions",
-              "android/app/build.gradle has google-services plugin applied",
-              "iOS Info.plist has background modes for remote-notification",
-              "Firebase.initializeApp() called in main.dart before runApp",
-              "README section added documenting Firebase setup steps"
-            ]
-          },
-          {
-            "id": "realtime-story-8",
-            "title": "Create connection status indicator and WebSocket initialization",
-            "description": "Show WebSocket connection status in app UI and initialize connection on app start",
-            "filesToModify": [
-              "lib/app.dart",
-              "lib/features/dashboard/presentation/pages/dashboard_page.dart"
-            ],
-            "filesToCreate": [
-              "lib/shared/widgets/connection_status_indicator.dart"
-            ],
-            "priority": 8,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "ConnectionStatusIndicator widget shows online/offline/connecting status",
-              "Green dot for connected, yellow for connecting, red for disconnected",
-              "Widget displayed in app bar or status area",
-              "WebSocketService.connect() called when user authenticates",
-              "WebSocketService.disconnect() called on logout",
-              "Connection restored automatically when app returns to foreground"
-            ]
-          }
+          "WebSocket service as singleton with connection state management",
+          "Event-driven architecture matching backend socket event types",
+          "Push notification setup follows Firebase best practices",
+          "Reconnection with exponential backoff"
         ],
         "repoType": "frontend"
       }
