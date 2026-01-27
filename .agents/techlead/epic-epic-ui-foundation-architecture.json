@@ -1,0 +1,159 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "193cc61ae3eeaf12d20b2316",
+    "timestamp": "2026-01-27T10:59:38.755Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-27T10:59:38.755Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 5,
+    "architecture": "## UI Foundation Architecture\n\n### Design System Structure\n```\nlib/\n├── core/\n│   ├── theme/\n│   │   ├── app_colors.dart      # Color palette constants (abstract final class)\n│   │   ├── app_text_styles.dart # Typography constants (abstract final class)\n│   │   └── app_theme.dart       # ThemeData composition (abstract final class)\n│   └── router/\n│       ├── route_names.dart     # Route path constants (abstract final class)\n│       └── app_router.dart      # GoRouter configuration (abstract final class)\n├── shared/\n│   └── widgets/\n│       ├── app_button.dart      # Primary button component\n│       ├── app_text_field.dart  # Text input component\n│       ├── app_card.dart        # Card container component\n│       ├── avatar_widget.dart   # User avatar component\n│       ├── loading_indicator.dart # Loading state component\n│       ├── error_widget.dart    # Error state component\n│       ├── empty_state.dart     # Empty state component\n│       └── app_scaffold.dart    # Page scaffold component\n```\n\n### SOLID Principles Applied\n1. **SRP**: Each file has single responsibility (colors, styles, theme, routing)\n2. **OCP**: Widgets accept customization via parameters without modification\n3. **LSP**: All widgets extend StatelessWidget properly\n4. **ISP**: Small focused interfaces (ButtonVariant, ButtonSize enums)\n5. **DIP**: Widgets depend on Theme abstraction via Theme.of(context)\n\n### Pattern Conventions\n- `abstract final class` for constants (AppColors, AppTextStyles, RouteNames)\n- `StatelessWidget` with const constructors for UI components\n- `Theme.of(context)` for runtime theme access\n- Named parameters with sensible defaults\n- Enums for variant types (ButtonVariant, ButtonSize)\n\n### Verification Commands\n- Typecheck: `flutter analyze`\n- Test: `flutter test`\n- Build: `flutter build apk --debug`",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Create AppColors and AppTextStyles in lib/core/theme/",
+        "description": "Create the foundational theme constants files for the design system.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/constants/app_constants.dart (for abstract final class pattern)\n- Create: lib/core/theme/app_colors.dart, lib/core/theme/app_text_styles.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class AppColors` pattern from app_constants.dart\n- Use Material 3 ColorScheme-compatible colors\n- Use static const for all color definitions\n- Colors should include: primary, secondary, tertiary, error, success, warning, surface variants, text colors\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use class with instance methods - use `abstract final class`\n- DO NOT use Color(0xFF...) without meaningful names\n- DO NOT create themes here - only raw color/text style constants\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**app_colors.dart:**\n- `abstract final class AppColors` with:\n  - Primary palette: primary, primaryContainer, onPrimary, onPrimaryContainer\n  - Secondary palette: secondary, secondaryContainer, onSecondary, onSecondaryContainer\n  - Tertiary palette: tertiary, tertiaryContainer, onTertiary, onTertiaryContainer\n  - Semantic colors: error, success, warning (with containers)\n  - Surface colors: surface, surfaceVariant, background, onSurface, onSurfaceVariant\n  - Outline colors: outline, outlineVariant\n  - Text colors: textPrimary, textSecondary, textDisabled\n\n**app_text_styles.dart:**\n- `abstract final class AppTextStyles` with:\n  - Display: displayLarge, displayMedium, displaySmall\n  - Headline: headlineLarge, headlineMedium, headlineSmall\n  - Title: titleLarge, titleMedium, titleSmall\n  - Body: bodyLarge, bodyMedium, bodySmall\n  - Label: labelLarge, labelMedium, labelSmall\n  - Use TextStyle with fontWeight, fontSize, letterSpacing\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/theme/\n- Ensure no lint errors\n- All colors should be const Color values\n- All text styles should be const TextStyle values",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/constants/app_constants.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_text_styles.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given a new theme directory, When AppColors is accessed, Then all Material 3 color constants are available as static const Color",
+          "Given a new theme directory, When AppTextStyles is accessed, Then all Material 3 text style constants are available as static const TextStyle",
+          "Given the codebase pattern, When reviewing the files, Then they follow abstract final class pattern from app_constants.dart"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Create AppTheme with light and dark ThemeData in lib/core/theme/app_theme.dart",
+        "description": "Create the main theme configuration file that composes AppColors and AppTextStyles into complete ThemeData objects.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_text_styles.dart, lib/app.dart\n- Create: lib/core/theme/app_theme.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class AppTheme` pattern\n- Use ThemeData with useMaterial3: true\n- Use ColorScheme.light() and ColorScheme.dark() with custom colors from AppColors\n- Apply AppTextStyles to textTheme via TextTheme()\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use ColorScheme.fromSeed() - use explicit colors from AppColors\n- DO NOT duplicate color values - reference AppColors.colorName\n- DO NOT create theme mode switching logic here - just provide static theme data\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**app_theme.dart:**\n- `abstract final class AppTheme` with:\n  - `static ThemeData get lightTheme` - Complete light theme using AppColors light palette\n  - `static ThemeData get darkTheme` - Complete dark theme using AppColors dark palette\n  - Both themes must include:\n    - colorScheme from AppColors\n    - textTheme from AppTextStyles\n    - appBarTheme (centerTitle: true, elevation: 0)\n    - cardTheme (elevation: 0, shape: RoundedRectangleBorder)\n    - inputDecorationTheme (outlined borders, consistent colors)\n    - elevatedButtonTheme (rounded corners, proper sizing)\n    - outlinedButtonTheme (consistent with elevatedButton)\n    - textButtonTheme (proper padding, foreground color)\n    - scaffoldBackgroundColor from AppColors\n    - dividerTheme with AppColors.outline\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/theme/app_theme.dart\n- Ensure AppTheme.lightTheme and AppTheme.darkTheme return valid ThemeData\n- No hardcoded colors - all from AppColors",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_text_styles.dart",
+          "lib/app.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/theme/app_theme.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppColors and AppTextStyles exist, When AppTheme.lightTheme is accessed, Then it returns a complete Material 3 ThemeData with light color scheme",
+          "Given AppColors and AppTextStyles exist, When AppTheme.darkTheme is accessed, Then it returns a complete Material 3 ThemeData with dark color scheme",
+          "Given the theme configuration, When applying to MaterialApp, Then all component themes (AppBar, Card, Button, Input) are consistently styled"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create GoRouter navigation system and integrate into app.dart",
+        "description": "Setup GoRouter navigation with route definitions and integrate the complete theme system into app.dart.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, lib/core/di/injection_container.dart\n- Modify: lib/app.dart, pubspec.yaml\n- Create: lib/core/router/route_names.dart, lib/core/router/app_router.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract final class RouteNames` for route path constants\n- Use GoRouter with routes list and initial route\n- Use MaterialApp.router() with routerConfig\n- Register router in DI if needed for access elsewhere\n- Import and use AppTheme.lightTheme and AppTheme.darkTheme\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use string literals for route paths - use RouteNames constants\n- DO NOT create screens/pages in this story - use placeholder widgets\n- DO NOT forget to add go_router to pubspec.yaml dependencies\n- DO NOT remove _FoundationReadyScreen - rename it and use as initial screen\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**route_names.dart:**\n- `abstract final class RouteNames` with:\n  - `static const String home = '/'`\n  - `static const String login = '/login'`\n  - `static const String register = '/register'`\n  - `static const String dashboard = '/dashboard'`\n  - `static const String profile = '/profile'`\n  - `static const String settings = '/settings'`\n\n**app_router.dart:**\n- `abstract final class AppRouter` with:\n  - `static final GoRouter router = GoRouter(...)` with:\n    - initialLocation: RouteNames.home\n    - routes: List<RouteBase> with GoRoute for each RouteNames\n    - errorBuilder: returns error page widget\n  - Each route returns a Scaffold with centered Text showing route name (placeholder)\n\n**app.dart modifications:**\n- Import app_theme.dart and app_router.dart\n- Change MaterialApp to MaterialApp.router\n- Add routerConfig: AppRouter.router\n- Replace inline ThemeData with theme: AppTheme.lightTheme\n- Replace inline darkTheme with darkTheme: AppTheme.darkTheme\n- Remove home: parameter (router handles it)\n- Keep _FoundationReadyScreen as the home '/' route content\n\n**pubspec.yaml:**\n- Add: go_router: ^14.0.0 under dependencies\n\n🧪 **VERIFICATION:**\n- Run: flutter pub get\n- Run: flutter analyze lib/core/router/ lib/app.dart\n- Run: flutter build apk --debug (verify compiles)\n- App should launch with themed Foundation Ready screen",
+        "epicId": "epic-ui-foundation",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/app.dart",
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/router/route_names.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given go_router added to pubspec.yaml, When flutter pub get runs, Then go_router 14.x is installed",
+          "Given AppRouter is created, When accessing AppRouter.router, Then a configured GoRouter instance with all routes is returned",
+          "Given app.dart uses MaterialApp.router, When the app launches, Then it uses AppTheme and navigates via GoRouter",
+          "Given RouteNames constants, When navigating programmatically, Then all route paths are available as constants"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Create AppButton, AppTextField, AppCard, and AvatarWidget in lib/shared/widgets/",
+        "description": "Create the core input and display reusable widget components for the design system.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/core/theme/app_text_styles.dart\n- Create: lib/shared/widgets/app_button.dart, lib/shared/widgets/app_text_field.dart, lib/shared/widgets/app_card.dart, lib/shared/widgets/avatar_widget.dart\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget with const constructor\n- Use Theme.of(context) for accessing current theme colors/styles\n- Use named parameters with sensible defaults\n- Use enum for variants (e.g., ButtonVariant.primary, ButtonVariant.secondary)\n- Follow existing patterns from app_constants.dart for documentation\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode colors - use Theme.of(context).colorScheme\n- DO NOT use StatefulWidget unless absolutely necessary\n- DO NOT create multiple widgets per file - one main widget per file\n- NO placeholder text like 'Coming Soon' - widgets must be fully functional\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**app_button.dart:**\n- `class AppButton extends StatelessWidget` with:\n  - `required String text`\n  - `required VoidCallback? onPressed` (nullable for disabled state)\n  - `ButtonVariant variant` (primary, secondary, outline, text) with default primary\n  - `ButtonSize size` (small, medium, large) with default medium\n  - `bool isLoading` with default false\n  - `IconData? leadingIcon`\n  - `IconData? trailingIcon`\n  - `bool fullWidth` with default false\n- Implement all variants with proper styling from theme\n- Show CircularProgressIndicator when isLoading is true\n- Disable button when onPressed is null OR isLoading is true\n\n**app_text_field.dart:**\n- `class AppTextField extends StatelessWidget` with:\n  - `TextEditingController? controller`\n  - `String? labelText`\n  - `String? hintText`\n  - `String? errorText`\n  - `bool obscureText` with default false\n  - `TextInputType? keyboardType`\n  - `ValueChanged<String>? onChanged`\n  - `VoidCallback? onEditingComplete`\n  - `IconData? prefixIcon`\n  - `Widget? suffixIcon`\n  - `bool enabled` with default true\n  - `int? maxLines` with default 1\n  - `String? Function(String?)? validator`\n- Uses InputDecoration from theme with custom error state\n\n**app_card.dart:**\n- `class AppCard extends StatelessWidget` with:\n  - `required Widget child`\n  - `EdgeInsetsGeometry? padding` with default EdgeInsets.all(16)\n  - `EdgeInsetsGeometry? margin`\n  - `VoidCallback? onTap`\n  - `Color? backgroundColor`\n  - `double? elevation` with default 0\n  - `BorderRadius? borderRadius` with default BorderRadius.circular(12)\n- Uses Card widget with theme styling\n- Wraps in InkWell when onTap is provided\n\n**avatar_widget.dart:**\n- `class AvatarWidget extends StatelessWidget` with:\n  - `String? imageUrl`\n  - `String? name` (for initials fallback)\n  - `double size` with default 40\n  - `VoidCallback? onTap`\n- Shows network image if imageUrl provided\n- Shows initials (first letter of first and last word) if no image\n- Uses CircleAvatar with proper colors from theme\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/shared/widgets/\n- All widgets must have const constructors where possible\n- All widgets must be fully functional (no placeholder code)",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/core/theme/app_text_styles.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_text_field.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/avatar_widget.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppButton is used, When variant and size are specified, Then the button renders with correct theme styling",
+          "Given AppButton with isLoading: true, When rendered, Then it shows a CircularProgressIndicator and is disabled",
+          "Given AppTextField with errorText, When rendered, Then it shows error styling with the error message",
+          "Given AppCard with onTap, When tapped, Then the callback is invoked with ripple effect",
+          "Given AvatarWidget with name but no image, When rendered, Then it shows initials in a themed circle"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-5",
+        "title": "Create LoadingIndicator, AppErrorWidget, EmptyState, and AppScaffold in lib/shared/widgets/",
+        "description": "Create the state display and layout reusable widget components and export all widgets from main.dart.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_colors.dart, lib/app.dart\n- Modify: lib/main.dart\n- Create: lib/shared/widgets/loading_indicator.dart, lib/shared/widgets/error_widget.dart, lib/shared/widgets/empty_state.dart, lib/shared/widgets/app_scaffold.dart\n\n🔧 **PATTERNS TO USE:**\n- Use StatelessWidget with const constructor\n- Use Theme.of(context) for accessing current theme\n- Follow the same documentation style as existing code\n- Use Lottie animations if available, fallback to Flutter built-in animations\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode colors - use Theme.of(context).colorScheme\n- DO NOT use StatefulWidget unless animation requires it\n- NO placeholder text like 'Coming Soon' or 'TODO'\n- DO NOT create dependency on external assets that don't exist\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n\n**loading_indicator.dart:**\n- `class LoadingIndicator extends StatelessWidget` with:\n  - `double size` with default 40\n  - `Color? color` (defaults to theme primary)\n  - `String? message` (optional loading text below spinner)\n  - `bool overlay` with default false (for full-screen loading overlay)\n- Uses CircularProgressIndicator.adaptive() for platform-native look\n- When overlay is true, shows semi-transparent background covering parent\n\n**error_widget.dart:**\n- `class AppErrorWidget extends StatelessWidget` with:\n  - `required String message`\n  - `String? title` with default 'Something went wrong'\n  - `VoidCallback? onRetry`\n  - `IconData? icon` with default Icons.error_outline\n- Shows error icon, title, message, and optional retry button\n- Uses theme error colors\n- Centered layout with proper spacing\n\n**empty_state.dart:**\n- `class EmptyState extends StatelessWidget` with:\n  - `required String message`\n  - `String? title`\n  - `IconData? icon` with default Icons.inbox_outlined\n  - `Widget? action` (optional action button/widget)\n- Shows icon, title (if provided), message, and action\n- Uses theme onSurfaceVariant colors for subtle appearance\n- Centered layout with proper spacing\n\n**app_scaffold.dart:**\n- `class AppScaffold extends StatelessWidget` with:\n  - `required Widget body`\n  - `String? title`\n  - `List<Widget>? actions` (app bar actions)\n  - `Widget? floatingActionButton`\n  - `Widget? bottomNavigationBar`\n  - `bool showBackButton` with default true\n  - `VoidCallback? onBackPressed` (custom back behavior)\n  - `bool resizeToAvoidBottomInset` with default true\n  - `Color? backgroundColor`\n- Wraps Scaffold with consistent AppBar styling\n- Handles back button visibility and custom callback\n- Uses SafeArea for body content\n\n**main.dart modification:**\n- Add comment section for shared widgets exports (for easy importing elsewhere)\n- No functional changes needed - widgets are imported where used\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/shared/widgets/\n- Run: flutter analyze lib/main.dart\n- All widgets must be fully functional\n- No hardcoded colors or placeholder text",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_colors.dart",
+          "lib/app.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart"
+        ],
+        "filesToCreate": [
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/error_widget.dart",
+          "lib/shared/widgets/empty_state.dart",
+          "lib/shared/widgets/app_scaffold.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given LoadingIndicator with overlay: true, When rendered, Then it shows a semi-transparent overlay with centered spinner",
+          "Given AppErrorWidget with onRetry callback, When retry button is tapped, Then the callback is invoked",
+          "Given EmptyState with action widget, When rendered, Then it shows icon, message, and the action widget",
+          "Given AppScaffold with title, When rendered, Then it shows AppBar with title and proper theme styling",
+          "Given AppScaffold with showBackButton: false, When rendered, Then no back button is shown in AppBar"
+        ]
+      }
+    ]
+  }
+}
