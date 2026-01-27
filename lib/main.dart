@@ -5,6 +5,22 @@
 /// 2. Loading environment variables from .env file
 /// 3. Initializing dependency injection
 /// 4. Running the main App widget
+///
+/// ## Shared Widgets Exports
+///
+/// For importing shared widgets throughout the application, use:
+/// ```dart
+/// import 'package:app_pasos_frontend/shared/widgets/loading_indicator.dart';
+/// import 'package:app_pasos_frontend/shared/widgets/error_widget.dart';
+/// import 'package:app_pasos_frontend/shared/widgets/empty_state.dart';
+/// import 'package:app_pasos_frontend/shared/widgets/app_scaffold.dart';
+/// ```
+///
+/// Available widgets:
+/// - `LoadingIndicator` - Circular progress with optional message and overlay
+/// - `AppErrorWidget` - Error display with retry functionality
+/// - `EmptyState` - Empty content display with optional action
+/// - `AppScaffold` - Consistent page layout with AppBar
 library;
 
 import 'package:app_pasos_frontend/app.dart';
@@ -20,7 +36,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// 1. [WidgetsFlutterBinding.ensureInitialized] - Required for async operations
 ///    before runApp, such as loading files or initializing plugins.
 ///
-/// 2. [dotenv.load] - Loads environment variables from the .env file.
+/// 2. `dotenv.load` - Loads environment variables from the .env file.
 ///    If the file doesn't exist, the app continues with default values.
 ///
 /// 3. [initializeDependencies] - Registers all services in the DI container.
