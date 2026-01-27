@@ -1,0 +1,22 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "12baa90f412362136a0177ff",
+    "timestamp": "2026-01-27T11:55:01.250Z",
+    "phase": "judge",
+    "epicId": "epic-auth-ui",
+    "savedAt": "2026-01-27T11:55:01.250Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "techlead",
+    "entityId": "epic-auth-ui",
+    "verdict": "approved",
+    "score": 95,
+    "feedback": "Exceptionally well-designed epic with verified file paths, proper Clean Architecture structure, correct usage of existing infrastructure, logical story dependencies, and detailed implementation guidance.",
+    "issues": [],
+    "suggestions": [
+      "Consider adding pubspec.yaml to epic-level filesToModify for completeness"
+    ]
+  }
+}
