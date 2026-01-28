@@ -1,254 +1,258 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "323317759c9c31a85f289166",
-    "timestamp": "2026-01-27T17:43:41.526Z",
+    "taskId": "c9dcfbbdd18341688986b41a",
+    "timestamp": "2026-01-28T09:42:48.118Z",
     "phase": "planning",
-    "savedAt": "2026-01-27T17:43:41.526Z",
+    "savedAt": "2026-01-28T09:42:48.118Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "FFNNN21",
-    "taskDescription": "Descripción de tareas para completar el frontend en Flutter\n\nCompletar los 6 epics del frontend de la aplicación \"Pasos\" (contador de pasos social) usando Flutter.\n\n================================================================================\n\nCONTEXTO\n\n================================================================================\n\nEl backend ya está completo en: project-app-pasos-backend\n\nUsar Flutter para aplicación móvil nativa multiplataforma (iOS/Android/web)\n\n================================================================================\n\nEPICS A IMPLEMENTAR\n\n================================================================================\n\nSHARING UI\n\nLista de amigos\n\nGestión de compartir datos con amigos\n\nSolicitudes de amistad\n\nVista de actividad de amigos\n\nGOALS UI\n\nGrupos y metas compartidas\n\nCreación y edición de metas\n\nProgreso de grupos\n\nRankings\n\nNATIVE INTEGRATION\n\nIntegración con podómetro nativo usando health package\n\nLectura de pasos desde HealthKit (iOS)\n\nLectura de pasos desde Google Fit/Health Connect (Android)\n\nBackground sync de datos\n\nREAL-TIME CLIENT\n\nIntegración WebSocket con web_socket_channel\n\nActualizaciones en tiempo real\n\nNotificaciones push (firebase_messaging)\n\nManejo de reconexión",
-    "epicsCount": 4,
+    "taskTitle": "TASK mvp pasos",
+    "taskDescription": "Descripción de tareas para completar el frontend en Flutter\n\nCompletar los 6 epics del frontend de la aplicación \"Pasos\" (contador de pasos social) usando Flutter.\n\n================================================================================\n\nCONTEXTO\n\n================================================================================\n\nEl backend ya está completo en: project-app-pasos-backend\n\nUsar Flutter para aplicación móvil nativa multiplataforma (iOS/Android/web)\n\n================================================================================\n\nEPICS A IMPLEMENTAR\n\n================================================================================\n\nSHARING UI\n\nLista de amigos\n\nGestión de compartir datos con amigos\n\nSolicitudes de amistad\n\nVista de actividad de amigos\n\nGOALS UI\n\nGrupos y metas compartidas\n\nCreación y edición de metas\n\nProgreso de grupos\n\nRankings\n\nNATIVE INTEGRATION\n\nIntegración con podómetro nativo usando health package\n\nLectura de pasos desde HealthKit (iOS)\n\nLectura de pasos desde Google Fit/Health Connect (Android)\n\nBackground sync de datos\n\nREAL-TIME CLIENT\n\nIntegración WebSocket con web_socket_channel\n\nActualizaciones en tiempo real\n\nNotificaciones push (firebase_messaging)",
+    "epicsCount": 5,
     "epics": [
       {
-        "id": "epic-sharing-ui",
-        "title": "Sharing UI - Friend Management System",
-        "description": "Complete friend management system with friends list, friendship requests, sharing management, and friends activity view. Includes sending/accepting/rejecting requests, viewing friend step activity, and managing sharing relationships.",
+        "id": "epic-native-health-integration",
+        "title": "Native Health Integration with HealthKit and Health Connect",
+        "description": "Implement native pedometer integration using health package to read step data from HealthKit (iOS) and Health Connect (Android), with background sync capability",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
         "filesToModify": [
-          "lib/core/router/route_names.dart",
-          "lib/core/router/app_router.dart",
-          "lib/core/network/api_endpoints.dart",
-          "lib/core/di/injection_container.dart"
-        ],
-        "filesToCreate": [
-          "lib/features/sharing/domain/entities/sharing_relationship.dart",
-          "lib/features/sharing/domain/entities/shared_user.dart",
-          "lib/features/sharing/domain/entities/friend_stats.dart",
-          "lib/features/sharing/domain/repositories/sharing_repository.dart",
-          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
-          "lib/features/sharing/domain/usecases/send_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart",
-          "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart",
-          "lib/features/sharing/domain/usecases/search_users_usecase.dart",
-          "lib/features/sharing/data/models/sharing_relationship_model.dart",
-          "lib/features/sharing/data/models/shared_user_model.dart",
-          "lib/features/sharing/data/models/friend_stats_model.dart",
-          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
-          "lib/features/sharing/data/repositories/sharing_repository_impl.dart",
-          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
-          "lib/features/sharing/presentation/bloc/sharing_event.dart",
-          "lib/features/sharing/presentation/bloc/sharing_state.dart",
-          "lib/features/sharing/presentation/bloc/friend_search_bloc.dart",
-          "lib/features/sharing/presentation/bloc/friend_search_event.dart",
-          "lib/features/sharing/presentation/bloc/friend_search_state.dart",
-          "lib/features/sharing/presentation/pages/friends_list_page.dart",
-          "lib/features/sharing/presentation/pages/friend_requests_page.dart",
-          "lib/features/sharing/presentation/pages/friend_activity_page.dart",
-          "lib/features/sharing/presentation/pages/add_friend_page.dart",
-          "lib/features/sharing/presentation/widgets/friend_card.dart",
-          "lib/features/sharing/presentation/widgets/friend_request_card.dart",
-          "lib/features/sharing/presentation/widgets/friend_stats_card.dart",
-          "lib/features/sharing/presentation/widgets/user_search_result_tile.dart"
-        ],
-        "filesToRead": [
-          "lib/features/auth/domain/entities/user.dart",
-          "lib/features/dashboard/domain/entities/step_stats.dart",
-          "lib/core/network/api_client.dart"
-        ],
-        "estimatedComplexity": "high",
-        "dependencies": [],
-        "executionOrder": 1,
-        "followsPatterns": [
-          "Clean Architecture with domain/data/presentation layers",
-          "BLoC pattern matching existing dashboard_bloc structure",
-          "Uses existing ApiClient and error handling patterns",
-          "Entities extend Equatable for value equality"
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-goals-ui",
-        "title": "Goals UI - Group Goals Management System",
-        "description": "Complete group goals system with goals list, goal creation/editing, group progress tracking, member management, and rankings. Users can create goals, invite friends, track collective progress, and view leaderboards.",
-        "targetRepository": "app-pasos-frontend-flutter",
-        "affectedRepositories": [
-          "app-pasos-frontend-flutter"
-        ],
-        "filesToModify": [
-          "lib/core/router/route_names.dart",
-          "lib/core/router/app_router.dart",
-          "lib/core/network/api_endpoints.dart",
-          "lib/core/di/injection_container.dart"
-        ],
-        "filesToCreate": [
-          "lib/features/goals/domain/entities/group_goal.dart",
-          "lib/features/goals/domain/entities/goal_membership.dart",
-          "lib/features/goals/domain/entities/goal_progress.dart",
-          "lib/features/goals/domain/entities/member_contribution.dart",
-          "lib/features/goals/domain/repositories/goals_repository.dart",
-          "lib/features/goals/domain/usecases/get_user_goals_usecase.dart",
-          "lib/features/goals/domain/usecases/create_goal_usecase.dart",
-          "lib/features/goals/domain/usecases/get_goal_details_usecase.dart",
-          "lib/features/goals/domain/usecases/invite_user_usecase.dart",
-          "lib/features/goals/domain/usecases/join_goal_usecase.dart",
-          "lib/features/goals/domain/usecases/leave_goal_usecase.dart",
-          "lib/features/goals/domain/usecases/get_goal_progress_usecase.dart",
-          "lib/features/goals/data/models/group_goal_model.dart",
-          "lib/features/goals/data/models/goal_membership_model.dart",
-          "lib/features/goals/data/models/goal_progress_model.dart",
-          "lib/features/goals/data/models/member_contribution_model.dart",
-          "lib/features/goals/data/datasources/goals_remote_datasource.dart",
-          "lib/features/goals/data/repositories/goals_repository_impl.dart",
-          "lib/features/goals/presentation/bloc/goals_list_bloc.dart",
-          "lib/features/goals/presentation/bloc/goals_list_event.dart",
-          "lib/features/goals/presentation/bloc/goals_list_state.dart",
-          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
-          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
-          "lib/features/goals/presentation/bloc/goal_detail_state.dart",
-          "lib/features/goals/presentation/bloc/create_goal_bloc.dart",
-          "lib/features/goals/presentation/bloc/create_goal_event.dart",
-          "lib/features/goals/presentation/bloc/create_goal_state.dart",
-          "lib/features/goals/presentation/pages/goals_list_page.dart",
-          "lib/features/goals/presentation/pages/goal_detail_page.dart",
-          "lib/features/goals/presentation/pages/create_goal_page.dart",
-          "lib/features/goals/presentation/pages/invite_members_page.dart",
-          "lib/features/goals/presentation/pages/goal_rankings_page.dart",
-          "lib/features/goals/presentation/widgets/goal_card.dart",
-          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
-          "lib/features/goals/presentation/widgets/member_contribution_tile.dart",
-          "lib/features/goals/presentation/widgets/ranking_list_item.dart",
-          "lib/features/goals/presentation/widgets/goal_form.dart"
-        ],
-        "filesToRead": [
-          "lib/features/auth/domain/entities/user.dart",
-          "lib/features/sharing/domain/entities/shared_user.dart",
-          "lib/core/network/api_client.dart"
-        ],
-        "estimatedComplexity": "high",
-        "dependencies": [
-          "epic-sharing-ui"
-        ],
-        "executionOrder": 2,
-        "followsPatterns": [
-          "Clean Architecture with domain/data/presentation layers",
-          "Multiple BLoCs for different screens (list, detail, create)",
-          "Uses existing form patterns from auth feature",
-          "Progress indicators follow dashboard chart patterns"
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-native-integration",
-        "title": "Native Integration - Health Package Pedometer",
-        "description": "Integrate native pedometer using health package to read steps from HealthKit (iOS) and Google Fit/Health Connect (Android). Includes permission handling, step reading, and background sync to upload steps to backend periodically.",
-        "targetRepository": "app-pasos-frontend-flutter",
-        "affectedRepositories": [
-          "app-pasos-frontend-flutter"
-        ],
-        "filesToModify": [
-          "pubspec.yaml",
           "lib/core/di/injection_container.dart",
           "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
           "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
           "lib/features/dashboard/domain/repositories/steps_repository.dart",
           "lib/features/dashboard/data/repositories/steps_repository_impl.dart",
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/health/domain/entities/health_data.dart",
+          "lib/features/health/domain/entities/step_sample.dart",
+          "lib/features/health/domain/repositories/health_repository.dart",
+          "lib/features/health/domain/usecases/get_steps_from_health_usecase.dart",
+          "lib/features/health/domain/usecases/request_health_permissions_usecase.dart",
+          "lib/features/health/domain/usecases/sync_steps_background_usecase.dart",
+          "lib/features/health/data/datasources/health_local_datasource.dart",
+          "lib/features/health/data/repositories/health_repository_impl.dart",
+          "lib/features/health/data/models/health_data_model.dart",
+          "lib/features/health/data/models/step_sample_model.dart",
+          "lib/features/health/presentation/bloc/health_bloc.dart",
+          "lib/features/health/presentation/bloc/health_event.dart",
+          "lib/features/health/presentation/bloc/health_state.dart",
+          "lib/features/health/presentation/widgets/health_permission_dialog.dart",
+          "lib/features/health/presentation/widgets/health_sync_indicator.dart",
+          "lib/core/services/background_sync_service.dart"
+        ],
+        "filesToRead": [
+          "lib/features/dashboard/domain/repositories/steps_repository.dart",
+          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
+          "lib/core/di/injection_container.dart",
           "android/app/src/main/AndroidManifest.xml",
           "ios/Runner/Info.plist"
         ],
-        "filesToCreate": [
-          "lib/core/services/health_service.dart",
-          "lib/core/services/background_sync_service.dart",
-          "lib/core/services/permission_service.dart",
-          "lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart",
-          "lib/features/dashboard/domain/usecases/get_native_steps_usecase.dart",
-          "lib/features/dashboard/domain/entities/health_data_point.dart",
-          "lib/features/dashboard/data/datasources/health_local_datasource.dart",
-          "lib/features/dashboard/data/models/health_data_point_model.dart",
-          "lib/features/settings/presentation/pages/health_permissions_page.dart",
-          "lib/features/settings/presentation/widgets/health_connection_status.dart",
-          "lib/features/settings/presentation/widgets/sync_settings_card.dart"
-        ],
-        "filesToRead": [
-          "lib/features/dashboard/domain/entities/step_record.dart",
-          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
-          "lib/core/storage/secure_storage_service.dart"
-        ],
         "estimatedComplexity": "high",
-        "dependencies": [
-          "epic-sharing-ui"
-        ],
-        "executionOrder": 2,
+        "dependencies": [],
+        "executionOrder": 1,
         "followsPatterns": [
-          "Service classes registered as lazy singletons in DI container",
-          "Permission handling with clear user feedback",
-          "Background tasks follow platform best practices",
-          "Native configuration in appropriate platform files"
+          "Clean Architecture with data/domain/presentation layers",
+          "BLoC pattern matching existing health feature",
+          "Repository pattern with local datasource for health data",
+          "Use case pattern for business logic"
         ],
         "repoType": "frontend"
       },
       {
-        "id": "epic-realtime-client",
-        "title": "Real-time Client - WebSocket & Push Notifications",
-        "description": "Implement WebSocket client for real-time updates using web_socket_channel, integrate firebase_messaging for push notifications. Includes connection management, automatic reconnection, event handling, and notification display.",
+        "id": "epic-realtime-websocket-client",
+        "title": "Real-time WebSocket Client for Live Updates",
+        "description": "Implement WebSocket client using web_socket_channel to connect with Socket.io backend, enabling real-time step updates between friends and live goal progress tracking",
         "targetRepository": "app-pasos-frontend-flutter",
         "affectedRepositories": [
           "app-pasos-frontend-flutter"
         ],
         "filesToModify": [
-          "pubspec.yaml",
           "lib/core/di/injection_container.dart",
-          "lib/main.dart",
-          "lib/app.dart",
+          "lib/core/network/api_endpoints.dart",
           "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/presentation/bloc/sharing_event.dart",
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
           "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
-          "android/app/build.gradle",
-          "android/build.gradle",
-          "ios/Runner/Info.plist"
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_state.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
+          "pubspec.yaml"
         ],
         "filesToCreate": [
-          "lib/core/services/websocket_service.dart",
-          "lib/core/services/websocket_event_handler.dart",
-          "lib/core/services/push_notification_service.dart",
-          "lib/core/services/notification_handler.dart",
-          "lib/core/models/socket_events.dart",
-          "lib/core/models/socket_payloads.dart",
-          "lib/features/notifications/domain/entities/app_notification.dart",
-          "lib/features/notifications/domain/repositories/notification_repository.dart",
-          "lib/features/notifications/data/repositories/notification_repository_impl.dart",
-          "lib/features/notifications/presentation/bloc/notification_bloc.dart",
-          "lib/features/notifications/presentation/bloc/notification_event.dart",
-          "lib/features/notifications/presentation/bloc/notification_state.dart",
-          "lib/features/notifications/presentation/widgets/notification_badge.dart",
-          "lib/features/notifications/presentation/pages/notifications_page.dart",
-          "android/app/google-services.json",
-          "ios/Runner/GoogleService-Info.plist",
-          "firebase_options.dart"
+          "lib/features/realtime/domain/entities/socket_event.dart",
+          "lib/features/realtime/domain/entities/steps_updated_payload.dart",
+          "lib/features/realtime/domain/entities/goal_progress_payload.dart",
+          "lib/features/realtime/domain/repositories/realtime_repository.dart",
+          "lib/features/realtime/domain/usecases/connect_socket_usecase.dart",
+          "lib/features/realtime/domain/usecases/disconnect_socket_usecase.dart",
+          "lib/features/realtime/domain/usecases/emit_steps_updated_usecase.dart",
+          "lib/features/realtime/domain/usecases/emit_goal_progress_usecase.dart",
+          "lib/features/realtime/data/datasources/socket_datasource.dart",
+          "lib/features/realtime/data/repositories/realtime_repository_impl.dart",
+          "lib/features/realtime/data/models/socket_event_model.dart",
+          "lib/features/realtime/data/models/steps_updated_model.dart",
+          "lib/features/realtime/data/models/goal_progress_model.dart",
+          "lib/features/realtime/presentation/bloc/realtime_bloc.dart",
+          "lib/features/realtime/presentation/bloc/realtime_event.dart",
+          "lib/features/realtime/presentation/bloc/realtime_state.dart",
+          "lib/core/network/socket_client.dart",
+          "lib/core/network/socket_interceptors.dart"
         ],
         "filesToRead": [
           "lib/core/network/api_client.dart",
           "lib/core/storage/secure_storage_service.dart",
-          "project-app-pasos-backend/src/socket/types.ts"
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart"
         ],
         "estimatedComplexity": "high",
         "dependencies": [
-          "epic-sharing-ui",
-          "epic-goals-ui",
-          "epic-native-integration"
+          "epic-native-health-integration"
         ],
-        "executionOrder": 3,
+        "executionOrder": 2,
         "followsPatterns": [
-          "WebSocket service as singleton with connection state management",
-          "Event-driven architecture matching backend socket event types",
-          "Push notification setup follows Firebase best practices",
-          "Reconnection with exponential backoff"
+          "Clean Architecture for realtime feature",
+          "Socket client follows ApiClient pattern",
+          "BLoC integration with stream subscriptions",
+          "Event-driven updates matching backend Socket.io events"
+        ],
+        "repoType": "frontend"
+      },
+      {
+        "id": "epic-sharing-ui-realtime-integration",
+        "title": "Sharing UI Real-time Integration",
+        "description": "Integrate real-time WebSocket updates into the existing Sharing feature to display live step counts from friends and instant notification of friend activity",
+        "targetRepository": "app-pasos-frontend-flutter",
+        "affectedRepositories": [
+          "app-pasos-frontend-flutter"
+        ],
+        "filesToModify": [
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/presentation/bloc/sharing_event.dart",
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
+          "lib/features/sharing/presentation/pages/friends_list_page.dart",
+          "lib/features/sharing/presentation/pages/friend_activity_page.dart",
+          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/sharing/presentation/widgets/friend_stats_card.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/sharing/presentation/widgets/live_step_indicator.dart",
+          "lib/features/sharing/presentation/widgets/friend_activity_stream.dart"
+        ],
+        "filesToRead": [
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/presentation/pages/friends_list_page.dart",
+          "lib/features/sharing/domain/entities/friend_stats.dart"
+        ],
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-realtime-websocket-client",
+          "epic-native-health-integration",
+          "epic-realtime-websocket-client"
+        ],
+        "executionOrder": 2,
+        "followsPatterns": [
+          "BLoC stream subscription for real-time events",
+          "Widget composition for live indicators",
+          "Existing SharingBloc event/state pattern"
+        ],
+        "repoType": "frontend"
+      },
+      {
+        "id": "epic-goals-ui-realtime-integration",
+        "title": "Goals UI Real-time Progress Integration",
+        "description": "Integrate real-time WebSocket updates into the existing Goals feature to display live progress from all group members and instant ranking updates",
+        "targetRepository": "app-pasos-frontend-flutter",
+        "affectedRepositories": [
+          "app-pasos-frontend-flutter"
+        ],
+        "filesToModify": [
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_state.dart",
+          "lib/features/goals/presentation/pages/goal_detail_page.dart",
+          "lib/features/goals/presentation/pages/goal_rankings_page.dart",
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/member_contribution_tile.dart",
+          "lib/features/goals/presentation/widgets/ranking_list_item.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/widgets/live_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/live_ranking_badge.dart"
+        ],
+        "filesToRead": [
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/features/goals/presentation/pages/goal_detail_page.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart"
+        ],
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-realtime-websocket-client",
+          "epic-native-health-integration",
+          "epic-realtime-websocket-client"
+        ],
+        "executionOrder": 2,
+        "followsPatterns": [
+          "BLoC stream subscription for goal progress events",
+          "Animated widget updates for live progress",
+          "Existing GoalDetailBloc event/state pattern"
+        ],
+        "repoType": "frontend"
+      },
+      {
+        "id": "epic-push-notifications",
+        "title": "Push Notifications with Firebase Messaging",
+        "description": "Implement push notifications using firebase_messaging to alert users of friend activity, goal achievements, and friend requests even when app is in background",
+        "targetRepository": "app-pasos-frontend-flutter",
+        "affectedRepositories": [
+          "app-pasos-frontend-flutter"
+        ],
+        "filesToModify": [
+          "lib/main.dart",
+          "lib/core/di/injection_container.dart",
+          "lib/core/router/app_router.dart",
+          "android/app/build.gradle",
+          "ios/Runner/AppDelegate.swift",
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/notifications/domain/entities/push_notification.dart",
+          "lib/features/notifications/domain/repositories/notification_repository.dart",
+          "lib/features/notifications/domain/usecases/initialize_notifications_usecase.dart",
+          "lib/features/notifications/domain/usecases/handle_notification_tap_usecase.dart",
+          "lib/features/notifications/domain/usecases/request_notification_permission_usecase.dart",
+          "lib/features/notifications/data/datasources/notification_remote_datasource.dart",
+          "lib/features/notifications/data/repositories/notification_repository_impl.dart",
+          "lib/features/notifications/data/models/push_notification_model.dart",
+          "lib/features/notifications/presentation/bloc/notification_bloc.dart",
+          "lib/features/notifications/presentation/bloc/notification_event.dart",
+          "lib/features/notifications/presentation/bloc/notification_state.dart",
+          "lib/core/services/firebase_messaging_service.dart",
+          "android/app/google-services.json",
+          "ios/Runner/GoogleService-Info.plist",
+          "ios/firebase_app_id_file.json"
+        ],
+        "filesToRead": [
+          "lib/main.dart",
+          "lib/core/router/app_router.dart",
+          "android/app/build.gradle"
+        ],
+        "estimatedComplexity": "high",
+        "dependencies": [
+          "epic-native-health-integration"
+        ],
+        "executionOrder": 2,
+        "followsPatterns": [
+          "Clean Architecture for notifications feature",
+          "Service layer for Firebase initialization",
+          "Deep linking integration with GoRouter"
         ],
         "repoType": "frontend"
       }
