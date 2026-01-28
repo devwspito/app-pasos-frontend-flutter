@@ -1,0 +1,168 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "c9dcfbbdd18341688986b41a",
+    "timestamp": "2026-01-28T09:48:31.265Z",
+    "phase": "techlead",
+    "epicId": "epic-native-health-integration",
+    "savedAt": "2026-01-28T09:48:31.265Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-native-health-integration",
+    "storiesCount": 5,
+    "architecture": "## Architecture Design: Native Health Integration\n\n### Overview\nThis epic implements native health data integration following the existing Clean Architecture pattern with BLoC state management. The implementation adds a new `health` feature module that mirrors the structure of the existing `dashboard` feature.\n\n### Layer Structure (Following Existing Patterns)\n```\nlib/features/health/\n├── domain/\n│   ├── entities/\n│   │   ├── health_data.dart      # Domain entity for aggregated health data\n│   │   └── step_sample.dart      # Domain entity for individual step samples\n│   ├── repositories/\n│   │   └── health_repository.dart # Abstract interface\n│   └── usecases/\n│       ├── get_steps_from_health_usecase.dart\n│       ├── request_health_permissions_usecase.dart\n│       └── sync_steps_background_usecase.dart\n├── data/\n│   ├── models/\n│   │   ├── health_data_model.dart    # Extends entity with JSON\n│   │   └── step_sample_model.dart\n│   ├── datasources/\n│   │   └── health_local_datasource.dart  # Uses health package\n│   └── repositories/\n│       └── health_repository_impl.dart\n└── presentation/\n    ├── bloc/\n    │   ├── health_bloc.dart\n    │   ├── health_event.dart\n    │   └── health_state.dart\n    └── widgets/\n        ├── health_permission_dialog.dart\n        └── health_sync_indicator.dart\n```\n\n### Key Patterns (From Codebase Analysis)\n1. **Entity Pattern**: `extends Equatable`, `const` constructor, `empty()` factory, `props` getter\n2. **Model Pattern**: Extends entity, adds `fromJson`, `toJson`, `fromEntity`, `copyWith`\n3. **Repository Pattern**: Interface in domain, implementation in data layer\n4. **Datasource Pattern**: Interface + Impl, encapsulates external dependencies\n5. **Use Case Pattern**: Single responsibility, `call()` method, params class if needed\n6. **BLoC Pattern**: Sealed events/states, factory registration, `on<Event>` handlers\n7. **DI Pattern**: LazySingleton for services, Factory for BLoCs\n\n### Integration Points\n1. **DashboardBloc**: Add `DashboardHealthSyncRequested` event for triggering sync\n2. **StepsRepository**: Used by `SyncStepsBackgroundUseCase` to record synced steps\n3. **injection_container.dart**: Register all health dependencies\n\n### Platform Configuration (Already Done)\n- Android: Health Connect permissions in AndroidManifest.xml ✓\n- iOS: HealthKit usage descriptions in Info.plist ✓\n\n### Dependencies\n- `health: ^10.2.0` - Flutter package for HealthKit/Health Connect",
+    "stories": [
+      {
+        "id": "epic-native-health-integration-story-1",
+        "title": "Create health domain entities and repository interface in lib/features/health/domain/",
+        "description": "Create the domain layer for health feature following the exact patterns from lib/features/dashboard/domain/.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/domain/entities/step_record.dart, lib/features/dashboard/domain/repositories/steps_repository.dart\n- Create: lib/features/health/domain/entities/health_data.dart, lib/features/health/domain/entities/step_sample.dart, lib/features/health/domain/repositories/health_repository.dart\n\n🔧 **PATTERNS TO USE:**\n- Entity pattern from `StepRecord`: extend `Equatable`, use `const` constructor, add `empty()` factory, `props` getter\n- Repository pattern from `StepsRepository`: use `abstract interface class`, document exceptions with `@throws`\n- Import `package:equatable/equatable.dart` for Equatable\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**HealthData entity (health_data.dart):**\n```dart\nclass HealthData extends Equatable {\n  const HealthData({\n    required this.totalSteps,\n    required this.startDate,\n    required this.endDate,\n    required this.samples,\n  });\n  final int totalSteps;\n  final DateTime startDate;\n  final DateTime endDate;\n  final List<StepSample> samples;\n  factory HealthData.empty() => HealthData(...);\n  @override List<Object?> get props => [...];\n}\n```\n\n**StepSample entity (step_sample.dart):**\n```dart\nclass StepSample extends Equatable {\n  const StepSample({\n    required this.steps,\n    required this.startTime,\n    required this.endTime,\n    required this.source,\n  });\n  final int steps;\n  final DateTime startTime;\n  final DateTime endTime;\n  final String source; // e.g., 'com.apple.health', 'com.google.android.apps.fitness'\n  @override List<Object?> get props => [...];\n}\n```\n\n**HealthRepository interface (health_repository.dart):**\n```dart\nabstract interface class HealthRepository {\n  Future<bool> requestPermissions();\n  Future<bool> hasPermissions();\n  Future<HealthData> getStepsForDateRange({required DateTime start, required DateTime end});\n  Future<int> getTodayStepsFromHealth();\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use mutable classes\n- Do NOT skip Equatable extension\n- Do NOT add platform-specific code in domain layer\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/health/domain/`\n- All files must compile without errors\n- Entities must extend Equatable",
+        "epicId": "epic-native-health-integration",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/domain/entities/step_record.dart",
+          "lib/features/dashboard/domain/repositories/steps_repository.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/domain/entities/health_data.dart",
+          "lib/features/health/domain/entities/step_sample.dart",
+          "lib/features/health/domain/repositories/health_repository.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the health domain layer, When importing HealthData and StepSample, Then they must extend Equatable with proper props",
+          "Given the HealthRepository interface, When reading its methods, Then it must define requestPermissions(), hasPermissions(), getStepsForDateRange(), and getTodayStepsFromHealth()",
+          "Given flutter analyze, When run on lib/features/health/domain/, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-2",
+        "title": "Create health use cases in lib/features/health/domain/usecases/",
+        "description": "Create the use cases for health feature following the exact pattern from lib/features/dashboard/domain/usecases/.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: lib/features/dashboard/domain/usecases/get_today_steps_usecase.dart, lib/features/dashboard/domain/usecases/record_steps_usecase.dart, lib/features/health/domain/repositories/health_repository.dart\n- Create: lib/features/health/domain/usecases/get_steps_from_health_usecase.dart, lib/features/health/domain/usecases/request_health_permissions_usecase.dart, lib/features/health/domain/usecases/sync_steps_background_usecase.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Case pattern from `GetTodayStepsUseCase`: class with repository dependency, `call()` method\n- Params pattern from `RecordStepsParams`: extends Equatable when parameters needed\n- Constructor pattern: `UseCase({required HealthRepository repository}) : _repository = repository;`\n- Private field pattern: `final HealthRepository _repository;`\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**GetStepsFromHealthUseCase:**\n```dart\nclass GetStepsFromHealthParams extends Equatable {\n  const GetStepsFromHealthParams({required this.start, required this.end});\n  final DateTime start;\n  final DateTime end;\n  @override List<Object?> get props => [start, end];\n}\n\nclass GetStepsFromHealthUseCase {\n  GetStepsFromHealthUseCase({required HealthRepository repository}) : _repository = repository;\n  final HealthRepository _repository;\n  Future<HealthData> call(GetStepsFromHealthParams params) async {\n    return _repository.getStepsForDateRange(start: params.start, end: params.end);\n  }\n}\n```\n\n**RequestHealthPermissionsUseCase:**\n```dart\nclass RequestHealthPermissionsUseCase {\n  RequestHealthPermissionsUseCase({required HealthRepository repository}) : _repository = repository;\n  final HealthRepository _repository;\n  Future<bool> call() async => _repository.requestPermissions();\n}\n```\n\n**SyncStepsBackgroundUseCase:**\n```dart\nclass SyncStepsBackgroundUseCase {\n  SyncStepsBackgroundUseCase({required HealthRepository healthRepository, required StepsRepository stepsRepository})\n      : _healthRepository = healthRepository, _stepsRepository = stepsRepository;\n  final HealthRepository _healthRepository;\n  final StepsRepository _stepsRepository;\n  Future<StepRecord> call() async {\n    final todaySteps = await _healthRepository.getTodayStepsFromHealth();\n    return _stepsRepository.recordSteps(count: todaySteps, source: StepSource.native);\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use `new` keyword (Dart 2+ style)\n- Do NOT add business logic outside use cases\n- Do NOT access datasources directly - go through repository\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/health/domain/usecases/`\n- All use cases must have proper constructor with named `repository` parameter",
+        "epicId": "epic-native-health-integration",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-integration-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/domain/usecases/get_today_steps_usecase.dart",
+          "lib/features/dashboard/domain/usecases/record_steps_usecase.dart",
+          "lib/features/health/domain/repositories/health_repository.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/domain/usecases/get_steps_from_health_usecase.dart",
+          "lib/features/health/domain/usecases/request_health_permissions_usecase.dart",
+          "lib/features/health/domain/usecases/sync_steps_background_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given GetStepsFromHealthUseCase, When call() is invoked with date params, Then it delegates to repository.getStepsForDateRange()",
+          "Given RequestHealthPermissionsUseCase, When call() is invoked, Then it returns a Future<bool> from repository",
+          "Given SyncStepsBackgroundUseCase, When call() is invoked, Then it fetches from health and records via steps repository",
+          "Given flutter analyze, When run on lib/features/health/domain/usecases/, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-3",
+        "title": "Create health data layer with models, datasource, and repository implementation",
+        "description": "Create the data layer for health feature following the exact patterns from lib/features/dashboard/data/.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: lib/features/dashboard/data/models/step_record_model.dart, lib/features/dashboard/data/datasources/steps_remote_datasource.dart, lib/features/dashboard/data/repositories/steps_repository_impl.dart\n- Modify: pubspec.yaml (add health: ^10.2.0 dependency)\n- Create: lib/features/health/data/models/health_data_model.dart, lib/features/health/data/models/step_sample_model.dart, lib/features/health/data/datasources/health_local_datasource.dart, lib/features/health/data/repositories/health_repository_impl.dart\n\n🔧 **PATTERNS TO USE:**\n- Model pattern from `StepRecordModel`: extends entity, adds `fromJson`, `toJson`, `fromEntity`, `copyWith`\n- Datasource pattern from `StepsRemoteDatasource`: abstract interface + Impl class\n- Repository pattern from `StepsRepositoryImpl`: implements interface, delegates to datasource\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**pubspec.yaml addition:**\n```yaml\ndependencies:\n  health: ^10.2.0  # Add after flutter_secure_storage\n```\n\n**HealthDataModel (extends HealthData):**\n- `fromJson(Map<String, dynamic>)` factory\n- `toJson()` method\n- `fromEntity(HealthData)` factory\n- `copyWith()` method\n\n**StepSampleModel (extends StepSample):**\n- Same pattern as above\n\n**HealthLocalDatasource:**\n```dart\nimport 'package:health/health.dart';\n\nabstract interface class HealthLocalDatasource {\n  Future<bool> requestPermissions();\n  Future<bool> hasPermissions();\n  Future<List<StepSampleModel>> getStepSamples({required DateTime start, required DateTime end});\n  Future<int> getTodaySteps();\n}\n\nclass HealthLocalDatasourceImpl implements HealthLocalDatasource {\n  HealthLocalDatasourceImpl();\n  final Health _health = Health();\n  \n  static const List<HealthDataType> _types = [HealthDataType.STEPS];\n  static const List<HealthDataAccess> _permissions = [HealthDataAccess.READ];\n  \n  @override\n  Future<bool> requestPermissions() async {\n    return _health.requestAuthorization(_types, permissions: _permissions);\n  }\n  // ... implement other methods using _health.getHealthDataFromTypes()\n}\n```\n\n**HealthRepositoryImpl:**\n```dart\nclass HealthRepositoryImpl implements HealthRepository {\n  HealthRepositoryImpl({required HealthLocalDatasource datasource}) : _datasource = datasource;\n  final HealthLocalDatasource _datasource;\n  // delegate all methods to _datasource, convert models to entities\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT put health package logic in repository - keep in datasource\n- Do NOT throw raw exceptions - wrap in AppException types\n- Do NOT use hardcoded date formatting - use DateTime\n\n🧪 **VERIFICATION:**\n- Run: `flutter pub get`\n- Run: `flutter analyze lib/features/health/data/`\n- Health package must be properly imported",
+        "epicId": "epic-native-health-integration",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-health-integration-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/data/models/step_record_model.dart",
+          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
+          "lib/features/dashboard/data/repositories/steps_repository_impl.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/features/health/data/models/health_data_model.dart",
+          "lib/features/health/data/models/step_sample_model.dart",
+          "lib/features/health/data/datasources/health_local_datasource.dart",
+          "lib/features/health/data/repositories/health_repository_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml, When reading dependencies, Then health: ^10.2.0 must be present",
+          "Given HealthLocalDatasourceImpl, When requestPermissions() is called, Then it uses Health().requestAuthorization()",
+          "Given HealthRepositoryImpl, When any method is called, Then it delegates to datasource and converts models",
+          "Given flutter pub get, When run, Then health package installs successfully"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-4",
+        "title": "Create health BLoC with events, states, and presentation widgets",
+        "description": "Create the presentation layer for health feature following the exact patterns from lib/features/dashboard/presentation/bloc/.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/bloc/dashboard_bloc.dart, lib/features/dashboard/presentation/bloc/dashboard_event.dart, lib/features/dashboard/presentation/bloc/dashboard_state.dart, lib/shared/widgets/loading_indicator.dart\n- Create: lib/features/health/presentation/bloc/health_bloc.dart, lib/features/health/presentation/bloc/health_event.dart, lib/features/health/presentation/bloc/health_state.dart, lib/features/health/presentation/widgets/health_permission_dialog.dart, lib/features/health/presentation/widgets/health_sync_indicator.dart\n\n🔧 **PATTERNS TO USE:**\n- Event pattern from `DashboardEvent`: `sealed class extends Equatable`, `final class` for each event\n- State pattern from `DashboardState`: `sealed class extends Equatable`, Initial/Loading/Loaded/Error states\n- BLoC pattern from `DashboardBloc`: use cases as dependencies, `on<Event>` handlers, private `_onEventName` methods\n- Widget pattern: use `const` constructors, document with `///`\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**HealthEvent (health_event.dart):**\n```dart\nsealed class HealthEvent extends Equatable {\n  const HealthEvent();\n}\n\nfinal class HealthPermissionRequested extends HealthEvent {...}\nfinal class HealthSyncRequested extends HealthEvent {...}\nfinal class HealthCheckPermissionsRequested extends HealthEvent {...}\n```\n\n**HealthState (health_state.dart):**\n```dart\nsealed class HealthState extends Equatable {\n  const HealthState();\n}\n\nfinal class HealthInitial extends HealthState {...}\nfinal class HealthLoading extends HealthState {...}\nfinal class HealthPermissionGranted extends HealthState {...}\nfinal class HealthPermissionDenied extends HealthState {...}\nfinal class HealthSynced extends HealthState {\n  const HealthSynced({required this.stepsRecorded});\n  final int stepsRecorded;\n  ...\n}\nfinal class HealthError extends HealthState {\n  const HealthError({required this.message});\n  final String message;\n  ...\n}\n```\n\n**HealthBloc (health_bloc.dart):**\n```dart\nclass HealthBloc extends Bloc<HealthEvent, HealthState> {\n  HealthBloc({\n    required RequestHealthPermissionsUseCase requestPermissionsUseCase,\n    required GetStepsFromHealthUseCase getStepsUseCase,\n    required SyncStepsBackgroundUseCase syncStepsUseCase,\n  }) : _requestPermissionsUseCase = requestPermissionsUseCase, ... {\n    on<HealthPermissionRequested>(_onPermissionRequested);\n    on<HealthSyncRequested>(_onSyncRequested);\n    ...\n  }\n  ...\n}\n```\n\n**HealthPermissionDialog widget:**\n- Shows rationale for health permissions\n- Has 'Allow' and 'Deny' buttons\n- Uses AppButton from shared widgets\n\n**HealthSyncIndicator widget:**\n- Shows sync progress with LoadingIndicator\n- Shows success/error state\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use `class` for events/states - use `sealed class` + `final class`\n- Do NOT forget `@override List<Object?> get props` for Equatable\n- Do NOT use async in BLoC constructor\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/health/presentation/`\n- BLoC must have all event handlers registered",
+        "epicId": "epic-native-health-integration",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-native-health-integration-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_state.dart",
+          "lib/shared/widgets/loading_indicator.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/health/presentation/bloc/health_bloc.dart",
+          "lib/features/health/presentation/bloc/health_event.dart",
+          "lib/features/health/presentation/bloc/health_state.dart",
+          "lib/features/health/presentation/widgets/health_permission_dialog.dart",
+          "lib/features/health/presentation/widgets/health_sync_indicator.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthEvent, When pattern matching, Then all events are final classes extending sealed HealthEvent",
+          "Given HealthBloc, When created, Then it registers handlers for HealthPermissionRequested and HealthSyncRequested",
+          "Given HealthPermissionDialog, When displayed, Then it shows rationale text and Allow/Deny buttons",
+          "Given flutter analyze, When run on presentation layer, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-integration-story-5",
+        "title": "Register health feature dependencies in DI container and integrate with dashboard",
+        "description": "Register all health feature dependencies in injection_container.dart and integrate with DashboardBloc following the exact registration patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n\n📁 **FILES:**\n- Read: lib/core/di/injection_container.dart, lib/features/dashboard/presentation/bloc/dashboard_bloc.dart, lib/features/dashboard/presentation/bloc/dashboard_event.dart\n- Modify: lib/core/di/injection_container.dart, lib/features/dashboard/presentation/bloc/dashboard_bloc.dart, lib/features/dashboard/presentation/bloc/dashboard_event.dart\n- Create: lib/core/services/background_sync_service.dart\n\n🔧 **PATTERNS TO USE:**\n- DI registration from `injection_container.dart`: \n  - Datasources: `sl.registerLazySingleton<Interface>(() => Impl(...))`\n  - Repositories: `sl.registerLazySingleton<Interface>(() => Impl(datasource: sl<Datasource>()))`\n  - Use Cases: `sl.registerLazySingleton<UseCase>(() => UseCase(repository: sl<Repository>()))`\n  - BLoCs: `sl.registerFactory<Bloc>(() => Bloc(useCase1: sl<UseCase1>(), ...))`\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**injection_container.dart additions:**\n```dart\n// Add imports at top\nimport 'package:app_pasos_frontend/features/health/data/datasources/health_local_datasource.dart';\nimport 'package:app_pasos_frontend/features/health/data/repositories/health_repository_impl.dart';\nimport 'package:app_pasos_frontend/features/health/domain/repositories/health_repository.dart';\nimport 'package:app_pasos_frontend/features/health/domain/usecases/get_steps_from_health_usecase.dart';\nimport 'package:app_pasos_frontend/features/health/domain/usecases/request_health_permissions_usecase.dart';\nimport 'package:app_pasos_frontend/features/health/domain/usecases/sync_steps_background_usecase.dart';\nimport 'package:app_pasos_frontend/features/health/presentation/bloc/health_bloc.dart';\n\n// Add Health Feature section after Goals Feature:\n// ============================================================\n// Health Feature\n// ============================================================\n\n// Data Sources\nsl.registerLazySingleton<HealthLocalDatasource>(\n  HealthLocalDatasourceImpl.new,\n);\n\n// Repositories\nsl.registerLazySingleton<HealthRepository>(\n  () => HealthRepositoryImpl(datasource: sl<HealthLocalDatasource>()),\n);\n\n// Use Cases\nsl.registerLazySingleton<RequestHealthPermissionsUseCase>(\n  () => RequestHealthPermissionsUseCase(repository: sl<HealthRepository>()),\n);\nsl.registerLazySingleton<GetStepsFromHealthUseCase>(\n  () => GetStepsFromHealthUseCase(repository: sl<HealthRepository>()),\n);\nsl.registerLazySingleton<SyncStepsBackgroundUseCase>(\n  () => SyncStepsBackgroundUseCase(\n    healthRepository: sl<HealthRepository>(),\n    stepsRepository: sl<StepsRepository>(),\n  ),\n);\n\n// Blocs\nsl.registerFactory<HealthBloc>(\n  () => HealthBloc(\n    requestPermissionsUseCase: sl<RequestHealthPermissionsUseCase>(),\n    getStepsUseCase: sl<GetStepsFromHealthUseCase>(),\n    syncStepsUseCase: sl<SyncStepsBackgroundUseCase>(),\n  ),\n);\n```\n\n**DashboardEvent addition (dashboard_event.dart):**\n```dart\n/// Event dispatched to sync steps from native health APIs.\nfinal class DashboardHealthSyncRequested extends DashboardEvent {\n  const DashboardHealthSyncRequested();\n  @override\n  List<Object?> get props => [];\n}\n```\n\n**DashboardBloc additions:**\n- Add `SyncStepsBackgroundUseCase` as constructor parameter\n- Register handler: `on<DashboardHealthSyncRequested>(_onHealthSyncRequested);`\n- Implement `_onHealthSyncRequested` that calls the sync use case\n\n**BackgroundSyncService (background_sync_service.dart):**\n```dart\nclass BackgroundSyncService {\n  BackgroundSyncService({required SyncStepsBackgroundUseCase syncUseCase}) : _syncUseCase = syncUseCase;\n  final SyncStepsBackgroundUseCase _syncUseCase;\n  \n  Future<void> syncNow() async {\n    await _syncUseCase();\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT register BLoCs as singletons - use Factory for BLoCs\n- Do NOT forget to import all required files\n- Do NOT modify the order of existing registrations\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/core/di/injection_container.dart`\n- Run: `flutter analyze lib/features/dashboard/presentation/bloc/`\n- All dependencies must resolve without circular references",
+        "epicId": "epic-native-health-integration",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-integration-story-3",
+          "epic-native-health-integration-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/injection_container.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_event.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_event.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/services/background_sync_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given injection_container.dart, When sl<HealthBloc>() is called, Then a HealthBloc instance is created with all dependencies",
+          "Given DashboardBloc, When DashboardHealthSyncRequested is added, Then it triggers native health sync",
+          "Given BackgroundSyncService, When syncNow() is called, Then it delegates to SyncStepsBackgroundUseCase",
+          "Given flutter analyze, When run on modified files, Then no errors are reported"
+        ]
+      }
+    ]
+  }
+}
