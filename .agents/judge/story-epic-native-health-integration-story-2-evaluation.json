@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "c9dcfbbdd18341688986b41a",
+    "timestamp": "2026-01-28T09:56:01.368Z",
+    "phase": "judge",
+    "storyId": "epic-native-health-integration-story-2",
+    "savedAt": "2026-01-28T09:56:01.368Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-native-health-integration-story-2",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
