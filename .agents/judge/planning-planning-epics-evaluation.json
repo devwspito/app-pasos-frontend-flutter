@@ -1,26 +1,20 @@
 {
   "_metadata": {
     "agentType": "judge",
-    "taskId": "c9dcfbbdd18341688986b41a",
-    "timestamp": "2026-01-28T09:42:48.786Z",
+    "taskId": "3f0a828b1148d7e196359207",
+    "timestamp": "2026-01-28T11:14:48.603Z",
     "phase": "judge",
     "epicId": "planning-epics",
-    "savedAt": "2026-01-28T09:42:48.787Z",
+    "savedAt": "2026-01-28T11:14:48.603Z",
     "version": "1.0"
   },
   "data": {
     "judgeType": "planning",
     "entityId": "planning-epics",
     "verdict": "approved",
-    "score": 92,
-    "feedback": "The plan comprehensively covers all user requirements. Sharing UI and Goals UI already exist and are correctly identified for modification rather than recreation. New features (health integration, real-time WebSocket, push notifications) are properly scoped. Backend Socket.io events align with frontend entity definitions. Minor issues (duplicate deps, package choice) don't block implementation.",
-    "issues": [
-      "Minor: Duplicate dependency epic-realtime-websocket-client in some epics",
-      "Recommendation: Consider socket_io_client package instead of web_socket_channel for full Socket.io compatibility"
-    ],
-    "suggestions": [
-      "Add socket_io_client to dependencies instead of/alongside web_socket_channel",
-      "Remove duplicate dependency listings"
-    ]
+    "score": 70,
+    "feedback": "Judge output unparseable - approved by default",
+    "issues": [],
+    "suggestions": []
   }
 }
