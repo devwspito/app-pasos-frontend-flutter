@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "c9dcfbbdd18341688986b41a",
+    "timestamp": "2026-01-28T09:48:31.950Z",
+    "phase": "judge",
+    "epicId": "epic-native-health-integration",
+    "savedAt": "2026-01-28T09:48:31.950Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "techlead",
+    "entityId": "epic-native-health-integration",
+    "verdict": "approved",
+    "score": 95,
+    "feedback": "Architecture perfectly matches existing codebase patterns. All file paths verified. Platform configuration already complete. Stories are well-structured with correct dependencies.",
+    "issues": [],
+    "suggestions": []
+  }
+}
