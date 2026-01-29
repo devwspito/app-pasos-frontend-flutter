@@ -11,6 +11,7 @@ import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_stats_
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_today_steps_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/record_steps_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/sync_native_steps_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,21 +51,28 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ///
   /// All use cases are required dependencies that handle the actual
   /// business logic for each operation.
+  ///
+  /// [syncNativeStepsUseCase] is optional to maintain backward compatibility
+  /// with existing code that doesn't use native health sync.
   DashboardBloc({
     required GetTodayStepsUseCase getTodayStepsUseCase,
     required GetStatsUseCase getStatsUseCase,
     required GetWeeklyTrendUseCase getWeeklyTrendUseCase,
     required GetHourlyPeaksUseCase getHourlyPeaksUseCase,
     required RecordStepsUseCase recordStepsUseCase,
+    SyncNativeStepsUseCase? syncNativeStepsUseCase,
   })  : _getTodayStepsUseCase = getTodayStepsUseCase,
         _getStatsUseCase = getStatsUseCase,
         _getWeeklyTrendUseCase = getWeeklyTrendUseCase,
         _getHourlyPeaksUseCase = getHourlyPeaksUseCase,
         _recordStepsUseCase = recordStepsUseCase,
+        _syncNativeStepsUseCase = syncNativeStepsUseCase,
         super(const DashboardInitial()) {
     on<DashboardLoadRequested>(_onLoadRequested);
     on<DashboardRefreshRequested>(_onRefreshRequested);
     on<DashboardRecordStepsRequested>(_onRecordStepsRequested);
+    on<DashboardSyncHealthRequested>(_onSyncHealthRequested);
+    on<DashboardHealthSyncCompleted>(_onHealthSyncCompleted);
   }
 
   final GetTodayStepsUseCase _getTodayStepsUseCase;
@@ -72,6 +80,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetWeeklyTrendUseCase _getWeeklyTrendUseCase;
   final GetHourlyPeaksUseCase _getHourlyPeaksUseCase;
   final RecordStepsUseCase _recordStepsUseCase;
+  final SyncNativeStepsUseCase? _syncNativeStepsUseCase;
 
   /// Handles [DashboardLoadRequested] events.
   ///
@@ -121,6 +130,44 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     } catch (e) {
       emit(DashboardError(message: 'An unexpected error occurred: $e'));
     }
+  }
+
+  /// Handles [DashboardSyncHealthRequested] events.
+  ///
+  /// Triggers native health sync process to fetch steps from HealthKit (iOS)
+  /// or Health Connect (Android) and records them to the backend.
+  /// After sync completes, refreshes dashboard data to reflect updated totals.
+  Future<void> _onSyncHealthRequested(
+    DashboardSyncHealthRequested event,
+    Emitter<DashboardState> emit,
+  ) async {
+    // If sync use case is not available, just refresh the dashboard
+    if (_syncNativeStepsUseCase == null) {
+      await _fetchAndEmitDashboardData(emit);
+      return;
+    }
+
+    emit(const DashboardLoading());
+
+    // Execute the sync operation
+    final stepsSynced = await _syncNativeStepsUseCase();
+
+    // Always refresh dashboard data after sync attempt
+    // regardless of whether sync succeeded or failed
+    await _fetchAndEmitDashboardData(emit);
+  }
+
+  /// Handles [DashboardHealthSyncCompleted] events.
+  ///
+  /// Refreshes dashboard data after a health sync operation completes.
+  /// This handler is useful when the sync completion is triggered externally
+  /// or when the UI needs to react to sync completion events.
+  Future<void> _onHealthSyncCompleted(
+    DashboardHealthSyncCompleted event,
+    Emitter<DashboardState> emit,
+  ) async {
+    // Refresh dashboard data to reflect any changes from sync
+    await _fetchAndEmitDashboardData(emit);
   }
 
   /// Fetches all dashboard data in parallel and emits the result.

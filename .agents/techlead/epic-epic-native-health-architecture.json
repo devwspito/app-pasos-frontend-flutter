@@ -1,0 +1,227 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "755214819d2c213608fe0167",
+    "timestamp": "2026-01-29T16:38:58.698Z",
+    "phase": "techlead",
+    "epicId": "epic-native-health",
+    "savedAt": "2026-01-29T16:38:58.698Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-native-health",
+    "storiesCount": 8,
+    "architecture": "## Native Health Integration Architecture\n\n### Architecture Overview\nThis epic adds native health platform integration (Apple HealthKit / Google Health Connect) following the existing Clean Architecture patterns in the codebase.\n\n### Layer Breakdown\n\n**Core Layer (lib/core/services/)**\n- `HealthService` - Abstract interface defining health platform operations\n- `HealthServiceImpl` - Concrete implementation using the `health` Flutter package\n\n**Domain Layer (lib/features/dashboard/domain/usecases/)**\n- `SyncNativeStepsUseCase` - Orchestrates fetching native steps and recording to backend\n\n**Presentation Layer (lib/features/dashboard/presentation/)**\n- `HealthPermissionDialog` - UI for requesting health permissions\n- `StepSourceIndicator` - Visual indicator of step data source\n- Updated `DashboardBloc` with health sync events\n- Updated `DashboardPage` with sync button and indicators\n\n### Data Flow\n1. User taps sync button → Permission dialog shown\n2. User grants permission → `DashboardSyncHealthRequested` event dispatched\n3. Bloc calls `SyncNativeStepsUseCase`\n4. UseCase calls `HealthService.getTodaySteps()` → Native platform\n5. UseCase calls `StepsRepository.recordSteps()` → Backend API\n6. Bloc refreshes dashboard data\n\n### Key Design Decisions\n- **Optional injection**: `syncNativeStepsUseCase` is optional in DashboardBloc for backward compatibility\n- **Graceful degradation**: Returns null/false on unavailable platforms instead of throwing\n- **Existing enum reuse**: Uses existing `StepSource.native` value\n- **Permission flow**: Shows dialog before every sync for explicit consent\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n```bash\nflutter analyze              # Check all files for issues\nflutter test                 # Run unit tests\nflutter build apk --debug    # Verify Android build\nflutter build ios --debug    # Verify iOS build (Mac only)\n```\n\n### Health Package Integration Notes\n- Package: `health: ^10.2.0`\n- Requires iOS HealthKit entitlements in Xcode\n- Requires Android Health Connect permissions in AndroidManifest.xml\n- These platform configurations are outside this epic's scope (handled by DevOps/setup)",
+    "stories": [
+      {
+        "id": "epic-native-health-story-1",
+        "title": "Create HealthService abstract interface in lib/core/services/health_service.dart",
+        "description": "Create the abstract interface for native health platform integration following the existing service pattern from SecureStorageService.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/storage/secure_storage_service.dart (lines 1-120 for service interface pattern)\n- Create: lib/core/services/health_service.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow `abstract interface class` pattern from secure_storage_service.dart\n- Document with `///` doc comments like existing services\n- Use `library;` directive at top of file\n- Define Future-based async methods for health operations\n\n📦 **REQUIRED INTERFACE METHODS:**\n- `Future<bool> isAvailable()` - Check if health platform is available\n- `Future<bool> hasPermission()` - Check if permissions are granted\n- `Future<bool> requestPermission()` - Request health permissions\n- `Future<int> getTodaySteps()` - Get today's step count from native platform\n- `Future<List<HealthStepRecord>> getStepsForDateRange({required DateTime start, required DateTime end})` - Get steps for date range\n\n📦 **REQUIRED DATA CLASS:**\n- Create `HealthStepRecord` class with: `int steps`, `DateTime startTime`, `DateTime endTime`\n- Make it extend Equatable (import from package:equatable/equatable.dart)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- `abstract class` without `interface` keyword ← WRONG, use `abstract interface class`\n- Missing documentation comments ← WRONG, add /// comments\n- Platform-specific implementation in this file ← WRONG, only define interface\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Interface must be platform-agnostic (no iOS/Android specific code)\n- All methods must return Futures for async operations\n- HealthStepRecord must use DateTime, not String for timestamps\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/core/services/health_service.dart`\n- Verify no analysis errors\n- Verify all methods are documented",
+        "epicId": "epic-native-health",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/storage/secure_storage_service.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/services/health_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthService interface exists, When imported by other files, Then all method signatures are accessible",
+          "Given HealthStepRecord class exists, When instantiated with steps and times, Then all properties are accessible and comparable via Equatable",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-2",
+        "title": "Create HealthServiceImpl in lib/core/services/health_service_impl.dart",
+        "description": "Create the concrete implementation of HealthService that integrates with native health platforms using the health package.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/storage/secure_storage_service.dart (lines 121-301 for implementation pattern)\n- Read: lib/core/services/health_service.dart (the interface created in story-1)\n- Create: lib/core/services/health_service_impl.dart\n- Modify: pubspec.yaml (add health package dependency)\n\n🔧 **PATTERNS TO USE:**\n- Follow `class ServiceNameImpl implements ServiceName` pattern from SecureStorageServiceImpl\n- Use `library;` directive at top\n- Document class and methods with `///` comments\n- Handle platform checks gracefully (web returns unavailable)\n\n📦 **REQUIRED IMPLEMENTATION:**\n```dart\nclass HealthServiceImpl implements HealthService {\n  HealthServiceImpl({Health? health}) : _health = health ?? Health();\n  final Health _health;\n  // implement all interface methods\n}\n```\n\n📦 **HEALTH PACKAGE USAGE:**\n- Add to pubspec.yaml under dependencies: `health: ^10.2.0`\n- Import: `import 'package:health/health.dart';`\n- Use `Health()` instance for platform calls\n- Request `HealthDataType.STEPS` permission\n- Use `getHealthDataFromTypes()` to fetch step data\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Throwing exceptions on unavailable platforms ← WRONG, return false/empty\n- Direct `Platform.isIOS` checks without import ← WRONG, use kIsWeb from flutter/foundation.dart\n- Not handling web platform ← WRONG, return unavailable for web\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- isAvailable() returns false on web, checks Health.isHealthConnectAvailable() on Android\n- requestPermission() requests STEPS data type read access\n- getTodaySteps() returns 0 if unavailable, actual count otherwise\n- All errors caught and handled gracefully (no unhandled exceptions)\n\n🧪 **VERIFICATION:**\n- Run: `flutter pub get`\n- Run: `flutter analyze lib/core/services/health_service_impl.dart`\n- Verify health package added to pubspec.yaml\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/services/health_service.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/services/health_service_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthServiceImpl is instantiated, When isAvailable() is called on web, Then it returns false",
+          "Given health package is available, When getTodaySteps() is called, Then it returns step count from native platform",
+          "Given pubspec.yaml is updated, When flutter pub get runs, Then health package is installed without errors",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-3",
+        "title": "Create SyncNativeStepsUseCase in lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart",
+        "description": "Create a use case that orchestrates fetching steps from native health platform and recording them to the backend.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/domain/usecases/record_steps_usecase.dart (for UseCase pattern)\n- Read: lib/features/dashboard/domain/repositories/steps_repository.dart (for repository interface)\n- Read: lib/features/dashboard/domain/entities/step_record.dart (for StepSource enum)\n- Create: lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow UseCase pattern from record_steps_usecase.dart\n- Class with `call()` method that takes no params or simple params\n- Inject HealthService and StepsRepository via constructor\n- Use `StepSource.native` for recording steps\n\n📦 **REQUIRED IMPLEMENTATION:**\n```dart\nclass SyncNativeStepsUseCase {\n  SyncNativeStepsUseCase({\n    required HealthService healthService,\n    required StepsRepository stepsRepository,\n  }) : _healthService = healthService,\n       _stepsRepository = stepsRepository;\n\n  final HealthService _healthService;\n  final StepsRepository _stepsRepository;\n\n  /// Returns the number of steps synced, or null if sync failed/unavailable\n  Future<int?> call() async {\n    // 1. Check if health service is available\n    // 2. Check/request permission\n    // 3. Get today's steps from native\n    // 4. Record to backend with StepSource.native\n    // 5. Return synced count\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Directly instantiating HealthServiceImpl ← WRONG, use injected interface\n- Not checking availability before fetching ← WRONG, check isAvailable() first\n- Throwing on permission denied ← WRONG, return null gracefully\n- Using StepSource.manual for native steps ← WRONG, use StepSource.native\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Returns null if health service unavailable\n- Returns null if permission denied\n- Returns step count if sync successful\n- Uses StepSource.native enum value when recording to backend\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart`\n- Verify imports resolve correctly\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/domain/usecases/record_steps_usecase.dart",
+          "lib/features/dashboard/domain/repositories/steps_repository.dart",
+          "lib/features/dashboard/domain/entities/step_record.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given HealthService is unavailable, When call() is invoked, Then it returns null without throwing",
+          "Given permission is denied, When call() is invoked, Then it returns null without throwing",
+          "Given steps are fetched successfully, When recorded to backend, Then StepSource.native is used",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-4",
+        "title": "Create HealthPermissionDialog widget in lib/features/dashboard/presentation/widgets/health_permission_dialog.dart",
+        "description": "Create a dialog widget that explains health permissions and prompts user to grant access.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/shared/widgets/error_widget.dart (for dialog styling pattern)\n- Read: lib/shared/widgets/app_card.dart (for card styling)\n- Create: lib/features/dashboard/presentation/widgets/health_permission_dialog.dart\n\n🔧 **PATTERNS TO USE:**\n- StatelessWidget with `showDialog()` static method for easy invocation\n- Use Theme.of(context) for colors and text styles\n- Use Material Design 3 components (FilledButton, OutlinedButton)\n- Follow existing widget documentation pattern with `///` comments\n\n📦 **REQUIRED IMPLEMENTATION:**\n```dart\nclass HealthPermissionDialog extends StatelessWidget {\n  const HealthPermissionDialog({\n    required this.onAllow,\n    required this.onDeny,\n    super.key,\n  });\n\n  final VoidCallback onAllow;\n  final VoidCallback onDeny;\n\n  /// Shows the health permission dialog.\n  /// Returns true if permission was granted, false otherwise.\n  static Future<bool> show(BuildContext context) async {\n    return await showDialog<bool>(\n      context: context,\n      barrierDismissible: false,\n      builder: (context) => HealthPermissionDialog(\n        onAllow: () => Navigator.of(context).pop(true),\n        onDeny: () => Navigator.of(context).pop(false),\n      ),\n    ) ?? false;\n  }\n}\n```\n\n📦 **REQUIRED UI ELEMENTS:**\n- Health icon (Icons.favorite or Icons.health_and_safety)\n- Title: \"Connect to Health\"\n- Description text explaining why the app needs health data\n- \"Allow\" FilledButton (primary action)\n- \"Not Now\" OutlinedButton (secondary action)\n- Use colorScheme.primary for icon and button\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded colors ← WRONG, use Theme.of(context).colorScheme\n- Missing documentation ← WRONG, add /// comments\n- Using StatefulWidget when not needed ← WRONG, use StatelessWidget\n- Not using semantic button names ← WRONG, use \"Allow\" not \"OK\"\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Dialog is not dismissible by tapping outside\n- Callbacks are invoked correctly for each button\n- Static show() method returns bool for easy usage\n- UI follows Material Design 3 guidelines\n\n�� **VERIFICATION:**\n- Run: `flutter analyze lib/features/dashboard/presentation/widgets/health_permission_dialog.dart`\n- Verify imports resolve correctly\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/error_widget.dart",
+          "lib/shared/widgets/app_card.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/presentation/widgets/health_permission_dialog.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the dialog is shown, When user taps Allow, Then onAllow callback is invoked and dialog returns true",
+          "Given the dialog is shown, When user taps Not Now, Then onDeny callback is invoked and dialog returns false",
+          "Given the dialog is shown, When user taps outside, Then dialog is not dismissed",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-5",
+        "title": "Create StepSourceIndicator widget in lib/features/dashboard/presentation/widgets/step_source_indicator.dart",
+        "description": "Create a widget that displays the current source of step data (native health, manual, or web) with an icon and label.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/domain/entities/step_record.dart (for StepSource enum)\n- Read: lib/features/dashboard/presentation/widgets/step_counter_card.dart (for styling pattern)\n- Create: lib/features/dashboard/presentation/widgets/step_source_indicator.dart\n\n🔧 **PATTERNS TO USE:**\n- StatelessWidget with compact design for embedding in cards\n- Use Theme.of(context) for colors and text styles\n- Use Row with Icon and Text for horizontal layout\n- Follow existing widget documentation pattern\n\n📦 **REQUIRED IMPLEMENTATION:**\n```dart\nclass StepSourceIndicator extends StatelessWidget {\n  const StepSourceIndicator({\n    required this.source,\n    this.showLabel = true,\n    super.key,\n  });\n\n  final StepSource source;\n  final bool showLabel;\n\n  IconData get _icon => switch (source) {\n    StepSource.native => Icons.favorite,\n    StepSource.manual => Icons.edit,\n    StepSource.web => Icons.computer,\n  };\n\n  String get _label => switch (source) {\n    StepSource.native => 'Health Connected',\n    StepSource.manual => 'Manual Entry',\n    StepSource.web => 'Web Sync',\n  };\n}\n```\n\n📦 **REQUIRED UI ELEMENTS:**\n- Icon representing the source type\n- Label text (optional, controlled by showLabel)\n- Compact chip-like styling with background color\n- Use colorScheme.primaryContainer/secondaryContainer for background\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoded colors ← WRONG, use Theme.of(context).colorScheme\n- Using if/else instead of switch expression ← WRONG, use Dart 3 switch\n- Large padding making widget too big ← WRONG, keep compact (8px padding)\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Displays different icon for each StepSource value\n- Label can be hidden with showLabel: false\n- Compact enough to fit in StepCounterCard header\n- Uses theme colors consistently\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/dashboard/presentation/widgets/step_source_indicator.dart`\n- Verify StepSource import works correctly\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 5,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/domain/entities/step_record.dart",
+          "lib/features/dashboard/presentation/widgets/step_counter_card.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/dashboard/presentation/widgets/step_source_indicator.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given source is StepSource.native, When widget renders, Then heart icon and 'Health Connected' label are shown",
+          "Given source is StepSource.manual, When widget renders, Then edit icon and 'Manual Entry' label are shown",
+          "Given showLabel is false, When widget renders, Then only icon is shown without label text",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-6",
+        "title": "Update DashboardBloc with health sync events in lib/features/dashboard/presentation/bloc/",
+        "description": "Add health sync events and state handling to the existing DashboardBloc to support native step syncing.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/bloc/dashboard_bloc.dart (existing bloc)\n- Read: lib/features/dashboard/presentation/bloc/dashboard_event.dart (existing events)\n- Modify: lib/features/dashboard/presentation/bloc/dashboard_event.dart (add new events)\n- Modify: lib/features/dashboard/presentation/bloc/dashboard_bloc.dart (add handlers)\n\n🔧 **PATTERNS TO USE:**\n- Follow existing sealed class pattern for events\n- Follow existing event handler pattern in bloc\n- Use Equatable for event props\n- Inject SyncNativeStepsUseCase via constructor\n\n📦 **REQUIRED NEW EVENTS (add to dashboard_event.dart):**\n```dart\n/// Event dispatched when user requests to sync steps from native health.\nfinal class DashboardSyncHealthRequested extends DashboardEvent {\n  const DashboardSyncHealthRequested();\n  @override\n  List<Object?> get props => [];\n}\n\n/// Event dispatched when health sync completes (success or failure).\nfinal class DashboardHealthSyncCompleted extends DashboardEvent {\n  const DashboardHealthSyncCompleted({required this.stepsSynced});\n  final int? stepsSynced; // null if sync failed\n  @override\n  List<Object?> get props => [stepsSynced];\n}\n```\n\n📦 **REQUIRED BLOC CHANGES (in dashboard_bloc.dart):**\n- Add `SyncNativeStepsUseCase? syncNativeStepsUseCase` optional parameter to constructor\n- Add `on<DashboardSyncHealthRequested>(_onSyncHealthRequested)` event handler\n- In handler: call useCase, refresh dashboard data after sync\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Making syncNativeStepsUseCase required ← WRONG, keep optional for backward compatibility\n- Not refreshing data after sync ← WRONG, call _fetchAndEmitDashboardData after sync\n- Breaking existing constructor signature ← WRONG, add as optional parameter at end\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Existing bloc functionality must not break\n- New events follow sealed class pattern\n- Health sync triggers dashboard refresh\n- Null sync result handled gracefully (just refresh)\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/dashboard/presentation/bloc/`\n- Verify existing tests still pass (if any)\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 6,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_event.dart"
+        ],
+        "filesToModify": [
+          "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
+          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given DashboardSyncHealthRequested is added, When bloc receives event, Then sync usecase is called",
+          "Given sync completes successfully, When handler finishes, Then dashboard data is refreshed",
+          "Given syncNativeStepsUseCase is null, When bloc is created, Then it works without health sync capability",
+          "Given the files are analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-7",
+        "title": "Register HealthService in DI and update DashboardBloc registration in lib/core/di/injection_container.dart",
+        "description": "Register HealthService, HealthServiceImpl, SyncNativeStepsUseCase in the dependency injection container and update DashboardBloc registration.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/di/injection_container.dart (existing DI setup)\n- Read: lib/core/services/health_service.dart (interface to register)\n- Modify: lib/core/di/injection_container.dart (add registrations)\n\n🔧 **PATTERNS TO USE:**\n- Follow existing registration pattern: `sl.registerLazySingleton<Interface>(() => Impl(...))`\n- Add imports at top of file following existing import order\n- Add new section comment `// ============================================================`\n- Register in correct order (service first, then usecase, then update bloc)\n\n📦 **REQUIRED REGISTRATIONS:**\n```dart\n// ============================================================\n// Health Service\n// ============================================================\n\nsl.registerLazySingleton<HealthService>(HealthServiceImpl.new);\n\n// In Dashboard Feature section, add use case:\nsl.registerLazySingleton<SyncNativeStepsUseCase>(\n  () => SyncNativeStepsUseCase(\n    healthService: sl<HealthService>(),\n    stepsRepository: sl<StepsRepository>(),\n  ),\n);\n\n// Update DashboardBloc factory to include new use case:\nsl.registerFactory<DashboardBloc>(\n  () => DashboardBloc(\n    getTodayStepsUseCase: sl<GetTodayStepsUseCase>(),\n    getStatsUseCase: sl<GetStatsUseCase>(),\n    getWeeklyTrendUseCase: sl<GetWeeklyTrendUseCase>(),\n    getHourlyPeaksUseCase: sl<GetHourlyPeaksUseCase>(),\n    recordStepsUseCase: sl<RecordStepsUseCase>(),\n    syncNativeStepsUseCase: sl<SyncNativeStepsUseCase>(), // NEW\n  ),\n);\n```\n\n📦 **REQUIRED IMPORTS:**\n```dart\nimport 'package:app_pasos_frontend/core/services/health_service.dart';\nimport 'package:app_pasos_frontend/core/services/health_service_impl.dart';\nimport 'package:app_pasos_frontend/features/dashboard/domain/usecases/sync_native_steps_usecase.dart';\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Registering service after usecase that depends on it ← WRONG, register service first\n- Missing import statements ← WRONG, add all required imports\n- Changing existing registrations unnecessarily ← WRONG, only update DashboardBloc\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- HealthService registered as lazy singleton\n- SyncNativeStepsUseCase registered with correct dependencies\n- DashboardBloc updated to receive new use case\n- All existing functionality preserved\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/core/di/injection_container.dart`\n- Run: `flutter pub get && flutter analyze`\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 7,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-native-health-story-2",
+          "epic-native-health-story-3",
+          "epic-native-health-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/services/health_service.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given app starts, When DI initializes, Then HealthService is registered as lazy singleton",
+          "Given SyncNativeStepsUseCase is requested, When sl<SyncNativeStepsUseCase>() called, Then instance with correct dependencies returned",
+          "Given DashboardBloc is created, When factory invoked, Then syncNativeStepsUseCase is provided",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      },
+      {
+        "id": "epic-native-health-story-8",
+        "title": "Update DashboardPage to integrate health sync button and source indicator in lib/features/dashboard/presentation/pages/dashboard_page.dart",
+        "description": "Update the DashboardPage to show health connection status, sync button, and integrate the permission dialog flow.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify the file listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/pages/dashboard_page.dart (existing page)\n- Read: lib/features/dashboard/presentation/widgets/health_permission_dialog.dart (dialog to use)\n- Read: lib/features/dashboard/presentation/widgets/step_source_indicator.dart (indicator to use)\n- Modify: lib/features/dashboard/presentation/pages/dashboard_page.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow existing BlocBuilder pattern for state handling\n- Use WidgetsBinding.instance.addPostFrameCallback for initial checks\n- Import new widgets and use them in _buildLoadedState\n- Add app bar action for health sync\n\n📦 **REQUIRED CHANGES:**\n1. Add imports for new widgets:\n```dart\nimport 'package:app_pasos_frontend/features/dashboard/presentation/widgets/health_permission_dialog.dart';\nimport 'package:app_pasos_frontend/features/dashboard/presentation/widgets/step_source_indicator.dart';\n```\n\n2. Add sync button to AppBar actions:\n```dart\nappBar: AppBar(\n  title: const Text('Dashboard'),\n  centerTitle: true,\n  actions: [\n    IconButton(\n      icon: const Icon(Icons.sync),\n      tooltip: 'Sync from Health',\n      onPressed: () => _onSyncHealth(context),\n    ),\n  ],\n),\n```\n\n3. Add StepSourceIndicator below title in StepCounterCard area\n\n4. Implement _onSyncHealth method:\n```dart\nFuture<void> _onSyncHealth(BuildContext context) async {\n  final shouldSync = await HealthPermissionDialog.show(context);\n  if (shouldSync && context.mounted) {\n    context.read<DashboardBloc>().add(const DashboardSyncHealthRequested());\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Calling sync without showing permission dialog ← WRONG, show dialog first\n- Not checking context.mounted after await ← WRONG, always check\n- Breaking existing layout structure ← WRONG, integrate carefully\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Sync button visible in app bar\n- Permission dialog shown before sync\n- Source indicator shows current step source\n- Existing functionality preserved\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/dashboard/presentation/pages/dashboard_page.dart`\n- Run: `flutter build apk --debug` (verify builds)\n- Verify no analysis errors",
+        "epicId": "epic-native-health",
+        "priority": 8,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-native-health-story-4",
+          "epic-native-health-story-5",
+          "epic-native-health-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/presentation/pages/dashboard_page.dart",
+          "lib/features/dashboard/presentation/widgets/health_permission_dialog.dart",
+          "lib/features/dashboard/presentation/widgets/step_source_indicator.dart"
+        ],
+        "filesToModify": [
+          "lib/features/dashboard/presentation/pages/dashboard_page.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given DashboardPage is displayed, When loaded state reached, Then sync button visible in app bar",
+          "Given sync button is tapped, When dialog shown, Then permission dialog appears",
+          "Given permission granted, When dialog dismissed, Then DashboardSyncHealthRequested event dispatched",
+          "Given the file is analyzed, When running flutter analyze, Then no errors or warnings are reported"
+        ]
+      }
+    ]
+  }
+}
