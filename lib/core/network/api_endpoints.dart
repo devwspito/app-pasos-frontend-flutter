@@ -25,6 +25,45 @@ abstract final class ApiEndpoints {
         defaultValue: 'http://localhost:3000/api',
       );
 
+  /// WebSocket base URL derived from the HTTP base URL.
+  ///
+  /// Converts the HTTP base URL to WebSocket protocol:
+  /// - `http://` becomes `ws://`
+  /// - `https://` becomes `wss://`
+  /// - Removes the `/api` suffix if present
+  ///
+  /// Example:
+  /// - Input: `http://localhost:3000/api` → Output: `ws://localhost:3000`
+  /// - Input: `https://api.example.com/api` → Output: `wss://api.example.com`
+  static String get wsBaseUrl {
+    var url = baseUrl;
+
+    // Replace http:// with ws:// and https:// with wss://
+    if (url.startsWith('https://')) {
+      url = url.replaceFirst('https://', 'wss://');
+    } else if (url.startsWith('http://')) {
+      url = url.replaceFirst('http://', 'ws://');
+    } else {
+      url = 'ws://$url';
+    }
+
+    // Remove /api suffix if present
+    if (url.endsWith('/api')) {
+      url = url.substring(0, url.length - 4);
+    }
+
+    return url;
+  }
+
+  /// WebSocket connection path.
+  ///
+  /// Use with [wsBaseUrl] to form the complete WebSocket URL:
+  /// ```dart
+  /// final wsUrl = '${ApiEndpoints.wsBaseUrl}${ApiEndpoints.wsConnect}';
+  /// // Result: ws://localhost:3000/ws
+  /// ```
+  static const String wsConnect = '/ws';
+
   // ============================================================
   // Authentication Endpoints
   // ============================================================

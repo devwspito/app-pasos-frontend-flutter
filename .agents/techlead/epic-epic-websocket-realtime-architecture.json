@@ -1,0 +1,163 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "755214819d2c213608fe0167",
+    "timestamp": "2026-01-29T17:50:30.703Z",
+    "phase": "techlead",
+    "epicId": "epic-websocket-realtime",
+    "savedAt": "2026-01-29T17:50:30.703Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-websocket-realtime",
+    "storiesCount": 5,
+    "architecture": "## WebSocket Real-time Client Architecture\n\n### Architecture Overview\nThis epic implements a real-time WebSocket client following the established service abstraction pattern in the codebase. The design integrates with the existing BLoC event system for state management.\n\n### Key Components\n1. **WebSocketService (Interface)** - Abstract interface defining WebSocket operations\n2. **WebSocketServiceImpl** - Concrete implementation using web_socket_channel package\n3. **WebSocketEventHandler** - Routes incoming messages to appropriate BLoCs\n4. **RealtimeStepUpdate/RealtimeGoalUpdate** - Domain entities for typed message handling\n\n### Integration Points\n- Uses SecureStorageService for JWT token (auth header for WebSocket)\n- Integrates with existing SharingBloc and GoalDetailBloc via new events\n- Registered in DI container following existing patterns\n- WebSocket lifecycle managed in App widget\n\n### Data Flow\n```\nWebSocket Server → WebSocketServiceImpl.messageStream → WebSocketEventHandler._handleMessage → BLoC.add(RealtimeEvent) → UI Update\n```\n\n### SOLID Principles Applied\n- **SRP**: Each class has single responsibility (service, handler, entity)\n- **OCP**: New event types can be added without modifying existing code\n- **LSP**: WebSocketServiceImpl is substitutable for WebSocketService interface\n- **ISP**: Interface defines only necessary WebSocket methods\n- **DIP**: BLoCs depend on abstract entities, not concrete implementations\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Typecheck: dart analyze lib/\n- Test: flutter test\n- Lint: dart analyze lib/ --fatal-infos",
+    "stories": [
+      {
+        "id": "epic-websocket-realtime-story-1",
+        "title": "Create WebSocket service interface and implementation in lib/core/services/websocket_service.dart and websocket_service_impl.dart",
+        "description": "Create the WebSocket service following the exact same pattern as HealthService and BackgroundSyncService.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/services/health_service.dart, lib/core/services/health_service_impl.dart, lib/core/services/background_sync_service.dart\n- Modify: pubspec.yaml (add web_socket_channel dependency)\n- Create: lib/core/services/websocket_service.dart, lib/core/services/websocket_service_impl.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract interface class WebSocketService` pattern from health_service.dart\n- Use `class WebSocketServiceImpl implements WebSocketService` pattern from health_service_impl.dart\n- Use `SecureStorageService` for auth token (inject via constructor, same as BackgroundSyncServiceImpl)\n- Use Dart's built-in `dart:async` for StreamController\n- Add `web_socket_channel: ^2.4.0` to pubspec.yaml dependencies\n\n📦 **REQUIRED INTERFACE METHODS:**\n- `Future<void> connect()` - Establish WebSocket connection with auth token\n- `Future<void> disconnect()` - Close WebSocket connection gracefully\n- `bool get isConnected` - Check connection status\n- `Stream<Map<String, dynamic>> get messageStream` - Expose incoming messages as stream\n- `void send(Map<String, dynamic> message)` - Send message to server\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use direct WebSocket without token authentication\n- Do NOT create singleton manually - DI will handle it\n- Do NOT hardcode WebSocket URL - use ApiEndpoints (added in story-3)\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- WebSocketServiceImpl constructor takes SecureStorageService parameter\n- connect() retrieves auth token via `_storageService.getAuthToken()`\n- connect() appends token as query param: `ws://host?token=JWT`\n- disconnect() closes channel and clears stream controller\n- Implement automatic reconnection with exponential backoff (3 retries max)\n- Use StreamController<Map<String, dynamic>> for message broadcasting\n- Parse incoming JSON strings to Map<String, dynamic>\n\n🧪 **VERIFICATION:**\n- Run: flutter pub get\n- Run: dart analyze lib/core/services/websocket_service.dart\n- Run: dart analyze lib/core/services/websocket_service_impl.dart\n- Check: WebSocketService interface has all 5 required methods\n- Check: WebSocketServiceImpl implements all methods with proper error handling",
+        "epicId": "epic-websocket-realtime",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/health_service.dart",
+          "lib/core/services/health_service_impl.dart",
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/storage/secure_storage_service.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/services/websocket_service.dart",
+          "lib/core/services/websocket_service_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given lib/core/services/websocket_service.dart exists, When I read it, Then it contains abstract interface class WebSocketService with connect(), disconnect(), isConnected, messageStream, send() methods",
+          "Given lib/core/services/websocket_service_impl.dart exists, When I read it, Then it contains class WebSocketServiceImpl implements WebSocketService with SecureStorageService constructor parameter",
+          "Given WebSocketServiceImpl, When connect() is called, Then it retrieves auth token from SecureStorageService and establishes WebSocket connection",
+          "Given pubspec.yaml, When I read dependencies, Then web_socket_channel ^2.4.0 is listed",
+          "Given dart analyze runs, When analyzing both files, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-websocket-realtime-story-2",
+        "title": "Create realtime entities RealtimeStepUpdate and RealtimeGoalUpdate in lib/features/*/domain/entities/",
+        "description": "Create domain entities for real-time WebSocket updates following the exact same pattern as SharingRelationship entity.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/domain/entities/sharing_relationship.dart, lib/features/goals/domain/entities/goal_progress.dart\n- Modify: None\n- Create: lib/features/sharing/domain/entities/realtime_step_update.dart, lib/features/goals/domain/entities/realtime_goal_update.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `class EntityName extends Equatable` pattern from sharing_relationship.dart\n- Use named constructor parameters with `required` keyword\n- Implement `List<Object?> get props` for Equatable comparison\n- Add `toString()` override for debugging\n- Add factory constructor `fromJson(Map<String, dynamic> json)` for WebSocket message parsing\n\n📦 **REQUIRED FIELDS FOR RealtimeStepUpdate:**\n- `String eventType` - Type of event (e.g., 'step_update', 'friend_activity')\n- `String userId` - User who generated the update\n- `String? userName` - Display name of user (nullable)\n- `int stepCount` - Number of steps in this update\n- `DateTime timestamp` - When the event occurred\n\n📦 **REQUIRED FIELDS FOR RealtimeGoalUpdate:**\n- `String eventType` - Type of event (e.g., 'goal_progress', 'member_joined')\n- `String goalId` - ID of the affected goal\n- `String? userId` - User who triggered the update (nullable)\n- `int? currentProgress` - Updated progress value (nullable)\n- `int? targetSteps` - Goal target (nullable)\n- `DateTime timestamp` - When the event occurred\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT forget to extend Equatable\n- Do NOT use mutable fields (use final)\n- Do NOT skip fromJson factory - it's required for WebSocket message parsing\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Both entities must be immutable (all fields final)\n- fromJson must handle null values gracefully\n- timestamp fromJson should parse ISO8601 string: DateTime.parse(json['timestamp'])\n- Add isEmpty/isNotEmpty getters for validation\n\n🧪 **VERIFICATION:**\n- Run: dart analyze lib/features/sharing/domain/entities/realtime_step_update.dart\n- Run: dart analyze lib/features/goals/domain/entities/realtime_goal_update.dart\n- Check: Both entities extend Equatable\n- Check: Both have fromJson factory constructor",
+        "epicId": "epic-websocket-realtime",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/domain/entities/sharing_relationship.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/domain/entities/realtime_step_update.dart",
+          "lib/features/goals/domain/entities/realtime_goal_update.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given lib/features/sharing/domain/entities/realtime_step_update.dart exists, When I read it, Then it contains class RealtimeStepUpdate extends Equatable with eventType, userId, userName, stepCount, timestamp fields",
+          "Given lib/features/goals/domain/entities/realtime_goal_update.dart exists, When I read it, Then it contains class RealtimeGoalUpdate extends Equatable with eventType, goalId, userId, currentProgress, targetSteps, timestamp fields",
+          "Given both entities, When I check for fromJson factory, Then both have factory EntityName.fromJson(Map<String, dynamic> json)",
+          "Given dart analyze runs, When analyzing both entity files, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-websocket-realtime-story-3",
+        "title": "Create WebSocket event handler and register services in lib/core/di/injection_container.dart",
+        "description": "Create the WebSocket event handler that routes incoming messages to appropriate BLoCs, add WebSocket endpoint to ApiEndpoints, and register all WebSocket services in DI container.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/di/injection_container.dart, lib/core/network/api_endpoints.dart, lib/core/services/websocket_service.dart\n- Modify: lib/core/di/injection_container.dart, lib/core/network/api_endpoints.dart\n- Create: lib/core/services/websocket_event_handler.dart\n\n🔧 **PATTERNS TO USE:**\n- Use existing DI registration pattern: `sl.registerLazySingleton<ServiceName>(ServiceNameImpl.new)` or `sl.registerLazySingleton<ServiceName>(() => ServiceNameImpl(dependency: sl<DependencyType>()))`\n- Use `static const String` pattern for endpoint URLs from api_endpoints.dart\n- Use `static String get baseUrl` pattern for dynamic URL from api_endpoints.dart\n\n📦 **WebSocketEventHandler CLASS REQUIREMENTS:**\n- Constructor takes WebSocketService parameter\n- Method `void startListening()` - subscribes to messageStream\n- Method `void stopListening()` - cancels subscription\n- Method `void registerSharingBloc(SharingBloc bloc)` - register bloc for sharing events\n- Method `void registerGoalDetailBloc(GoalDetailBloc bloc)` - register bloc for goal events\n- Private method `_handleMessage(Map<String, dynamic> message)` - routes messages to appropriate bloc\n\n📦 **ApiEndpoints ADDITIONS:**\n- Add: `static String get wsBaseUrl` - Returns WebSocket URL derived from baseUrl (replace http with ws, https with wss)\n- Add: `static const String wsConnect = '/ws'` - WebSocket connection path\n\n📦 **injection_container.dart ADDITIONS:**\n- Register WebSocketService: `sl.registerLazySingleton<WebSocketService>(() => WebSocketServiceImpl(storageService: sl<SecureStorageService>()))`\n- Register WebSocketEventHandler: `sl.registerLazySingleton<WebSocketEventHandler>(() => WebSocketEventHandler(webSocketService: sl<WebSocketService>()))`\n- Place registration in new section after Background Sync Service section\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT import BLoCs directly in event handler - use callback pattern or pass blocs via register methods\n- Do NOT forget to add imports at top of injection_container.dart\n- Do NOT hardcode WebSocket URL - derive from ApiEndpoints.baseUrl\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- WebSocketEventHandler uses StreamSubscription to listen to messages\n- Event routing: messages with eventType starting with 'step_' or 'friend_' go to SharingBloc\n- Event routing: messages with eventType starting with 'goal_' go to GoalDetailBloc\n- Add proper imports for WebSocketService, WebSocketServiceImpl, WebSocketEventHandler\n\n🧪 **VERIFICATION:**\n- Run: dart analyze lib/core/services/websocket_event_handler.dart\n- Run: dart analyze lib/core/di/injection_container.dart\n- Run: dart analyze lib/core/network/api_endpoints.dart\n- Check: WebSocketService and WebSocketEventHandler are registered in DI\n- Check: ApiEndpoints has wsBaseUrl and wsConnect",
+        "epicId": "epic-websocket-realtime",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-websocket-realtime-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/network/api_endpoints.dart",
+          "lib/core/services/websocket_service.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/core/network/api_endpoints.dart"
+        ],
+        "filesToCreate": [
+          "lib/core/services/websocket_event_handler.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given lib/core/services/websocket_event_handler.dart exists, When I read it, Then it contains class WebSocketEventHandler with startListening(), stopListening(), registerSharingBloc(), registerGoalDetailBloc() methods",
+          "Given lib/core/network/api_endpoints.dart, When I read it, Then it contains static String get wsBaseUrl and static const String wsConnect = '/ws'",
+          "Given lib/core/di/injection_container.dart, When I read it, Then WebSocketService and WebSocketEventHandler are registered as lazy singletons",
+          "Given dart analyze runs on all three files, When analyzing, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-websocket-realtime-story-4",
+        "title": "Add SharingRealtimeUpdateReceived event to sharing_bloc for real-time updates",
+        "description": "Add a new event to the SharingBloc for handling real-time step updates from WebSocket, following existing event/bloc patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/bloc/sharing_event.dart, lib/features/sharing/presentation/bloc/sharing_bloc.dart, lib/features/sharing/domain/entities/realtime_step_update.dart\n- Modify: lib/features/sharing/presentation/bloc/sharing_event.dart, lib/features/sharing/presentation/bloc/sharing_bloc.dart\n- Create: None\n\n🔧 **PATTERNS TO USE:**\n- Use `final class EventName extends SharingEvent` pattern from existing events\n- Use `on<EventName>(_onEventHandler)` pattern in BLoC constructor from sharing_bloc.dart\n- Use `Future<void> _onEventHandler(Event event, Emitter<State> emit)` pattern for handlers\n\n📦 **sharing_event.dart ADDITIONS:**\n- Add: `final class SharingRealtimeUpdateReceived extends SharingEvent`\n- Constructor parameter: `required RealtimeStepUpdate update`\n- Add import for RealtimeStepUpdate entity\n\n📦 **sharing_bloc.dart ADDITIONS:**\n- Add import: `import 'package:app_pasos_frontend/features/sharing/domain/entities/realtime_step_update.dart';`\n- Register handler in constructor: `on<SharingRealtimeUpdateReceived>(_onRealtimeUpdateReceived);`\n- Add handler method: `Future<void> _onRealtimeUpdateReceived(SharingRealtimeUpdateReceived event, Emitter<SharingState> emit)`\n- Handler logic: If current state is SharingLoaded, emit SharingActionSuccess with message about the update, then trigger refresh\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT modify sharing_state.dart - use existing SharingActionSuccess state\n- Do NOT block the event handler - use quick emit then trigger refresh\n- Do NOT forget Equatable props for the new event\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- SharingRealtimeUpdateReceived event carries RealtimeStepUpdate entity\n- Handler emits SharingActionSuccess with user-friendly message: '${update.userName ?? 'A friend'} just walked ${update.stepCount} steps!'\n- Handler then calls _fetchAndEmitSharingData to refresh the list\n- Event must be part of the sealed class hierarchy\n\n🧪 **VERIFICATION:**\n- Run: dart analyze lib/features/sharing/presentation/bloc/sharing_event.dart\n- Run: dart analyze lib/features/sharing/presentation/bloc/sharing_bloc.dart\n- Check: SharingRealtimeUpdateReceived extends SharingEvent\n- Check: SharingBloc has on<SharingRealtimeUpdateReceived> registered\n- Check: _onRealtimeUpdateReceived handler exists and emits SharingActionSuccess",
+        "epicId": "epic-websocket-realtime",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-websocket-realtime-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/bloc/sharing_event.dart",
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/domain/entities/realtime_step_update.dart"
+        ],
+        "filesToModify": [
+          "lib/features/sharing/presentation/bloc/sharing_event.dart",
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given lib/features/sharing/presentation/bloc/sharing_event.dart, When I read it, Then it contains final class SharingRealtimeUpdateReceived extends SharingEvent with RealtimeStepUpdate update field",
+          "Given lib/features/sharing/presentation/bloc/sharing_bloc.dart, When I read it, Then it has on<SharingRealtimeUpdateReceived> registered in constructor",
+          "Given SharingBloc, When _onRealtimeUpdateReceived is called, Then it emits SharingActionSuccess with update message",
+          "Given dart analyze runs on both files, When analyzing, Then no errors are reported"
+        ]
+      },
+      {
+        "id": "epic-websocket-realtime-story-5",
+        "title": "Add GoalDetailRealtimeUpdateReceived event to goal_detail_bloc and initialize WebSocket in app.dart",
+        "description": "Add a new event to the GoalDetailBloc for handling real-time goal updates from WebSocket, and initialize the WebSocket connection in the app lifecycle.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/goals/presentation/bloc/goal_detail_event.dart, lib/features/goals/presentation/bloc/goal_detail_bloc.dart, lib/features/goals/domain/entities/realtime_goal_update.dart, lib/app.dart\n- Modify: lib/features/goals/presentation/bloc/goal_detail_event.dart, lib/features/goals/presentation/bloc/goal_detail_bloc.dart, lib/app.dart\n- Create: None\n\n🔧 **PATTERNS TO USE:**\n- Use `final class EventName extends GoalDetailEvent` pattern from existing events\n- Use `on<EventName>(_onEventHandler)` pattern in BLoC constructor from goal_detail_bloc.dart\n- Use StatefulWidget pattern for app.dart to manage WebSocket lifecycle\n\n📦 **goal_detail_event.dart ADDITIONS:**\n- Add: `final class GoalDetailRealtimeUpdateReceived extends GoalDetailEvent`\n- Constructor parameter: `required RealtimeGoalUpdate update`\n- Add import for RealtimeGoalUpdate entity\n\n📦 **goal_detail_bloc.dart ADDITIONS:**\n- Add import: `import 'package:app_pasos_frontend/features/goals/domain/entities/realtime_goal_update.dart';`\n- Register handler in constructor: `on<GoalDetailRealtimeUpdateReceived>(_onRealtimeUpdateReceived);`\n- Add handler: If update.goalId matches current loaded goal, emit action success and trigger refresh\n- Store current goalId in a field `String? _currentGoalId` updated in _onLoadRequested\n\n📦 **app.dart MODIFICATIONS:**\n- Convert App from StatelessWidget to StatefulWidget\n- In initState: Get WebSocketService and WebSocketEventHandler from DI, call webSocketService.connect()\n- In dispose: Call webSocketService.disconnect()\n- Add imports for DI (sl), WebSocketService, WebSocketEventHandler\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT modify goal_detail_state.dart - use existing GoalDetailActionSuccess\n- Do NOT block app startup - WebSocket connect is async, don't await it\n- Do NOT forget to handle null _currentGoalId case in handler\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- GoalDetailRealtimeUpdateReceived event carries RealtimeGoalUpdate entity\n- Handler checks if update.goalId == _currentGoalId before processing\n- Handler emits GoalDetailActionSuccess: 'Goal progress updated!'\n- Handler triggers _fetchAndEmitGoalDetails if goalId matches\n- App widget connects WebSocket on startup, disconnects on dispose\n- WebSocket connection failure should not crash the app (use try-catch)\n\n🧪 **VERIFICATION:**\n- Run: dart analyze lib/features/goals/presentation/bloc/goal_detail_event.dart\n- Run: dart analyze lib/features/goals/presentation/bloc/goal_detail_bloc.dart\n- Run: dart analyze lib/app.dart\n- Check: GoalDetailRealtimeUpdateReceived extends GoalDetailEvent\n- Check: GoalDetailBloc has on<GoalDetailRealtimeUpdateReceived> registered\n- Check: App is now StatefulWidget with initState/dispose managing WebSocket",
+        "epicId": "epic-websocket-realtime",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-websocket-realtime-story-2",
+          "epic-websocket-realtime-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/features/goals/domain/entities/realtime_goal_update.dart",
+          "lib/app.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/app.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given lib/features/goals/presentation/bloc/goal_detail_event.dart, When I read it, Then it contains final class GoalDetailRealtimeUpdateReceived extends GoalDetailEvent with RealtimeGoalUpdate update field",
+          "Given lib/features/goals/presentation/bloc/goal_detail_bloc.dart, When I read it, Then it has on<GoalDetailRealtimeUpdateReceived> registered and _currentGoalId field",
+          "Given lib/app.dart, When I read it, Then App is StatefulWidget with initState calling WebSocketService.connect()",
+          "Given dart analyze runs on all three files, When analyzing, Then no errors are reported"
+        ]
+      }
+    ]
+  }
+}

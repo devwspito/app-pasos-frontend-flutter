@@ -5,6 +5,7 @@
 /// exhaustive pattern matching.
 library;
 
+import 'package:app_pasos_frontend/features/sharing/domain/entities/realtime_step_update.dart';
 import 'package:equatable/equatable.dart';
 
 /// Base class for all sharing events.
@@ -116,4 +117,23 @@ final class SharingRevokeRequested extends SharingEvent {
 
   @override
   List<Object?> get props => [relationshipId];
+}
+
+/// Event dispatched when a real-time step update is received via WebSocket.
+///
+/// This event is used to handle real-time step updates from friends,
+/// allowing the UI to display live activity notifications.
+final class SharingRealtimeUpdateReceived extends SharingEvent {
+  /// Creates a [SharingRealtimeUpdateReceived] event.
+  ///
+  /// [update] - The real-time step update data received from WebSocket.
+  const SharingRealtimeUpdateReceived({
+    required this.update,
+  });
+
+  /// The real-time step update data.
+  final RealtimeStepUpdate update;
+
+  @override
+  List<Object?> get props => [update];
 }

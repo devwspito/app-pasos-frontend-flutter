@@ -5,6 +5,7 @@
 /// exhaustive pattern matching.
 library;
 
+import 'package:app_pasos_frontend/features/goals/domain/entities/realtime_goal_update.dart';
 import 'package:equatable/equatable.dart';
 
 /// Base class for all goal detail events.
@@ -97,4 +98,23 @@ final class GoalDetailLeaveRequested extends GoalDetailEvent {
 
   @override
   List<Object?> get props => [goalId];
+}
+
+/// Event dispatched when a real-time goal update is received via WebSocket.
+///
+/// This event is used to update the goal detail view when the backend
+/// notifies about goal progress changes or membership updates in real-time.
+final class GoalDetailRealtimeUpdateReceived extends GoalDetailEvent {
+  /// Creates a [GoalDetailRealtimeUpdateReceived] event.
+  ///
+  /// [update] - The real-time goal update received from WebSocket.
+  const GoalDetailRealtimeUpdateReceived({
+    required this.update,
+  });
+
+  /// The real-time goal update data.
+  final RealtimeGoalUpdate update;
+
+  @override
+  List<Object?> get props => [update];
 }
