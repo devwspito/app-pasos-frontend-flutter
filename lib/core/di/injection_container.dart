@@ -9,6 +9,9 @@ import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service_impl.dart';
+import 'package:app_pasos_frontend/core/services/websocket_event_handler.dart';
+import 'package:app_pasos_frontend/core/services/websocket_service.dart';
+import 'package:app_pasos_frontend/core/services/websocket_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/health_service.dart';
 import 'package:app_pasos_frontend/core/services/health_service_impl.dart';
 import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
@@ -129,6 +132,20 @@ Future<void> initializeDependencies() async {
   // Background Sync Service - For periodic data synchronization
   sl.registerLazySingleton<BackgroundSyncService>(
     () => BackgroundSyncServiceImpl(storageService: sl<SecureStorageService>()),
+  );
+
+  // ============================================================
+  // WebSocket Services
+  // ============================================================
+
+  // WebSocket Service - For real-time communication with backend
+  sl.registerLazySingleton<WebSocketService>(
+    () => WebSocketServiceImpl(storageService: sl<SecureStorageService>()),
+  );
+
+  // WebSocket Event Handler - Routes WebSocket messages to appropriate BLoCs
+  sl.registerLazySingleton<WebSocketEventHandler>(
+    () => WebSocketEventHandler(webSocketService: sl<WebSocketService>()),
   );
 
   // ============================================================
