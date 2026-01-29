@@ -8,6 +8,7 @@ library;
 import 'package:app_pasos_frontend/features/goals/domain/entities/goal_membership.dart';
 import 'package:app_pasos_frontend/features/goals/domain/entities/goal_progress.dart';
 import 'package:app_pasos_frontend/features/goals/domain/entities/group_goal.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/widgets/animated_progress_chart.dart';
 import 'package:equatable/equatable.dart';
 
 /// Base class for all goal detail states.
@@ -88,6 +89,7 @@ final class GoalDetailLoading extends GoalDetailState {
 /// - [goal] - The goal details
 /// - [progress] - The current progress towards the goal
 /// - [members] - The list of goal members
+/// - [progressHistory] - Historical progress data points for the chart
 ///
 /// Example:
 /// ```dart
@@ -101,10 +103,12 @@ final class GoalDetailLoaded extends GoalDetailState {
   /// [goal] - The goal details.
   /// [progress] - The current progress towards the goal.
   /// [members] - The list of goal members.
+  /// [progressHistory] - Historical progress data points for the chart.
   const GoalDetailLoaded({
     required this.goal,
     required this.progress,
     required this.members,
+    this.progressHistory = const [],
   });
 
   /// The goal details.
@@ -115,6 +119,9 @@ final class GoalDetailLoaded extends GoalDetailState {
 
   /// The list of goal members.
   final List<GoalMembership> members;
+
+  /// Historical progress data points for the animated progress chart.
+  final List<GoalProgressPoint> progressHistory;
 
   /// Whether the goal has any members.
   bool get hasMembers => members.isNotEmpty;
@@ -133,8 +140,11 @@ final class GoalDetailLoaded extends GoalDetailState {
   String get progressPercentageString =>
       '${progress.progressPercentage.toStringAsFixed(1)}%';
 
+  /// Whether there is progress history to display.
+  bool get hasProgressHistory => progressHistory.isNotEmpty;
+
   @override
-  List<Object?> get props => [goal, progress, members];
+  List<Object?> get props => [goal, progress, members, progressHistory];
 }
 
 /// State indicating that loading goal details has failed.
