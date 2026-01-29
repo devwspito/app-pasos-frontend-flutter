@@ -150,7 +150,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     emit(const DashboardLoading());
 
     // Execute the sync operation
-    final stepsSynced = await _syncNativeStepsUseCase();
+    await _syncNativeStepsUseCase();
 
     // Always refresh dashboard data after sync attempt
     // regardless of whether sync succeeded or failed

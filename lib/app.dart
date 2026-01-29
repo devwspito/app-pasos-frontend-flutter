@@ -9,9 +9,9 @@ import 'package:app_pasos_frontend/core/constants/app_constants.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/app_router.dart';
 import 'package:app_pasos_frontend/core/services/notification_service.dart';
-import 'package:app_pasos_frontend/core/services/websocket_event_handler.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service.dart';
 import 'package:app_pasos_frontend/core/theme/app_theme.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// The root widget of the App Pasos application.
@@ -41,10 +41,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   /// WebSocket service for real-time communication.
-  late final WebSocketService _webSocketService;
-
-  /// WebSocket event handler for routing messages to BLoCs.
-  late final WebSocketEventHandler _webSocketEventHandler;
+  WebSocketService? _webSocketService;
 
   @override
   void initState() {
@@ -58,31 +55,41 @@ class _AppState extends State<App> {
   /// the connection. Connection is non-blocking to avoid delaying
   /// app startup. Errors are caught to prevent app crashes.
   void _initializeWebSocket() {
-    _webSocketService = sl<WebSocketService>();
-    _webSocketEventHandler = sl<WebSocketEventHandler>();
+    try {
+      _webSocketService = sl<WebSocketService>();
 
-    // Connect WebSocket asynchronously - don't block app startup
-    // ignore: discarded_futures
-    _webSocketService.connect().catchError((Object error) {
-      // Log error but don't crash the app
-      debugPrint('WebSocket connection failed: $error');
-    });
+      // Connect WebSocket asynchronously - don't block app startup
+      // ignore: discarded_futures
+      _webSocketService?.connect().catchError((Object error) {
+        // Log error but don't crash the app
+        debugPrint('WebSocket connection failed: $error');
+        return;
+      });
 
-    // Log FCM token for testing (remove in production)
-    _logFcmToken();
+      // Log FCM token for testing (skip on web)
+      if (!kIsWeb) {
+        _logFcmToken();
+      }
+    } catch (e) {
+      debugPrint('Failed to initialize WebSocket: $e');
+    }
   }
 
   /// Logs the FCM token for debugging purposes.
-  void _logFcmToken() async {
-    final notificationService = sl<NotificationService>();
-    final token = await notificationService.getToken();
-    debugPrint('FCM Token: $token');
+  Future<void> _logFcmToken() async {
+    try {
+      final notificationService = sl<NotificationService>();
+      final token = await notificationService.getToken();
+      debugPrint('FCM Token: $token');
+    } catch (e) {
+      debugPrint('Failed to get FCM token: $e');
+    }
   }
 
   @override
   void dispose() {
     // Disconnect WebSocket when app is disposed
-    _webSocketService.disconnect();
+    _webSocketService?.disconnect();
     super.dispose();
   }
 

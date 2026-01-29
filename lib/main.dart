@@ -28,6 +28,7 @@ import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/notification_handler.dart';
 import 'package:app_pasos_frontend/core/services/notification_service.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -71,26 +72,46 @@ Future<void> main() async {
   // Services are registered as lazy singletons for efficiency.
   await initializeDependencies();
 
-  // Initialize background sync service.
-  // This sets up the workmanager and registers background task handlers.
-  await sl<BackgroundSyncService>().initialize();
+  // Initialize platform-specific services (skip on web)
+  // Background sync and notifications require native platform support
+  if (!kIsWeb) {
+    try {
+      // Initialize background sync service.
+      // This sets up the workmanager and registers background task handlers.
+      await sl<BackgroundSyncService>().initialize();
 
-  // Start background sync with 1-hour interval.
-  // This enables periodic synchronization of health data even when the app
-  // is in the background or terminated.
-  await sl<BackgroundSyncService>().startPeriodicSync(
-    interval: const Duration(hours: 1),
-  );
+      // Start background sync with 1-hour interval.
+      // This enables periodic synchronization of health data even when the app
+      // is in the background or terminated.
+      await sl<BackgroundSyncService>().startPeriodicSync(
+        interval: const Duration(hours: 1),
+      );
 
-  // Initialize notification service.
-  // This sets up Firebase Messaging and registers for notifications.
-  await sl<NotificationService>().initialize();
+      debugPrint('Background sync service initialized successfully');
+    } catch (e) {
+      // Log error but don't crash the app
+      debugPrint('Failed to initialize background sync service: $e');
+    }
 
-  // Request notification permission.
-  await sl<NotificationService>().requestPermission();
+    try {
+      // Initialize notification service.
+      // This sets up Firebase Messaging and registers for notifications.
+      await sl<NotificationService>().initialize();
 
-  // Initialize notification handler for deep linking.
-  await sl<NotificationHandler>().initialize();
+      // Request notification permission.
+      await sl<NotificationService>().requestPermission();
+
+      // Initialize notification handler for deep linking.
+      await sl<NotificationHandler>().initialize();
+
+      debugPrint('Notification service initialized successfully');
+    } catch (e) {
+      // Log error but don't crash the app
+      debugPrint('Failed to initialize notification service: $e');
+    }
+  } else {
+    debugPrint('Running on web - skipping native service initialization');
+  }
 
   // Start the application.
   runApp(const App());

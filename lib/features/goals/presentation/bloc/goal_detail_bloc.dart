@@ -6,7 +6,6 @@
 library;
 
 import 'package:app_pasos_frontend/core/errors/app_exceptions.dart';
-import 'package:app_pasos_frontend/features/goals/domain/entities/realtime_goal_update.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/get_goal_details_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/get_goal_progress_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/invite_user_usecase.dart';
