@@ -4,11 +4,14 @@
 /// the user's step progress, statistics, and activity data.
 library;
 
+import 'package:app_pasos_frontend/features/dashboard/domain/entities/step_record.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_state.dart';
+import 'package:app_pasos_frontend/features/dashboard/presentation/widgets/health_permission_dialog.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/widgets/stats_overview_card.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/widgets/step_counter_card.dart';
+import 'package:app_pasos_frontend/features/dashboard/presentation/widgets/step_source_indicator.dart';
 import 'package:app_pasos_frontend/shared/widgets/error_widget.dart';
 import 'package:app_pasos_frontend/shared/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +46,13 @@ class DashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Dashboard'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sync),
+            tooltip: 'Sync from Health',
+            onPressed: () => _onSyncHealth(context),
+          ),
+        ],
       ),
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
@@ -88,6 +98,15 @@ class DashboardPage extends StatelessWidget {
           StepCounterCard(
             currentSteps: state.todaySteps,
             goal: state.goal,
+          ),
+          const SizedBox(height: 8),
+
+          // Step source indicator showing current data source
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: StepSourceIndicator(
+              source: StepSource.web,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -177,5 +196,17 @@ class DashboardPage extends StatelessWidget {
   /// Handles refresh action by dispatching a refresh event.
   void _onRefresh(BuildContext context) {
     context.read<DashboardBloc>().add(const DashboardRefreshRequested());
+  }
+
+  /// Handles health sync action by showing permission dialog first.
+  ///
+  /// Shows a [HealthPermissionDialog] to request user consent before
+  /// syncing health data. Only dispatches [DashboardSyncHealthRequested]
+  /// if the user grants permission.
+  Future<void> _onSyncHealth(BuildContext context) async {
+    final shouldSync = await HealthPermissionDialog.show(context);
+    if (shouldSync && context.mounted) {
+      context.read<DashboardBloc>().add(const DashboardSyncHealthRequested());
+    }
   }
 }
