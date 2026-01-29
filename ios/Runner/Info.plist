@@ -49,5 +49,14 @@
 	<string>App Pasos needs access to read your step count data to track your daily walking activity.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>App Pasos needs access to write step data to keep your health records synchronized.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.apppasos.stepSync</string>
+	</array>
 </dict>
 </plist>
