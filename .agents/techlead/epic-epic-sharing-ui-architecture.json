@@ -1,200 +1,134 @@
 {
   "_metadata": {
     "agentType": "techlead",
-    "taskId": "323317759c9c31a85f289166",
-    "timestamp": "2026-01-27T18:08:34.722Z",
+    "taskId": "2c9e212b85d8a72c8a4d95bf",
+    "timestamp": "2026-01-29T14:04:25.098Z",
     "phase": "techlead",
     "epicId": "epic-sharing-ui",
-    "savedAt": "2026-01-27T18:08:34.722Z",
+    "savedAt": "2026-01-29T14:04:25.098Z",
     "version": "1.0"
   },
   "data": {
     "epicId": "epic-sharing-ui",
-    "storiesCount": 5,
-    "architecture": "## Architecture Overview\n\nThis epic implements a **Friend Management System** following **Clean Architecture** with **BLoC pattern** for state management.\n\n### Layer Structure\n\n```\nlib/features/sharing/\n├── domain/                      # Business logic layer (pure Dart)\n│   ├── entities/                # Domain entities (Equatable)\n│   │   ├── sharing_relationship.dart\n│   │   ├── shared_user.dart\n│   │   └── friend_stats.dart\n│   ├── repositories/            # Repository interfaces\n│   │   └── sharing_repository.dart\n│   └── usecases/                # Single-purpose use cases\n│       ├── get_relationships_usecase.dart\n│       ├── send_request_usecase.dart\n│       ├── accept_request_usecase.dart\n│       ├── reject_request_usecase.dart\n│       ├── revoke_sharing_usecase.dart\n│       ├── get_friend_stats_usecase.dart\n│       └── search_users_usecase.dart\n├── data/                        # Data layer\n│   ├── models/                  # JSON serialization models\n│   │   ├── sharing_relationship_model.dart\n│   │   ├── shared_user_model.dart\n│   │   └── friend_stats_model.dart\n│   ├── datasources/             # API communication\n│   │   └── sharing_remote_datasource.dart\n│   └── repositories/            # Repository implementations\n│       └── sharing_repository_impl.dart\n└── presentation/                # UI layer\n    ├── bloc/                    # State management\n    │   ├── sharing_bloc.dart\n    │   ├── sharing_event.dart\n    │   ├── sharing_state.dart\n    │   ├── friend_search_bloc.dart\n    │   ├── friend_search_event.dart\n    │   └── friend_search_state.dart\n    ├── pages/                   # Full-page screens\n    │   ├── friends_list_page.dart\n    │   ├── friend_requests_page.dart\n    │   ├── friend_activity_page.dart\n    │   └── add_friend_page.dart\n    └── widgets/                 # Reusable UI components\n        ├── friend_card.dart\n        ├── friend_request_card.dart\n        ├── friend_stats_card.dart\n        └── user_search_result_tile.dart\n```\n\n### Key Patterns\n\n1. **Entities**: Extend Equatable, const constructors, factory empty(), props getter\n2. **Models**: Extend entities, fromJson/toJson, fromEntity, copyWith\n3. **Repository Interface**: abstract interface class with async methods\n4. **Use Cases**: Single call() method, repository injection\n5. **BLoC**: Sealed events/states, use case injection, error handling\n6. **Widgets**: StatelessWidget, const constructor, theme-aware styling\n\n### Dependency Flow\n\n```\nPresentation → Domain ← Data\n    ↓              ↓\n  BLoC → UseCase → Repository (interface)\n                      ↑\n               RepositoryImpl → Datasource → ApiClient\n```\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- **Analyze**: `flutter analyze`\n- **Test**: `flutter test`\n- **Build**: `flutter build apk --debug`",
+    "storiesCount": 4,
+    "architecture": "## Sharing UI Enhancement Architecture\n\n### Overview\nThis epic enhances the sharing feature UI following the existing Clean Architecture pattern with BLoC state management. All changes maintain consistency with the established codebase patterns.\n\n### Technology Stack\n- **State Management**: flutter_bloc with sealed classes\n- **Charts**: fl_chart (already used in dashboard)\n- **DI**: get_it service locator\n- **Routing**: go_router with BlocProvider wrapping\n- **UI Components**: Shared widgets (AppCard, AvatarWidget, EmptyState, LoadingIndicator)\n\n### Key Patterns to Follow\n\n1. **Widget Pattern**:\n   - Stateless widgets with data via constructor\n   - Use Theme.of(context).colorScheme for theming\n   - Use shared widgets from lib/shared/widgets/\n\n2. **BLoC Pattern**:\n   - Sealed classes for events/states (Dart 3)\n   - Equatable for state comparison\n   - Factory registration in injection_container.dart\n\n3. **UseCase Pattern**:\n   - Single responsibility\n   - Repository dependency via constructor\n   - LazySingleton registration\n\n4. **Chart Pattern** (from WeeklyChart):\n   - fl_chart LineChart with gradient fill\n   - Touch tooltips with date/value\n   - Proper empty state handling\n\n### File Structure\n```\nlib/features/sharing/\n├── data/\n│   └── datasources/\n│       └── sharing_remote_datasource.dart (MODIFY)\n├── domain/\n│   └── usecases/\n│       └── get_pending_requests_count_usecase.dart (CREATE)\n├── presentation/\n│   ├── bloc/\n│   │   ├── sharing_bloc.dart (MODIFY)\n│   │   └── sharing_state.dart (MODIFY)\n│   ├── pages/\n│   │   ├── friends_list_page.dart (MODIFY)\n│   │   ├── friend_requests_page.dart (MODIFY)\n│   │   ├── friend_activity_page.dart (MODIFY)\n│   │   └── add_friend_page.dart (MODIFY)\n│   └── widgets/\n│       ├── friend_card.dart (MODIFY)\n│       ├── friend_request_card.dart (MODIFY)\n│       ├── friend_stats_card.dart (MODIFY)\n│       ├── friend_activity_chart.dart (CREATE)\n│       └── pending_request_badge.dart (CREATE)\n```\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- **Analyze**: `flutter analyze lib/features/sharing/`\n- **Test**: `flutter test`\n- **Format**: `dart format lib/features/sharing/`\n\n### SOLID Principles Compliance\n- **SRP**: Each widget has single purpose (chart, badge, card)\n- **OCP**: New widgets extend existing patterns without modifying them\n- **LSP**: All widgets follow consistent StatelessWidget contract\n- **ISP**: Small, focused interfaces (SharedUser, FriendStats)\n- **DIP**: UseCase depends on SharingRepository interface",
     "stories": [
       {
         "id": "epic-sharing-ui-story-1",
-        "title": "Create Domain Layer - Entities, Repository Interface, and Use Cases in lib/features/sharing/domain/",
-        "description": "Create the complete domain layer for the sharing feature following Clean Architecture patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/domain/entities/user.dart, lib/features/dashboard/domain/entities/step_stats.dart, lib/features/dashboard/domain/repositories/steps_repository.dart, lib/features/dashboard/domain/usecases/get_stats_usecase.dart\n- Modify: NONE\n- Create: lib/features/sharing/domain/entities/sharing_relationship.dart, lib/features/sharing/domain/entities/shared_user.dart, lib/features/sharing/domain/entities/friend_stats.dart, lib/features/sharing/domain/repositories/sharing_repository.dart, lib/features/sharing/domain/usecases/get_relationships_usecase.dart, lib/features/sharing/domain/usecases/send_request_usecase.dart, lib/features/sharing/domain/usecases/accept_request_usecase.dart, lib/features/sharing/domain/usecases/reject_request_usecase.dart, lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart, lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart, lib/features/sharing/domain/usecases/search_users_usecase.dart\n\n🔧 **PATTERNS TO USE:**\n- Entities MUST extend Equatable (from 'package:equatable/equatable.dart')\n- Use `const` constructors for all entities\n- Add `factory EntityName.empty()` for initial states\n- Add `bool get isEmpty` and `bool get isNotEmpty` getters\n- Override `List<Object?> get props` for Equatable\n- Override `toString()` method\n- Repository interface: Use `abstract interface class SharingRepository`\n- Use cases: Single class with `call()` method returning Future\n- Use cases take repository in constructor: `SharingRepository repository`\n\n📦 **ENTITY STRUCTURES:**\n\n**SharingRelationship:**\n```dart\nclass SharingRelationship extends Equatable {\n  const SharingRelationship({\n    required this.id,\n    required this.fromUserId,\n    required this.toUserId,\n    required this.status, // pending, accepted, rejected\n    required this.createdAt,\n    this.acceptedAt,\n  });\n}\n```\n\n**SharedUser:**\n```dart\nclass SharedUser extends Equatable {\n  const SharedUser({\n    required this.id,\n    required this.name,\n    required this.email,\n    this.avatarUrl,\n    this.todaySteps,\n  });\n}\n```\n\n**FriendStats:**\n```dart\nclass FriendStats extends Equatable {\n  const FriendStats({\n    required this.userId,\n    required this.todaySteps,\n    required this.weekSteps,\n    required this.monthSteps,\n    required this.allTimeSteps,\n  });\n}\n```\n\n**SharingRepository Interface Methods:**\n- `Future<List<SharingRelationship>> getRelationships()`\n- `Future<SharingRelationship> sendRequest({required String toUserId})`\n- `Future<SharingRelationship> acceptRequest({required String relationshipId})`\n- `Future<void> rejectRequest({required String relationshipId})`\n- `Future<void> revokeSharing({required String relationshipId})`\n- `Future<FriendStats> getFriendStats({required String friendId})`\n- `Future<List<SharedUser>> searchUsers({required String query})`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `class` without `Equatable` - all entities must extend Equatable\n- DO NOT forget `const` constructor\n- DO NOT use dynamic typing - all fields must have explicit types\n- DO NOT import data layer classes in domain layer\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- SharingRelationship must have status enum or string with values: 'pending', 'accepted', 'rejected'\n- SharedUser represents a friend with their basic profile and optional step count\n- FriendStats contains step statistics for a specific friend\n- All 7 use cases must follow the single-responsibility pattern from get_stats_usecase.dart\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/domain/`\n- All files must have no analyzer errors\n- All entities must compile with Equatable",
+        "title": "Create FriendActivityChart widget and enhance FriendActivityPage with visual activity data",
+        "description": "Create a new chart widget following the WeeklyChart pattern from fl_chart to display friend step activity. Integrate into friend_activity_page and enhance friend_stats_card.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/widgets/weekly_chart.dart (chart pattern), lib/features/sharing/domain/entities/friend_stats.dart, lib/shared/widgets/app_card.dart\n- Modify: lib/features/sharing/presentation/pages/friend_activity_page.dart, lib/features/sharing/presentation/widgets/friend_stats_card.dart\n- Create: lib/features/sharing/presentation/widgets/friend_activity_chart.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow WeeklyChart pattern from lib/features/dashboard/presentation/widgets/weekly_chart.dart\n- Use fl_chart LineChart with LineChartData for activity visualization\n- Use Theme.of(context).colorScheme for colors\n- Use AppCard from lib/shared/widgets/app_card.dart for container\n- Follow stateless widget pattern with data passed via constructor\n\n📦 **REQUIRED STRUCTURE for FriendActivityChart:**\n- Constructor takes List<ActivityDataPoint> (create simple class with date/steps)\n- Build method returns LineChart with gradient fill\n- Include touch tooltips showing date and step count\n- Handle empty state with icon and message\n- Use _formatSteps helper for number formatting\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use BlocBuilder inside chart widget - data comes via props\n- DO NOT use hardcoded colors - use colorScheme\n- DO NOT use StatefulWidget unless necessary\n- NO placeholder text like \"Coming Soon\"\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. FriendActivityChart shows 7-day step trend line with gradient fill below\n2. X-axis shows day abbreviations (Mon, Tue, etc.)\n3. Y-axis shows step counts with K/M formatting\n4. Touch shows tooltip with date and exact step count\n5. Empty state shows \"No activity data\" with chart icon\n6. FriendStatsCard enhanced with clearer visual hierarchy\n7. friend_activity_page integrates chart below stats card\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/sharing/\n- Run: flutter test (if tests exist)\n- Visual: Chart renders with mock data, tooltips work on touch",
         "epicId": "epic-sharing-ui",
         "priority": 1,
         "estimatedComplexity": "moderate",
         "dependencies": [],
         "status": "pending",
         "filesToRead": [
-          "lib/features/auth/domain/entities/user.dart",
-          "lib/features/dashboard/domain/entities/step_stats.dart",
-          "lib/features/dashboard/domain/repositories/steps_repository.dart",
-          "lib/features/dashboard/domain/usecases/get_stats_usecase.dart"
-        ],
-        "filesToModify": [],
-        "filesToCreate": [
-          "lib/features/sharing/domain/entities/sharing_relationship.dart",
-          "lib/features/sharing/domain/entities/shared_user.dart",
+          "lib/features/dashboard/presentation/widgets/weekly_chart.dart",
           "lib/features/sharing/domain/entities/friend_stats.dart",
-          "lib/features/sharing/domain/repositories/sharing_repository.dart",
-          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
-          "lib/features/sharing/domain/usecases/send_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/accept_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/reject_request_usecase.dart",
-          "lib/features/sharing/domain/usecases/revoke_sharing_usecase.dart",
-          "lib/features/sharing/domain/usecases/get_friend_stats_usecase.dart",
-          "lib/features/sharing/domain/usecases/search_users_usecase.dart"
+          "lib/shared/widgets/app_card.dart",
+          "lib/features/sharing/domain/entities/shared_user.dart"
+        ],
+        "filesToModify": [
+          "lib/features/sharing/presentation/pages/friend_activity_page.dart",
+          "lib/features/sharing/presentation/widgets/friend_stats_card.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/sharing/presentation/widgets/friend_activity_chart.dart"
         ],
         "acceptanceCriteria": [
-          "Given the domain layer is created, When running flutter analyze, Then there should be no errors in lib/features/sharing/domain/",
-          "Given SharingRelationship entity is created, When checking the class, Then it must extend Equatable and have all required fields (id, fromUserId, toUserId, status, createdAt, acceptedAt)",
-          "Given SharedUser entity is created, When checking the class, Then it must extend Equatable and have all required fields (id, name, email, avatarUrl, todaySteps)",
-          "Given FriendStats entity is created, When checking the class, Then it must extend Equatable and have all step statistics fields",
-          "Given SharingRepository interface is created, When checking the class, Then it must be an abstract interface class with all 7 methods",
-          "Given all 7 use cases are created, When checking each class, Then each must have a constructor taking SharingRepository and a call() method"
+          "Given a friend's activity data, When viewing friend_activity_page, Then a line chart displays 7-day step trend with gradient fill",
+          "Given the chart is touched, When user taps a data point, Then tooltip shows date and exact step count",
+          "Given no activity data, When chart renders, Then empty state shows 'No activity data' with icon",
+          "Given the FriendStatsCard, When displayed, Then stats have clear visual hierarchy with improved spacing"
         ]
       },
       {
         "id": "epic-sharing-ui-story-2",
-        "title": "Create Data Layer - Models, Datasource, and Repository Implementation in lib/features/sharing/data/",
-        "description": "Create the complete data layer for the sharing feature with JSON serialization models, remote datasource, and repository implementation.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/data/models/step_stats_model.dart, lib/features/dashboard/data/datasources/steps_remote_datasource.dart, lib/features/dashboard/data/repositories/steps_repository_impl.dart, lib/core/network/api_client.dart, lib/core/network/api_endpoints.dart, lib/core/errors/app_exceptions.dart\n- Modify: NONE\n- Create: lib/features/sharing/data/models/sharing_relationship_model.dart, lib/features/sharing/data/models/shared_user_model.dart, lib/features/sharing/data/models/friend_stats_model.dart, lib/features/sharing/data/datasources/sharing_remote_datasource.dart, lib/features/sharing/data/repositories/sharing_repository_impl.dart\n\n🔧 **PATTERNS TO USE:**\n- Models MUST extend the domain entity: `class SharingRelationshipModel extends SharingRelationship`\n- Add `factory ModelName.fromJson(Map<String, dynamic> json)`\n- Add `factory ModelName.fromEntity(Entity entity)`\n- Add `factory ModelName.empty()`\n- Add `Map<String, dynamic> toJson()` method\n- Add `ModelName copyWith({...})` method\n- Use `_parseInt(dynamic value)` pattern for safe int parsing\n- Datasource: `abstract interface class SharingRemoteDatasource` + `class SharingRemoteDatasourceImpl implements SharingRemoteDatasource`\n- Datasource constructor: `SharingRemoteDatasourceImpl({required ApiClient client})`\n- Repository impl: `class SharingRepositoryImpl implements SharingRepository`\n- Use `_client.get<Map<String, dynamic>>()` and `_client.post<Map<String, dynamic>>()` patterns\n\n📦 **API ENDPOINT PATHS TO USE:**\n- GET /sharing/relationships - Get all relationships\n- POST /sharing/request - Send friend request {toUserId}\n- POST /sharing/accept - Accept request {relationshipId}\n- POST /sharing/reject - Reject request {relationshipId}\n- DELETE /sharing/revoke - Revoke sharing {relationshipId}\n- GET /sharing/stats/{friendId} - Get friend stats\n- GET /sharing/search?query= - Search users\n\n📦 **MODEL JSON STRUCTURES:**\n\n**SharingRelationshipModel fromJson:**\n```dart\nfactory SharingRelationshipModel.fromJson(Map<String, dynamic> json) {\n  return SharingRelationshipModel(\n    id: json['_id'] as String? ?? json['id'] as String,\n    fromUserId: json['fromUserId'] as String,\n    toUserId: json['toUserId'] as String,\n    status: json['status'] as String,\n    createdAt: DateTime.parse(json['createdAt'] as String),\n    acceptedAt: json['acceptedAt'] != null ? DateTime.parse(json['acceptedAt'] as String) : null,\n  );\n}\n```\n\n**SharedUserModel fromJson:**\n```dart\nfactory SharedUserModel.fromJson(Map<String, dynamic> json) {\n  return SharedUserModel(\n    id: json['_id'] as String? ?? json['id'] as String,\n    name: json['name'] as String,\n    email: json['email'] as String,\n    avatarUrl: json['avatarUrl'] as String?,\n    todaySteps: _parseInt(json['todaySteps']),\n  );\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `new` keyword - use constructor calls directly\n- DO NOT forget to handle null responses with ServerException\n- DO NOT use hardcoded API paths - define them in api_endpoints.dart (will be added in story 5)\n- DO NOT skip error handling - throw appropriate AppException types\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All models must extend their domain entities\n- Datasource must use ApiClient for all HTTP requests\n- Repository must delegate to datasource and return domain entities\n- Handle both wrapped ({data: ...}) and unwrapped API responses\n- Use String.fromEnvironment or hardcoded paths for now (endpoints added in story 5)\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/data/`\n- All files must have no analyzer errors\n- All models must properly extend domain entities",
+        "title": "Create PendingRequestBadge widget and enhance FriendRequestsPage with improved UI",
+        "description": "Create a badge widget to show pending request count and enhance the friend_requests_page with better visual feedback and friend_request_card improvements.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/bloc/sharing_state.dart (for pendingRequests list), lib/shared/widgets/app_card.dart, lib/shared/widgets/avatar_widget.dart\n- Modify: lib/features/sharing/presentation/pages/friend_requests_page.dart, lib/features/sharing/presentation/widgets/friend_request_card.dart\n- Create: lib/features/sharing/presentation/widgets/pending_request_badge.dart\n\n🔧 **PATTERNS TO USE:**\n- Use Theme.of(context).colorScheme for badge colors (errorContainer for urgent)\n- Use Container with BoxDecoration for badge circle\n- Access pending count from SharingLoaded state: state.pendingRequests.length\n- Follow existing widget patterns from friend_card.dart\n- Use AnimatedSwitcher for smooth count transitions\n\n📦 **REQUIRED STRUCTURE for PendingRequestBadge:**\n```dart\nclass PendingRequestBadge extends StatelessWidget {\n  const PendingRequestBadge({required this.count, super.key});\n  final int count;\n  // Shows red circle badge with count (max 99+)\n  // Returns SizedBox.shrink() if count == 0\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT hardcode badge color - use colorScheme.errorContainer\n- DO NOT show badge when count is 0\n- DO NOT use magic numbers - define constants\n- NO placeholder buttons without handlers\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. PendingRequestBadge shows count in red circle (colorScheme.errorContainer)\n2. Badge shows '99+' if count > 99\n3. Badge hidden when count is 0\n4. friend_requests_page AppBar shows badge next to title\n5. friend_request_card enhanced with:\n   - Better visual separation between user info and buttons\n   - Loading state on buttons during accept/reject\n   - Timestamp shows 'Just now', '5m ago', 'Yesterday' etc.\n6. Pull-to-refresh works with visual feedback\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/sharing/\n- Visual: Badge shows correct count, buttons disable during loading",
         "epicId": "epic-sharing-ui",
-        "priority": 2,
-        "estimatedComplexity": "moderate",
-        "dependencies": [
-          "epic-sharing-ui-story-1"
-        ],
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
         "status": "pending",
         "filesToRead": [
-          "lib/features/dashboard/data/models/step_stats_model.dart",
-          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
-          "lib/features/dashboard/data/repositories/steps_repository_impl.dart",
-          "lib/core/network/api_client.dart",
-          "lib/core/network/api_endpoints.dart",
-          "lib/core/errors/app_exceptions.dart"
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
+          "lib/shared/widgets/app_card.dart",
+          "lib/shared/widgets/avatar_widget.dart",
+          "lib/features/sharing/domain/entities/sharing_relationship.dart"
         ],
-        "filesToModify": [],
+        "filesToModify": [
+          "lib/features/sharing/presentation/pages/friend_requests_page.dart",
+          "lib/features/sharing/presentation/widgets/friend_request_card.dart"
+        ],
         "filesToCreate": [
-          "lib/features/sharing/data/models/sharing_relationship_model.dart",
-          "lib/features/sharing/data/models/shared_user_model.dart",
-          "lib/features/sharing/data/models/friend_stats_model.dart",
-          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
-          "lib/features/sharing/data/repositories/sharing_repository_impl.dart"
+          "lib/features/sharing/presentation/widgets/pending_request_badge.dart"
         ],
         "acceptanceCriteria": [
-          "Given the data layer is created, When running flutter analyze, Then there should be no errors in lib/features/sharing/data/",
-          "Given SharingRelationshipModel is created, When checking the class, Then it must extend SharingRelationship and have fromJson, toJson, fromEntity, copyWith methods",
-          "Given SharedUserModel is created, When checking the class, Then it must extend SharedUser and have fromJson, toJson, fromEntity, copyWith methods",
-          "Given FriendStatsModel is created, When checking the class, Then it must extend FriendStats and have fromJson, toJson, fromEntity, copyWith methods",
-          "Given SharingRemoteDatasource is created, When checking the class, Then it must have interface and implementation with ApiClient dependency",
-          "Given SharingRepositoryImpl is created, When checking the class, Then it must implement SharingRepository and delegate to datasource"
+          "Given pending requests exist, When viewing friend_requests_page, Then badge shows count in AppBar",
+          "Given count > 99, When badge renders, Then it shows '99+'",
+          "Given count is 0, When badge renders, Then badge is not visible (SizedBox.shrink)",
+          "Given accept button is pressed, When processing, Then button shows loading state and is disabled"
         ]
       },
       {
         "id": "epic-sharing-ui-story-3",
-        "title": "Create Presentation BLoCs - SharingBloc and FriendSearchBloc in lib/features/sharing/presentation/bloc/",
-        "description": "Create the BLoC state management layer for the sharing feature following the existing dashboard_bloc pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/bloc/dashboard_bloc.dart, lib/features/dashboard/presentation/bloc/dashboard_event.dart, lib/features/dashboard/presentation/bloc/dashboard_state.dart, lib/core/errors/app_exceptions.dart\n- Modify: NONE\n- Create: lib/features/sharing/presentation/bloc/sharing_bloc.dart, lib/features/sharing/presentation/bloc/sharing_event.dart, lib/features/sharing/presentation/bloc/sharing_state.dart, lib/features/sharing/presentation/bloc/friend_search_bloc.dart, lib/features/sharing/presentation/bloc/friend_search_event.dart, lib/features/sharing/presentation/bloc/friend_search_state.dart\n\n🔧 **PATTERNS TO USE:**\n- Events: `sealed class SharingEvent extends Equatable` with `final class` subclasses\n- States: `sealed class SharingState extends Equatable` with `final class` subclasses\n- Bloc: `class SharingBloc extends Bloc<SharingEvent, SharingState>`\n- Use case injection in constructor\n- Register event handlers in constructor with `on<EventType>(_handlerMethod)`\n- Use `_getErrorMessage(AppException exception)` pattern for error messages\n- Use `switch (exception)` pattern matching for error handling\n\n📦 **SHARING BLOC STRUCTURE:**\n\n**SharingEvent types:**\n```dart\nsealed class SharingEvent extends Equatable {}\nfinal class SharingLoadRequested extends SharingEvent {}\nfinal class SharingRefreshRequested extends SharingEvent {}\nfinal class SharingSendRequestRequested extends SharingEvent {\n  final String toUserId;\n}\nfinal class SharingAcceptRequestRequested extends SharingEvent {\n  final String relationshipId;\n}\nfinal class SharingRejectRequestRequested extends SharingEvent {\n  final String relationshipId;\n}\nfinal class SharingRevokeRequested extends SharingEvent {\n  final String relationshipId;\n}\n```\n\n**SharingState types:**\n```dart\nsealed class SharingState extends Equatable {}\nfinal class SharingInitial extends SharingState {}\nfinal class SharingLoading extends SharingState {}\nfinal class SharingLoaded extends SharingState {\n  final List<SharingRelationship> relationships;\n  final List<SharingRelationship> pendingRequests; // status == 'pending' && toUserId == currentUserId\n  final List<SharingRelationship> sentRequests; // status == 'pending' && fromUserId == currentUserId\n  final List<SharingRelationship> friends; // status == 'accepted'\n}\nfinal class SharingError extends SharingState {\n  final String message;\n}\nfinal class SharingActionSuccess extends SharingState {\n  final String message;\n}\n```\n\n**SharingBloc constructor:**\n```dart\nSharingBloc({\n  required GetRelationshipsUseCase getRelationshipsUseCase,\n  required SendRequestUseCase sendRequestUseCase,\n  required AcceptRequestUseCase acceptRequestUseCase,\n  required RejectRequestUseCase rejectRequestUseCase,\n  required RevokeSharingUseCase revokeSharingUseCase,\n})\n```\n\n📦 **FRIEND SEARCH BLOC STRUCTURE:**\n\n**FriendSearchEvent types:**\n```dart\nsealed class FriendSearchEvent extends Equatable {}\nfinal class FriendSearchQueryChanged extends FriendSearchEvent {\n  final String query;\n}\nfinal class FriendSearchCleared extends FriendSearchEvent {}\n```\n\n**FriendSearchState types:**\n```dart\nsealed class FriendSearchState extends Equatable {}\nfinal class FriendSearchInitial extends FriendSearchState {}\nfinal class FriendSearchLoading extends FriendSearchState {}\nfinal class FriendSearchLoaded extends FriendSearchState {\n  final List<SharedUser> users;\n  final String query;\n}\nfinal class FriendSearchEmpty extends FriendSearchState {\n  final String query;\n}\nfinal class FriendSearchError extends FriendSearchState {\n  final String message;\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `class` for events/states - must be `sealed class` base and `final class` subtypes\n- DO NOT forget Equatable extension and `props` getter\n- DO NOT forget `const` constructor for events and states\n- DO NOT forget to handle all AppException types in _getErrorMessage\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- SharingBloc must manage relationships, filter into pending/sent/friends lists\n- SharingBloc must handle all CRUD operations (load, send, accept, reject, revoke)\n- FriendSearchBloc must handle search with debouncing consideration\n- Both blocs must properly handle loading, success, and error states\n- Use exhaustive switch patterns for state building\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/presentation/bloc/`\n- All files must have no analyzer errors\n- All events and states must be properly typed",
+        "title": "Enhance FriendsListPage and FriendCard with improved data display and AddFriendPage UX",
+        "description": "Enhance the friends list page with better friend cards showing real user data, and improve add_friend_page UX with better search feedback.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/domain/entities/shared_user.dart, lib/features/sharing/domain/entities/sharing_relationship.dart, lib/shared/widgets/empty_state.dart\n- Modify: lib/features/sharing/presentation/pages/friends_list_page.dart, lib/features/sharing/presentation/widgets/friend_card.dart, lib/features/sharing/presentation/pages/add_friend_page.dart\n\n🔧 **PATTERNS TO USE:**\n- Use SharedUser entity for friend data (id, name, email, avatarUrl, todaySteps)\n- Use SharingRelationship entity for relationship metadata\n- Use AvatarWidget from lib/shared/widgets/avatar_widget.dart\n- Use AppCard for consistent card styling\n- Use RefreshIndicator for pull-to-refresh\n- Follow BlocBuilder pattern from existing pages\n\n📦 **REQUIRED IMPROVEMENTS:**\n1. FriendCard now receives SharedUser directly (not constructed from relationship)\n2. _FriendCardItem in friends_list_page extracts user data properly\n3. Show pending requests badge in AppBar of friends_list_page\n4. AddFriendPage shows better empty search state\n5. Search debouncing already exists - enhance visual feedback\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT construct SharedUser with placeholder data like 'Friend 1234'\n- DO NOT use direct model instantiation - use entities from state\n- DO NOT ignore null safety - use ?. and ?? operators\n- NO 'Coming Soon' or 'TODO' text\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. FriendCard displays: avatar, name, email, todaySteps badge (if available)\n2. friends_list_page shows pending request badge in AppBar actions\n3. Empty state shows clear message with 'Add Friend' action button\n4. add_friend_page search shows typing indicator during debounce\n5. add_friend_page 'No results' state shows search query used\n6. Swipe-to-dismiss on friend card shows remove confirmation\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/sharing/\n- Visual: Friend cards show real-looking data, search feedback is clear",
         "epicId": "epic-sharing-ui",
-        "priority": 3,
-        "estimatedComplexity": "complex",
-        "dependencies": [
-          "epic-sharing-ui-story-1"
-        ],
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
         "status": "pending",
         "filesToRead": [
-          "lib/features/dashboard/presentation/bloc/dashboard_bloc.dart",
-          "lib/features/dashboard/presentation/bloc/dashboard_event.dart",
-          "lib/features/dashboard/presentation/bloc/dashboard_state.dart",
-          "lib/core/errors/app_exceptions.dart"
+          "lib/features/sharing/domain/entities/shared_user.dart",
+          "lib/features/sharing/domain/entities/sharing_relationship.dart",
+          "lib/shared/widgets/empty_state.dart",
+          "lib/shared/widgets/avatar_widget.dart",
+          "lib/features/sharing/presentation/bloc/sharing_state.dart"
         ],
-        "filesToModify": [],
-        "filesToCreate": [
-          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
-          "lib/features/sharing/presentation/bloc/sharing_event.dart",
-          "lib/features/sharing/presentation/bloc/sharing_state.dart",
-          "lib/features/sharing/presentation/bloc/friend_search_bloc.dart",
-          "lib/features/sharing/presentation/bloc/friend_search_event.dart",
-          "lib/features/sharing/presentation/bloc/friend_search_state.dart"
+        "filesToModify": [
+          "lib/features/sharing/presentation/pages/friends_list_page.dart",
+          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/sharing/presentation/pages/add_friend_page.dart"
         ],
+        "filesToCreate": [],
         "acceptanceCriteria": [
-          "Given the bloc layer is created, When running flutter analyze, Then there should be no errors in lib/features/sharing/presentation/bloc/",
-          "Given SharingBloc is created, When checking the class, Then it must extend Bloc<SharingEvent, SharingState> and inject all 5 use cases",
-          "Given SharingEvent is created, When checking the hierarchy, Then it must be a sealed class with all event subtypes as final classes",
-          "Given SharingState is created, When checking the hierarchy, Then it must be a sealed class with Initial, Loading, Loaded, Error, ActionSuccess as final classes",
-          "Given FriendSearchBloc is created, When checking the class, Then it must extend Bloc<FriendSearchEvent, FriendSearchState> and inject SearchUsersUseCase",
-          "Given all event/state classes, When checking props, Then all must extend Equatable with proper props getter"
+          "Given a friend with step data, When FriendCard renders, Then it shows avatar, name, email, and step badge",
+          "Given friends_list_page, When there are pending requests, Then badge shows in AppBar",
+          "Given add_friend_page search, When typing, Then visual feedback shows search is processing",
+          "Given add_friend_page with no results, When displayed, Then message includes the search query used"
         ]
       },
       {
         "id": "epic-sharing-ui-story-4",
-        "title": "Create Presentation Widgets - FriendCard, FriendRequestCard, FriendStatsCard, UserSearchResultTile in lib/features/sharing/presentation/widgets/",
-        "description": "Create reusable UI widgets for the sharing feature following the existing shared widget patterns.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/shared/widgets/app_card.dart, lib/shared/widgets/avatar_widget.dart, lib/shared/widgets/loading_indicator.dart, lib/shared/widgets/empty_state.dart, lib/core/theme/app_colors.dart\n- Modify: NONE\n- Create: lib/features/sharing/presentation/widgets/friend_card.dart, lib/features/sharing/presentation/widgets/friend_request_card.dart, lib/features/sharing/presentation/widgets/friend_stats_card.dart, lib/features/sharing/presentation/widgets/user_search_result_tile.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `const` constructor with `super.key`\n- Use `Theme.of(context)` and `theme.colorScheme` for colors\n- Use `theme.textTheme` for text styles\n- Use shared widgets: AppCard, AvatarWidget, LoadingIndicator\n- Follow Material 3 design guidelines\n- Widgets must be StatelessWidget unless state is required\n- All required params first, then optional with defaults\n\n📦 **WIDGET SPECIFICATIONS:**\n\n**FriendCard:**\n```dart\nclass FriendCard extends StatelessWidget {\n  const FriendCard({\n    required this.friend, // SharedUser\n    required this.onTap, // VoidCallback\n    this.onRemove, // VoidCallback?\n    super.key,\n  });\n  // Displays: AvatarWidget, name, email, today's steps badge\n  // Optional trailing remove/more icon button\n}\n```\n\n**FriendRequestCard:**\n```dart\nclass FriendRequestCard extends StatelessWidget {\n  const FriendRequestCard({\n    required this.relationship, // SharingRelationship\n    required this.user, // SharedUser (the requester)\n    required this.onAccept, // VoidCallback\n    required this.onReject, // VoidCallback\n    this.isLoading = false,\n    super.key,\n  });\n  // Displays: AvatarWidget, user name, request date\n  // Accept (green) and Reject (red outline) buttons\n}\n```\n\n**FriendStatsCard:**\n```dart\nclass FriendStatsCard extends StatelessWidget {\n  const FriendStatsCard({\n    required this.friend, // SharedUser\n    required this.stats, // FriendStats\n    super.key,\n  });\n  // Displays: Friend avatar/name at top\n  // Grid of stats: Today, Week, Month, All-Time (like StatsOverviewCard)\n}\n```\n\n**UserSearchResultTile:**\n```dart\nclass UserSearchResultTile extends StatelessWidget {\n  const UserSearchResultTile({\n    required this.user, // SharedUser\n    required this.onAddFriend, // VoidCallback\n    this.isAlreadyFriend = false,\n    this.isRequestPending = false,\n    this.isLoading = false,\n    super.key,\n  });\n  // Displays: AvatarWidget, name, email\n  // Trailing: Add Friend button (or status indicator if already friend/pending)\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use hardcoded colors - use theme.colorScheme\n- DO NOT use hardcoded text styles - use theme.textTheme\n- DO NOT use SizedBox without const\n- DO NOT forget null safety checks for optional fields\n- DO NOT use placeholder text like 'Coming Soon' or 'TODO'\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- FriendCard: Tappable card showing friend info with optional remove action\n- FriendRequestCard: Shows incoming request with accept/reject buttons that disable during loading\n- FriendStatsCard: Displays friend's step statistics in a grid format\n- UserSearchResultTile: ListTile-style for search results with add friend action\n- All widgets must handle their loading states with disabled buttons or LoadingIndicator\n- All widgets must use AvatarWidget for user avatars\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/presentation/widgets/`\n- All files must have no analyzer errors\n- All widgets must be StatelessWidget with const constructors",
+        "title": "Create GetPendingRequestsCountUseCase and enhance SharingBloc with pendingCount tracking",
+        "description": "Create a usecase for getting pending requests count and enhance the SharingBloc/State to track and expose this count. Update app_router and datasource as needed.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/sharing/domain/usecases/get_relationships_usecase.dart (usecase pattern), lib/features/sharing/domain/repositories/sharing_repository.dart\n- Modify: lib/features/sharing/presentation/bloc/sharing_bloc.dart, lib/features/sharing/presentation/bloc/sharing_state.dart, lib/features/sharing/data/datasources/sharing_remote_datasource.dart, lib/core/router/app_router.dart\n- Create: lib/features/sharing/domain/usecases/get_pending_requests_count_usecase.dart\n\n🔧 **PATTERNS TO USE:**\n- Follow GetRelationshipsUseCase pattern for new usecase\n- UseCase takes SharingRepository in constructor\n- Register usecase in injection_container.dart (add to sharing section)\n- SharingLoaded state already has pendingRequests list - add getter for count\n- Use sealed class pattern for any new state variants\n\n📦 **REQUIRED STRUCTURE for GetPendingRequestsCountUseCase:**\n```dart\nclass GetPendingRequestsCountUseCase {\n  GetPendingRequestsCountUseCase({required SharingRepository repository})\n      : _repository = repository;\n  final SharingRepository _repository;\n  \n  Future<int> call() async {\n    final relationships = await _repository.getRelationships();\n    // Filter for pending requests where current user is recipient\n    return relationships.where((r) => r.isPending).length;\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT add new API endpoint if data is already available from getRelationships\n- DO NOT modify existing state classes - extend them if needed\n- DO NOT forget to register usecase in injection_container.dart\n- DO NOT break existing BLoC functionality\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. GetPendingRequestsCountUseCase returns count of pending requests\n2. SharingLoaded state has `int get pendingCount => pendingRequests.length`\n3. SharingBloc emits state with accurate pending count\n4. app_router ensures SharingBloc is properly provided to pages needing badge\n5. sharing_remote_datasource has any new helper methods if needed\n6. Register usecase in lib/core/di/injection_container.dart\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/sharing/\n- Run: flutter analyze lib/core/\n- Verify: Usecase is registered in injection_container.dart",
         "epicId": "epic-sharing-ui",
-        "priority": 3,
+        "priority": 2,
         "estimatedComplexity": "moderate",
-        "dependencies": [
-          "epic-sharing-ui-story-1"
-        ],
+        "dependencies": [],
         "status": "pending",
         "filesToRead": [
-          "lib/shared/widgets/app_card.dart",
-          "lib/shared/widgets/avatar_widget.dart",
-          "lib/shared/widgets/loading_indicator.dart",
-          "lib/shared/widgets/empty_state.dart",
-          "lib/core/theme/app_colors.dart"
-        ],
-        "filesToModify": [],
-        "filesToCreate": [
-          "lib/features/sharing/presentation/widgets/friend_card.dart",
-          "lib/features/sharing/presentation/widgets/friend_request_card.dart",
-          "lib/features/sharing/presentation/widgets/friend_stats_card.dart",
-          "lib/features/sharing/presentation/widgets/user_search_result_tile.dart"
-        ],
-        "acceptanceCriteria": [
-          "Given the widgets are created, When running flutter analyze, Then there should be no errors in lib/features/sharing/presentation/widgets/",
-          "Given FriendCard is created, When checking the class, Then it must be StatelessWidget with const constructor and display SharedUser with AvatarWidget",
-          "Given FriendRequestCard is created, When checking the class, Then it must have Accept and Reject buttons that respect isLoading state",
-          "Given FriendStatsCard is created, When checking the class, Then it must display FriendStats in a grid format similar to StatsOverviewCard",
-          "Given UserSearchResultTile is created, When checking the class, Then it must show user info with Add Friend button that handles already friend/pending states"
-        ]
-      },
-      {
-        "id": "epic-sharing-ui-story-5",
-        "title": "Create Presentation Pages and Wire Up Integration in lib/features/sharing/presentation/pages/ and modify core files",
-        "description": "Create all 4 sharing pages and integrate the feature into the app by updating router, DI container, API endpoints, and route names.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/pages/dashboard_page.dart, lib/core/router/app_router.dart, lib/core/router/route_names.dart, lib/core/di/injection_container.dart, lib/core/network/api_endpoints.dart\n- Modify: lib/core/router/route_names.dart, lib/core/router/app_router.dart, lib/core/network/api_endpoints.dart, lib/core/di/injection_container.dart\n- Create: lib/features/sharing/presentation/pages/friends_list_page.dart, lib/features/sharing/presentation/pages/friend_requests_page.dart, lib/features/sharing/presentation/pages/friend_activity_page.dart, lib/features/sharing/presentation/pages/add_friend_page.dart\n\n🔧 **PATTERNS TO USE:**\n\n**Page Pattern:**\n- Extends StatelessWidget with const constructor\n- Uses BlocBuilder<SharingBloc, SharingState> for state\n- Uses `switch (state)` pattern for exhaustive state handling\n- Uses RefreshIndicator for pull-to-refresh\n- Uses Scaffold with AppBar\n\n**Route Names to Add:**\n```dart\nstatic const String friends = '/friends';\nstatic const String friendRequests = '/friends/requests';\nstatic const String friendActivity = '/friends/activity';\nstatic const String addFriend = '/friends/add';\n```\n\n**Router Routes to Add:**\n```dart\nGoRoute(\n  path: RouteNames.friends,\n  name: 'friends',\n  builder: (context, state) => BlocProvider(\n    create: (_) => sl<SharingBloc>()..add(const SharingLoadRequested()),\n    child: const FriendsListPage(),\n  ),\n),\n// Similar for other routes\n```\n\n**API Endpoints to Add:**\n```dart\n// Sharing/Friends Endpoints\nstatic const String sharingRelationships = '/sharing/relationships';\nstatic const String sharingRequest = '/sharing/request';\nstatic const String sharingAccept = '/sharing/accept';\nstatic const String sharingReject = '/sharing/reject';\nstatic const String sharingRevoke = '/sharing/revoke';\nstatic const String sharingStats = '/sharing/stats'; // Use with /{friendId}\nstatic const String sharingSearch = '/sharing/search';\n```\n\n**DI Registration Pattern:**\n```dart\n// Sharing Feature section after Dashboard Feature\n// Data Sources\nsl.registerLazySingleton<SharingRemoteDatasource>(\n  () => SharingRemoteDatasourceImpl(client: sl<ApiClient>()),\n);\n// Repositories\nsl.registerLazySingleton<SharingRepository>(\n  () => SharingRepositoryImpl(datasource: sl<SharingRemoteDatasource>()),\n);\n// Use Cases (all 7)\n// Blocs (Factory)\nsl.registerFactory<SharingBloc>(() => SharingBloc(...));\nsl.registerFactory<FriendSearchBloc>(() => FriendSearchBloc(...));\n```\n\n📦 **PAGE SPECIFICATIONS:**\n\n**FriendsListPage:**\n- AppBar: title 'Friends', action IconButton to navigate to AddFriendPage\n- Body: ListView of FriendCard widgets from SharingLoaded.friends\n- FAB: FloatingActionButton to navigate to AddFriendPage\n- Empty state: EmptyState widget when no friends\n- Pull-to-refresh support\n\n**FriendRequestsPage:**\n- AppBar: title 'Friend Requests'\n- Body: ListView of FriendRequestCard widgets from SharingLoaded.pendingRequests\n- Empty state: EmptyState when no pending requests\n- Pull-to-refresh support\n\n**FriendActivityPage:**\n- AppBar: title 'Friend Activity' or friend's name\n- Body: FriendStatsCard at top, then activity feed (can be placeholder for now)\n- Takes friendId as route parameter\n\n**AddFriendPage:**\n- AppBar: title 'Add Friend'\n- Search TextField at top\n- Body: ListView of UserSearchResultTile from FriendSearchLoaded.users\n- Uses FriendSearchBloc for search state\n- Empty/Initial state message\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT forget to import BLoCs and provide them via BlocProvider\n- DO NOT forget to dispatch initial load events in router\n- DO NOT use placeholder text like 'Coming Soon' or 'TODO'\n- DO NOT forget to register ALL use cases in DI container\n- DO NOT forget to import new files in existing files you modify\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All pages must be fully functional with real BLoC integration\n- FriendsListPage must show accepted friends and navigate to activity on tap\n- FriendRequestsPage must allow accepting/rejecting with loading states\n- AddFriendPage must search users and allow sending friend requests\n- Router must properly provide BLoCs to all pages\n- DI must register all datasources, repositories, use cases, and blocs\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze`\n- All files must have no analyzer errors\n- Routes must be accessible via context.go(RouteNames.friends)",
-        "epicId": "epic-sharing-ui",
-        "priority": 4,
-        "estimatedComplexity": "complex",
-        "dependencies": [
-          "epic-sharing-ui-story-2",
-          "epic-sharing-ui-story-3",
-          "epic-sharing-ui-story-4"
-        ],
-        "status": "pending",
-        "filesToRead": [
-          "lib/features/dashboard/presentation/pages/dashboard_page.dart",
-          "lib/core/router/app_router.dart",
-          "lib/core/router/route_names.dart",
-          "lib/core/di/injection_container.dart",
-          "lib/core/network/api_endpoints.dart"
+          "lib/features/sharing/domain/usecases/get_relationships_usecase.dart",
+          "lib/features/sharing/domain/repositories/sharing_repository.dart",
+          "lib/core/di/injection_container.dart"
         ],
         "filesToModify": [
-          "lib/core/router/route_names.dart",
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
+          "lib/features/sharing/data/datasources/sharing_remote_datasource.dart",
           "lib/core/router/app_router.dart",
-          "lib/core/network/api_endpoints.dart",
           "lib/core/di/injection_container.dart"
         ],
         "filesToCreate": [
-          "lib/features/sharing/presentation/pages/friends_list_page.dart",
-          "lib/features/sharing/presentation/pages/friend_requests_page.dart",
-          "lib/features/sharing/presentation/pages/friend_activity_page.dart",
-          "lib/features/sharing/presentation/pages/add_friend_page.dart"
+          "lib/features/sharing/domain/usecases/get_pending_requests_count_usecase.dart"
         ],
         "acceptanceCriteria": [
-          "Given all pages are created, When running flutter analyze, Then there should be no analyzer errors",
-          "Given RouteNames is updated, When checking the file, Then it must contain friends, friendRequests, friendActivity, addFriend routes",
-          "Given AppRouter is updated, When checking the file, Then all 4 sharing routes must be registered with BlocProvider wrapping",
-          "Given ApiEndpoints is updated, When checking the file, Then all sharing API endpoints must be defined",
-          "Given injection_container is updated, When checking the file, Then SharingRemoteDatasource, SharingRepository, all 7 use cases, SharingBloc, and FriendSearchBloc must be registered",
-          "Given FriendsListPage is created, When the page loads, Then it must display friends list with FriendCard widgets and support pull-to-refresh",
-          "Given AddFriendPage is created, When user searches, Then it must use FriendSearchBloc and display UserSearchResultTile widgets"
+          "Given GetPendingRequestsCountUseCase, When called, Then returns count of pending requests",
+          "Given SharingLoaded state, When accessed, Then pendingCount getter returns correct count",
+          "Given injection_container.dart, When app starts, Then GetPendingRequestsCountUseCase is registered",
+          "Given app_router.dart, When navigating to friends routes, Then SharingBloc is properly provided"
         ]
       }
     ]
