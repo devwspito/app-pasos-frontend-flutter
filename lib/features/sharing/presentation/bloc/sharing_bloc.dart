@@ -181,8 +181,14 @@ class SharingBloc extends Bloc<SharingEvent, SharingState> {
 
   /// Handles [SharingRealtimeUpdateReceived] events.
   ///
-  /// Processes real-time step updates from WebSocket, emits a success
-  /// message to notify the user, and then refreshes the sharing data.
+  /// Processes real-time step updates from WebSocket. If the current state
+  /// is [SharingLoaded], updates the realtime data in place. Otherwise,
+  /// emits a success message and refreshes the sharing data.
+  ///
+  /// When a realtime update is received:
+  /// - The user is added to [onlineFriendIds]
+  /// - The update is stored in [realtimeUpdates] map
+  /// - A success message is emitted to notify the user
   Future<void> _onRealtimeUpdateReceived(
     SharingRealtimeUpdateReceived event,
     Emitter<SharingState> emit,
@@ -191,8 +197,35 @@ class SharingBloc extends Bloc<SharingEvent, SharingState> {
     final userName = update.userName ?? 'A friend';
     final message = '$userName just walked ${update.stepCount} steps!';
 
+    // Emit success message first
     emit(SharingActionSuccess(message: message));
-    await _fetchAndEmitSharingData(emit);
+
+    // If current state is SharingLoaded, update realtime data in place
+    final currentState = state;
+    if (currentState is SharingLoaded) {
+      // Create updated realtime data
+      final updatedRealtimeUpdates = Map<String, RealtimeStepUpdate>.from(
+        currentState.realtimeUpdates,
+      )..[update.userId] = update;
+
+      final updatedOnlineFriendIds = Set<String>.from(
+        currentState.onlineFriendIds,
+      )..add(update.userId);
+
+      emit(
+        SharingLoaded(
+          relationships: currentState.relationships,
+          pendingRequests: currentState.pendingRequests,
+          sentRequests: currentState.sentRequests,
+          friends: currentState.friends,
+          realtimeUpdates: updatedRealtimeUpdates,
+          onlineFriendIds: updatedOnlineFriendIds,
+        ),
+      );
+    } else {
+      // Fall back to fetching fresh data
+      await _fetchAndEmitSharingData(emit);
+    }
   }
 
   /// Fetches all sharing relationships and emits the categorized result.
@@ -201,9 +234,22 @@ class SharingBloc extends Bloc<SharingEvent, SharingState> {
   /// - pendingRequests: received requests awaiting response
   /// - sentRequests: sent requests awaiting response
   /// - friends: accepted relationships
+  ///
+  /// Preserves realtime data ([realtimeUpdates] and [onlineFriendIds]) from
+  /// the previous [SharingLoaded] state if available, ensuring realtime
+  /// information is not lost during refresh operations.
   Future<void> _fetchAndEmitSharingData(
     Emitter<SharingState> emit,
   ) async {
+    // Preserve realtime data from previous state before fetching
+    final previousState = state;
+    final previousRealtimeUpdates = previousState is SharingLoaded
+        ? previousState.realtimeUpdates
+        : const <String, RealtimeStepUpdate>{};
+    final previousOnlineFriendIds = previousState is SharingLoaded
+        ? previousState.onlineFriendIds
+        : const <String>{};
+
     try {
       // Get current user to filter relationships
       final currentUser = await _getCurrentUserUseCase();
@@ -225,12 +271,16 @@ class SharingBloc extends Bloc<SharingEvent, SharingState> {
       final sentRequests = _filterSentRequests(relationships, currentUserId);
       final friends = _filterFriends(relationships);
 
-      emit(SharingLoaded(
-        relationships: relationships,
-        pendingRequests: pendingRequests,
-        sentRequests: sentRequests,
-        friends: friends,
-      ),);
+      emit(
+        SharingLoaded(
+          relationships: relationships,
+          pendingRequests: pendingRequests,
+          sentRequests: sentRequests,
+          friends: friends,
+          realtimeUpdates: previousRealtimeUpdates,
+          onlineFriendIds: previousOnlineFriendIds,
+        ),
+      );
     } on AppException catch (e) {
       emit(SharingError(message: _getErrorMessage(e)));
     } catch (e) {
