@@ -7,6 +7,7 @@ library;
 
 import 'package:app_pasos_frontend/core/errors/app_exceptions.dart';
 import 'package:app_pasos_frontend/features/auth/domain/usecases/get_current_user_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/domain/entities/realtime_step_update.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/sharing_relationship.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/usecases/accept_request_usecase.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/usecases/get_relationships_usecase.dart';
@@ -65,6 +66,7 @@ class SharingBloc extends Bloc<SharingEvent, SharingState> {
     on<SharingAcceptRequestRequested>(_onAcceptRequestRequested);
     on<SharingRejectRequestRequested>(_onRejectRequestRequested);
     on<SharingRevokeRequested>(_onRevokeRequested);
+    on<SharingRealtimeUpdateReceived>(_onRealtimeUpdateReceived);
   }
 
   final GetRelationshipsUseCase _getRelationshipsUseCase;
@@ -175,6 +177,22 @@ class SharingBloc extends Bloc<SharingEvent, SharingState> {
     } catch (e) {
       emit(SharingError(message: 'An unexpected error occurred: $e'));
     }
+  }
+
+  /// Handles [SharingRealtimeUpdateReceived] events.
+  ///
+  /// Processes real-time step updates from WebSocket, emits a success
+  /// message to notify the user, and then refreshes the sharing data.
+  Future<void> _onRealtimeUpdateReceived(
+    SharingRealtimeUpdateReceived event,
+    Emitter<SharingState> emit,
+  ) async {
+    final update = event.update;
+    final userName = update.userName ?? 'A friend';
+    final message = '$userName just walked ${update.stepCount} steps!';
+
+    emit(SharingActionSuccess(message: message));
+    await _fetchAndEmitSharingData(emit);
   }
 
   /// Fetches all sharing relationships and emits the categorized result.
