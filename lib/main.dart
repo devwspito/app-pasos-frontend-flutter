@@ -26,6 +26,8 @@ library;
 import 'package:app_pasos_frontend/app.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
+import 'package:app_pasos_frontend/core/services/notification_handler.dart';
+import 'package:app_pasos_frontend/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -79,6 +81,16 @@ Future<void> main() async {
   await sl<BackgroundSyncService>().startPeriodicSync(
     interval: const Duration(hours: 1),
   );
+
+  // Initialize notification service.
+  // This sets up Firebase Messaging and registers for notifications.
+  await sl<NotificationService>().initialize();
+
+  // Request notification permission.
+  await sl<NotificationService>().requestPermission();
+
+  // Initialize notification handler for deep linking.
+  await sl<NotificationHandler>().initialize();
 
   // Start the application.
   runApp(const App());

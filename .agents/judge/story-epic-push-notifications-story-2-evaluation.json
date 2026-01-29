@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "755214819d2c213608fe0167",
+    "timestamp": "2026-01-29T19:12:15.616Z",
+    "phase": "judge",
+    "storyId": "epic-push-notifications-story-2",
+    "savedAt": "2026-01-29T19:12:15.616Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-push-notifications-story-2",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}

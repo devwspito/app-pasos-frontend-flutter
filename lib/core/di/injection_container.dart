@@ -9,6 +9,9 @@ import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service_impl.dart';
+import 'package:app_pasos_frontend/core/services/notification_handler.dart';
+import 'package:app_pasos_frontend/core/services/notification_service.dart';
+import 'package:app_pasos_frontend/core/services/notification_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/websocket_event_handler.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service_impl.dart';
@@ -146,6 +149,18 @@ Future<void> initializeDependencies() async {
   // WebSocket Event Handler - Routes WebSocket messages to appropriate BLoCs
   sl.registerLazySingleton<WebSocketEventHandler>(
     () => WebSocketEventHandler(webSocketService: sl<WebSocketService>()),
+  );
+
+  // ============================================================
+  // Notification Services
+  // ============================================================
+
+  // Notification Service - For push notifications via FCM
+  sl.registerLazySingleton<NotificationService>(NotificationServiceImpl.new);
+
+  // Notification Handler - Routes notifications to appropriate screens
+  sl.registerLazySingleton<NotificationHandler>(
+    () => NotificationHandler(notificationService: sl<NotificationService>()),
   );
 
   // ============================================================

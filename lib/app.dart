@@ -8,6 +8,7 @@ library;
 import 'package:app_pasos_frontend/core/constants/app_constants.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/app_router.dart';
+import 'package:app_pasos_frontend/core/services/notification_service.dart';
 import 'package:app_pasos_frontend/core/services/websocket_event_handler.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service.dart';
 import 'package:app_pasos_frontend/core/theme/app_theme.dart';
@@ -66,6 +67,16 @@ class _AppState extends State<App> {
       // Log error but don't crash the app
       debugPrint('WebSocket connection failed: $error');
     });
+
+    // Log FCM token for testing (remove in production)
+    _logFcmToken();
+  }
+
+  /// Logs the FCM token for debugging purposes.
+  void _logFcmToken() async {
+    final notificationService = sl<NotificationService>();
+    final token = await notificationService.getToken();
+    debugPrint('FCM Token: $token');
   }
 
   @override
