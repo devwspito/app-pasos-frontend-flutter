@@ -47,7 +47,9 @@ import 'package:app_pasos_frontend/features/goals/domain/usecases/get_user_goals
 import 'package:app_pasos_frontend/features/goals/domain/usecases/invite_user_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/join_goal_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/leave_goal_usecase.dart';
+import 'package:app_pasos_frontend/features/goals/domain/usecases/update_goal_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/create_goal_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/edit_goal_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/data/datasources/sharing_remote_datasource.dart';
@@ -344,6 +346,9 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<LeaveGoalUseCase>(
     () => LeaveGoalUseCase(repository: sl<GoalsRepository>()),
   );
+  sl.registerLazySingleton<UpdateGoalUseCase>(
+    () => UpdateGoalUseCase(repository: sl<GoalsRepository>()),
+  );
 
   // Blocs (Factory - new instance per use)
   sl.registerFactory<GoalsListBloc>(
@@ -362,6 +367,12 @@ Future<void> initializeDependencies() async {
   sl.registerFactory<CreateGoalBloc>(
     () => CreateGoalBloc(
       createGoalUseCase: sl<CreateGoalUseCase>(),
+    ),
+  );
+  sl.registerFactory<EditGoalBloc>(
+    () => EditGoalBloc(
+      updateGoalUseCase: sl<UpdateGoalUseCase>(),
+      getGoalDetailsUseCase: sl<GetGoalDetailsUseCase>(),
     ),
   );
 }
