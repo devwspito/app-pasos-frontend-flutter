@@ -1,0 +1,159 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "755214819d2c213608fe0167",
+    "timestamp": "2026-01-29T18:27:13.458Z",
+    "phase": "techlead",
+    "epicId": "epic-sharing-ui-enhancement",
+    "savedAt": "2026-01-29T18:27:13.458Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-sharing-ui-enhancement",
+    "storiesCount": 5,
+    "architecture": "## Architecture Overview\n\nThis epic enhances the sharing feature UI following existing Material Design 3 patterns and BLoC architecture.\n\n### Widget Layer (New Components)\n\n1. **OnlineStatusIndicator** - Simple colored circle indicating online/offline status\n   - Uses AppColors.success for online, colorScheme.outlineVariant for offline\n   - Composable into FriendAvatar\n\n2. **FriendAvatar** - Enhanced avatar with optional online status\n   - Wraps existing AvatarWidget with Stack for positioning\n   - OnlineStatusIndicator positioned bottom-right\n\n3. **RealtimeStepBadge** - Animated badge for live step counts\n   - Follows existing _StepsBadge pattern\n   - Adds pulse animation for live updates\n   - Shows live indicator dot when active\n\n### Domain/Data Layer Changes\n\n**SharingRelationship Entity** - Extended with:\n- `isOnline: bool?` - Online status\n- `realtimeSteps: int?` - Current live step count\n- `lastStepUpdate: DateTime?` - When steps were last updated\n- `friendName: String?` - Display name for UI\n- `friendAvatarUrl: String?` - Avatar URL\n\n### BLoC Layer Changes\n\n**SharingLoaded State** - Extended with:\n- `realtimeUpdates: Map<String, RealtimeStepUpdate>` - Latest updates per friend\n- `onlineFriendIds: Set<String>` - Currently online friends\n- Helper methods: `isFriendOnline()`, `getRealtimeSteps()`\n\n**SharingBloc** - Updated handlers:\n- `_onRealtimeUpdateReceived` updates state with new realtime data\n- `_fetchAndEmitSharingData` preserves realtime data across refresh\n\n### Integration Points\n\n- FriendCard → uses FriendAvatar + RealtimeStepBadge\n- FriendStatsCard → uses FriendAvatar\n- FriendsListPage → passes realtime data from BLoC state to cards\n- FriendActivityPage → displays realtime stats if available\n\n### Dependency Graph\n\n```\nStory 1 (widgets: avatar, indicator) ─┐\nStory 2 (widget: badge)              ─┼─→ Story 5 (integration)\nStory 3 (entity/model) → Story 4 (bloc) ─┘\n```\n\nStories 1, 2, 3 can run in parallel. Story 4 depends on 3. Story 5 depends on all others.\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Typecheck/Analyze: `flutter analyze lib/features/sharing/`\n- Test: `flutter test test/features/sharing/` (if tests exist)\n- Build: `flutter build apk --debug` (optional full build check)",
+    "stories": [
+      {
+        "id": "epic-sharing-ui-enhancement-story-1",
+        "title": "Create FriendAvatar and OnlineStatusIndicator widgets in lib/features/sharing/presentation/widgets/",
+        "description": "🔧 **PATTERNS TO USE:**\n- Follow `AvatarWidget` pattern from `lib/shared/widgets/avatar_widget.dart` for avatar structure\n- Use `colorScheme.success` (AppColors.success) for online indicator, `colorScheme.error` for offline\n- Use `const` constructors with `super.key` pattern\n- Follow existing widget documentation style with `library;` directive and dartdoc comments\n\n📁 **FILES:**\n- Read: lib/shared/widgets/avatar_widget.dart, lib/core/theme/app_colors.dart\n- Create: lib/features/sharing/presentation/widgets/friend_avatar.dart, lib/features/sharing/presentation/widgets/online_status_indicator.dart\n\n📦 **IMPLEMENTATION DETAILS:**\n\n**OnlineStatusIndicator** (`online_status_indicator.dart`):\n- StatelessWidget with const constructor\n- Props: `isOnline` (bool, required), `size` (double, default 12)\n- Returns a `Container` with `BoxDecoration` using `BoxShape.circle`\n- Color: `isOnline ? AppColors.success : colorScheme.outlineVariant`\n- Add white border (2px) around indicator using `Border.all`\n\n**FriendAvatar** (`friend_avatar.dart`):\n- StatelessWidget with const constructor\n- Props: `imageUrl` (String?), `name` (String?), `size` (double, default 48), `isOnline` (bool?), `onTap` (VoidCallback?)\n- Use `Stack` to position `AvatarWidget` with `OnlineStatusIndicator` in bottom-right\n- Import and use existing `AvatarWidget` for the actual avatar display\n- Position indicator using `Positioned(right: 0, bottom: 0)`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create custom avatar logic - use existing `AvatarWidget`\n- DO NOT hardcode colors - use `Theme.of(context).colorScheme` or `AppColors`\n- DO NOT use `late` variables in StatelessWidget\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/presentation/widgets/`\n- Check: Both widgets compile without errors\n- Check: Widgets follow existing dartdoc comment style",
+        "epicId": "epic-sharing-ui-enhancement",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/avatar_widget.dart",
+          "lib/core/theme/app_colors.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/presentation/widgets/friend_avatar.dart",
+          "lib/features/sharing/presentation/widgets/online_status_indicator.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given OnlineStatusIndicator with isOnline=true, When rendered, Then displays green circle using AppColors.success",
+          "Given OnlineStatusIndicator with isOnline=false, When rendered, Then displays gray circle using colorScheme.outlineVariant",
+          "Given FriendAvatar with imageUrl and isOnline=true, When rendered, Then shows avatar with green online indicator in bottom-right",
+          "Given FriendAvatar with isOnline=null, When rendered, Then shows avatar without any status indicator",
+          "flutter analyze reports no errors for both new widget files"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-enhancement-story-2",
+        "title": "Create RealtimeStepBadge widget in lib/features/sharing/presentation/widgets/realtime_step_badge.dart",
+        "description": "🔧 **PATTERNS TO USE:**\n- Follow `_StepsBadge` pattern from `lib/features/sharing/presentation/widgets/friend_card.dart` (lines 122-168)\n- Use `colorScheme.primaryContainer` for background, `colorScheme.onPrimaryContainer` for text\n- Add pulsing animation for live updates using `AnimationController`\n- Use same step formatting logic: K for thousands, M for millions\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/widgets/friend_card.dart (see _StepsBadge class)\n- Create: lib/features/sharing/presentation/widgets/realtime_step_badge.dart\n\n📦 **IMPLEMENTATION DETAILS:**\n\n**RealtimeStepBadge** (`realtime_step_badge.dart`):\n- StatefulWidget (needs animation controller)\n- Props: `steps` (int, required), `isLive` (bool, default false), `lastUpdated` (DateTime?)\n- When `isLive=true`: Add subtle pulse animation (scale 1.0 to 1.05) using `AnimatedBuilder` with `Transform.scale`\n- Show walking icon `Icons.directions_walk` + formatted step count\n- When `isLive=true`: Add small live indicator dot (4px green circle) to the left of the icon\n- Use `_formatSteps()` helper: steps >= 1000000 → 'XM', steps >= 1000 → 'XK', else steps.toString()\n- Container with `BorderRadius.circular(16)` and padding `EdgeInsets.symmetric(horizontal: 10, vertical: 6)`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `Timer` for animation - use `AnimationController` with `vsync: this`\n- DO NOT forget to dispose AnimationController in `dispose()`\n- DO NOT create infinite animations without `isLive` check to stop when not live\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/presentation/widgets/realtime_step_badge.dart`\n- Check: Widget compiles without errors\n- Check: Animation controller properly disposed",
+        "epicId": "epic-sharing-ui-enhancement",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/widgets/friend_card.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/sharing/presentation/widgets/realtime_step_badge.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given RealtimeStepBadge with steps=5000, When rendered, Then displays '5K' with walking icon",
+          "Given RealtimeStepBadge with steps=1500000, When rendered, Then displays '1.5M'",
+          "Given RealtimeStepBadge with isLive=true, When rendered, Then shows pulsing animation and green live indicator dot",
+          "Given RealtimeStepBadge with isLive=false, When rendered, Then no animation plays",
+          "flutter analyze reports no errors for the new widget file"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-enhancement-story-3",
+        "title": "Extend SharingRelationship entity and model with online status and realtime step fields",
+        "description": "🔧 **PATTERNS TO USE:**\n- Follow existing `SharingRelationship` entity pattern from `lib/features/sharing/domain/entities/sharing_relationship.dart`\n- Follow `SharingRelationshipModel.fromJson()` pattern for JSON parsing\n- Use `Equatable` props list pattern - add new fields to props\n- Use nullable types for optional fields (`bool?`, `int?`, `DateTime?`)\n\n📁 **FILES:**\n- Read: lib/features/sharing/domain/entities/sharing_relationship.dart, lib/features/sharing/data/models/sharing_relationship_model.dart\n- Modify: lib/features/sharing/domain/entities/sharing_relationship.dart, lib/features/sharing/data/models/sharing_relationship_model.dart\n\n📦 **IMPLEMENTATION DETAILS:**\n\n**SharingRelationship entity** - Add these fields:\n```dart\n/// Whether the friend is currently online.\nfinal bool? isOnline;\n\n/// The friend's current step count (realtime).\nfinal int? realtimeSteps;\n\n/// When the realtime step data was last updated.\nfinal DateTime? lastStepUpdate;\n\n/// The friend's display name (for UI).\nfinal String? friendName;\n\n/// The friend's avatar URL.\nfinal String? friendAvatarUrl;\n```\n- Add to constructor with default null values\n- Add to `props` list for Equatable\n- Add helper getters: `bool get hasRealtimeData => realtimeSteps != null`\n- Update `empty()` factory to include new fields as null\n- Update `toString()` to include new fields\n\n**SharingRelationshipModel** - Update:\n- Add fields to constructor with `super.isOnline`, `super.realtimeSteps`, etc.\n- Update `fromJson()` to parse: `isOnline: json['isOnline'] as bool?`, `realtimeSteps: json['realtimeSteps'] as int?`, etc.\n- Update `toJson()` to include new fields with null checks\n- Update `copyWith()` to include new fields\n- Update `fromEntity()` factory to copy new fields\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT make new fields required - they must be optional (nullable)\n- DO NOT break existing code - all additions must be backward compatible\n- DO NOT remove any existing fields or methods\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/domain/entities/ lib/features/sharing/data/models/`\n- Check: Existing tests still pass (if any)\n- Check: No breaking changes to existing API",
+        "epicId": "epic-sharing-ui-enhancement",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/domain/entities/sharing_relationship.dart",
+          "lib/features/sharing/data/models/sharing_relationship_model.dart"
+        ],
+        "filesToModify": [
+          "lib/features/sharing/domain/entities/sharing_relationship.dart",
+          "lib/features/sharing/data/models/sharing_relationship_model.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given SharingRelationship, When created with isOnline=true, Then isOnline getter returns true",
+          "Given SharingRelationship, When created without isOnline, Then isOnline is null (backward compatible)",
+          "Given SharingRelationshipModel.fromJson with realtimeSteps=5000, When parsed, Then realtimeSteps equals 5000",
+          "Given existing code using SharingRelationship, When compiled, Then no breaking changes (all existing props work)",
+          "Given SharingRelationship.empty(), When created, Then all new fields are null",
+          "flutter analyze reports no errors"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-enhancement-story-4",
+        "title": "Enhance SharingState and SharingBloc to include realtime friend data in SharingLoaded state",
+        "description": "🔧 **PATTERNS TO USE:**\n- Follow existing `SharingLoaded` state pattern from `lib/features/sharing/presentation/bloc/sharing_state.dart`\n- Follow `_onRealtimeUpdateReceived` handler pattern in `lib/features/sharing/presentation/bloc/sharing_bloc.dart`\n- Use existing `RealtimeStepUpdate` entity for update data\n- Maintain sealed class pattern for states\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/bloc/sharing_state.dart, lib/features/sharing/presentation/bloc/sharing_bloc.dart, lib/features/sharing/domain/entities/realtime_step_update.dart\n- Modify: lib/features/sharing/presentation/bloc/sharing_state.dart, lib/features/sharing/presentation/bloc/sharing_bloc.dart\n\n📦 **IMPLEMENTATION DETAILS:**\n\n**SharingLoaded state** - Add:\n```dart\n/// Map of userId to their latest realtime step update.\nfinal Map<String, RealtimeStepUpdate> realtimeUpdates;\n\n/// List of currently online friend user IDs.\nfinal Set<String> onlineFriendIds;\n```\n- Add to constructor with default `const {}` and `const {}`\n- Add to `props` list\n- Add helper methods:\n  - `bool isFriendOnline(String friendId) => onlineFriendIds.contains(friendId)`\n  - `RealtimeStepUpdate? getRealtimeUpdate(String friendId) => realtimeUpdates[friendId]`\n  - `int? getRealtimeSteps(String friendId) => realtimeUpdates[friendId]?.stepCount`\n\n**SharingBloc** - Update `_onRealtimeUpdateReceived`:\n- Instead of just emitting success message, update the current state\n- If current state is `SharingLoaded`, create new `SharingLoaded` with updated `realtimeUpdates` map\n- Pattern: `emit(SharingLoaded(...state fields, realtimeUpdates: {...state.realtimeUpdates, update.userId: update}))`\n- Add the user to `onlineFriendIds` when update is received\n\n**SharingBloc** - Update `_fetchAndEmitSharingData`:\n- Preserve `realtimeUpdates` and `onlineFriendIds` from previous state if available\n- When emitting new `SharingLoaded`, include existing realtime data\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT lose realtime data on refresh - preserve it across state transitions\n- DO NOT modify existing state directly - always create new immutable state\n- DO NOT remove existing functionality from `_onRealtimeUpdateReceived`\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/presentation/bloc/`\n- Check: SharingLoaded state properly tracks realtime updates\n- Check: BLoC preserves realtime data across refresh",
+        "epicId": "epic-sharing-ui-enhancement",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-sharing-ui-enhancement-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart",
+          "lib/features/sharing/domain/entities/realtime_step_update.dart"
+        ],
+        "filesToModify": [
+          "lib/features/sharing/presentation/bloc/sharing_state.dart",
+          "lib/features/sharing/presentation/bloc/sharing_bloc.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given SharingLoaded with realtimeUpdates containing userId, When isFriendOnline called, Then returns true for that userId",
+          "Given SharingLoaded, When getRealtimeSteps called with valid userId, Then returns correct step count",
+          "Given SharingBloc receives SharingRealtimeUpdateReceived, When in SharingLoaded state, Then updates realtimeUpdates map",
+          "Given SharingBloc refresh requested, When realtime data exists, Then preserves realtime data in new state",
+          "flutter analyze reports no errors"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-enhancement-story-5",
+        "title": "Integrate FriendAvatar, OnlineStatusIndicator, and RealtimeStepBadge into friend_card, friend_stats_card, and pages",
+        "description": "🔧 **PATTERNS TO USE:**\n- Follow existing `FriendCard` widget pattern from `lib/features/sharing/presentation/widgets/friend_card.dart`\n- Use `BlocBuilder<SharingBloc, SharingState>` pattern from `friends_list_page.dart`\n- Access realtime data via `state.getRealtimeSteps(friendId)` and `state.isFriendOnline(friendId)`\n\n📁 **FILES:**\n- Read: lib/features/sharing/presentation/widgets/friend_avatar.dart, lib/features/sharing/presentation/widgets/realtime_step_badge.dart, lib/features/sharing/presentation/widgets/online_status_indicator.dart\n- Modify: lib/features/sharing/presentation/widgets/friend_card.dart, lib/features/sharing/presentation/widgets/friend_stats_card.dart, lib/features/sharing/presentation/pages/friends_list_page.dart, lib/features/sharing/presentation/pages/friend_activity_page.dart\n\n📦 **IMPLEMENTATION DETAILS:**\n\n**friend_card.dart** - Update:\n- Add props: `isOnline` (bool?), `realtimeSteps` (int?), `isLive` (bool, default false)\n- Replace `AvatarWidget` with `FriendAvatar` widget, pass `isOnline`\n- Replace `_StepsBadge` with `RealtimeStepBadge`, pass `steps`, `isLive`\n- Keep `_StepsBadge` private class as fallback or remove if RealtimeStepBadge covers all cases\n\n**friend_stats_card.dart** - Update:\n- Add props: `isOnline` (bool?)\n- Replace `AvatarWidget` with `FriendAvatar` widget, pass `isOnline`\n\n**friends_list_page.dart** - Update `_FriendCardItem`:\n- In `build()`, get realtime data from BLoC state:\n  ```dart\n  final state = context.read<SharingBloc>().state;\n  final isOnline = state is SharingLoaded ? state.isFriendOnline(friendId) : null;\n  final realtimeSteps = state is SharingLoaded ? state.getRealtimeSteps(friendId) : null;\n  ```\n- Pass `isOnline` and `realtimeSteps` to `FriendCard`\n- Set `isLive: realtimeSteps != null && DateTime.now().difference(lastUpdate).inMinutes < 5` (recent update)\n\n**friend_activity_page.dart** - Update:\n- Pass `isOnline` to `FriendStatsCard` (derive from state or API response)\n- If realtime steps available, show `RealtimeStepBadge` in activity summary\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT break existing FriendCard API - new props must be optional\n- DO NOT remove existing step display functionality\n- DO NOT access BLoC state outside of BlocBuilder/BlocListener when possible\n\n🧪 **VERIFICATION:**\n- Run: `flutter analyze lib/features/sharing/`\n- Check: FriendsListPage shows online indicators for online friends\n- Check: Realtime step badges show live pulse animation when data is recent",
+        "epicId": "epic-sharing-ui-enhancement",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-sharing-ui-enhancement-story-1",
+          "epic-sharing-ui-enhancement-story-2",
+          "epic-sharing-ui-enhancement-story-3",
+          "epic-sharing-ui-enhancement-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/sharing/presentation/widgets/friend_avatar.dart",
+          "lib/features/sharing/presentation/widgets/realtime_step_badge.dart",
+          "lib/features/sharing/presentation/widgets/online_status_indicator.dart"
+        ],
+        "filesToModify": [
+          "lib/features/sharing/presentation/widgets/friend_card.dart",
+          "lib/features/sharing/presentation/widgets/friend_stats_card.dart",
+          "lib/features/sharing/presentation/pages/friends_list_page.dart",
+          "lib/features/sharing/presentation/pages/friend_activity_page.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given FriendCard with isOnline=true, When rendered, Then shows FriendAvatar with green online indicator",
+          "Given FriendCard with realtimeSteps=5000 and isLive=true, When rendered, Then shows pulsing RealtimeStepBadge with '5K'",
+          "Given FriendsListPage with online friends, When rendered, Then each online friend shows green indicator",
+          "Given FriendActivityPage with friend data, When rendered, Then shows FriendStatsCard with appropriate online status",
+          "Given existing FriendCard usage without new props, When rendered, Then works correctly (backward compatible)",
+          "flutter analyze reports no errors for entire sharing feature"
+        ]
+      }
+    ]
+  }
+}
