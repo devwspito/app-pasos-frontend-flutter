@@ -20,11 +20,24 @@ import 'package:go_router/go_router.dart';
 const String _createGoalRoute = '/goals/create';
 const String _goalDetailRoute = '/goals/detail';
 
+/// Enum for goal filter options.
+enum GoalFilter {
+  /// Show all goals.
+  all,
+
+  /// Show only active goals.
+  active,
+
+  /// Show only completed goals.
+  completed,
+}
+
 /// Goals list page displaying all group goals the user participates in.
 ///
 /// Features:
 /// - Pull-to-refresh functionality
 /// - List of goal cards with progress data
+/// - Filter chips for All/Active/Completed filtering
 /// - Empty state when no goals
 /// - Navigation to create goal and goal detail pages
 ///
@@ -39,9 +52,17 @@ const String _goalDetailRoute = '/goals/detail';
 ///   ),
 /// )
 /// ```
-class GoalsListPage extends StatelessWidget {
+class GoalsListPage extends StatefulWidget {
   /// Creates a [GoalsListPage].
   const GoalsListPage({super.key});
+
+  @override
+  State<GoalsListPage> createState() => _GoalsListPageState();
+}
+
+class _GoalsListPageState extends State<GoalsListPage> {
+  /// The currently selected filter.
+  GoalFilter _selectedFilter = GoalFilter.all;
 
   @override
   Widget build(BuildContext context) {
@@ -96,46 +117,169 @@ class GoalsListPage extends StatelessWidget {
 
   /// Builds the loaded state UI with goals list.
   Widget _buildLoadedState(BuildContext context, List<GroupGoal> goals) {
-    if (goals.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: () async => _onRefresh(context),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.6,
-              child: EmptyState(
-                icon: Icons.flag_outlined,
-                title: 'No Goals Yet',
-                message:
-                    'Create a group goal to track steps with friends and family.',
-                action: FilledButton.icon(
-                  onPressed: () => context.push(_createGoalRoute),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Create Goal'),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    // Apply local filter to goals
+    final filteredGoals = _applyFilter(goals);
 
     return RefreshIndicator(
       onRefresh: () async => _onRefresh(context),
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: goals.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final goal = goals[index];
-          return GoalCard(
-            goal: goal,
-            onTap: () => _navigateToGoalDetail(context, goal),
-          );
-        },
+      child: Column(
+        children: [
+          // Filter chips
+          _buildFilterChips(context),
+
+          // Goals list or empty state
+          Expanded(
+            child: filteredGoals.isEmpty
+                ? _buildEmptyState(context, goals.isEmpty)
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: filteredGoals.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final goal = filteredGoals[index];
+                      return GoalCard(
+                        goal: goal,
+                        onTap: () => _navigateToGoalDetail(context, goal),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Builds the filter chips row.
+  Widget _buildFilterChips(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: GoalFilter.values.map((filter) {
+            final isSelected = _selectedFilter == filter;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(_getFilterLabel(filter)),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedFilter = filter;
+                  });
+                },
+                selectedColor: colorScheme.primaryContainer,
+                checkmarkColor: colorScheme.onPrimaryContainer,
+                labelStyle: TextStyle(
+                  color: isSelected
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+                avatar: isSelected
+                    ? null
+                    : Icon(
+                        _getFilterIcon(filter),
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  /// Returns the label for a filter.
+  String _getFilterLabel(GoalFilter filter) {
+    switch (filter) {
+      case GoalFilter.all:
+        return 'All';
+      case GoalFilter.active:
+        return 'Active';
+      case GoalFilter.completed:
+        return 'Completed';
+    }
+  }
+
+  /// Returns the icon for a filter.
+  IconData _getFilterIcon(GoalFilter filter) {
+    switch (filter) {
+      case GoalFilter.all:
+        return Icons.list;
+      case GoalFilter.active:
+        return Icons.play_circle_outline;
+      case GoalFilter.completed:
+        return Icons.check_circle_outline;
+    }
+  }
+
+  /// Applies the selected filter to the goals list.
+  List<GroupGoal> _applyFilter(List<GroupGoal> goals) {
+    switch (_selectedFilter) {
+      case GoalFilter.all:
+        return goals;
+      case GoalFilter.active:
+        return goals
+            .where((goal) => goal.status.toLowerCase() == 'active')
+            .toList();
+      case GoalFilter.completed:
+        return goals
+            .where((goal) => goal.status.toLowerCase() == 'completed')
+            .toList();
+    }
+  }
+
+  /// Builds the empty state widget.
+  Widget _buildEmptyState(BuildContext context, bool noGoalsExist) {
+    // If no goals exist at all, show create goal prompt
+    if (noGoalsExist) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: EmptyState(
+              icon: Icons.flag_outlined,
+              title: 'No Goals Yet',
+              message:
+                  'Create a group goal to track steps with friends and family.',
+              action: FilledButton.icon(
+                onPressed: () => context.push(_createGoalRoute),
+                icon: const Icon(Icons.add),
+                label: const Text('Create Goal'),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // If goals exist but none match the filter
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: EmptyState(
+            icon: _selectedFilter == GoalFilter.active
+                ? Icons.play_circle_outline
+                : Icons.check_circle_outline,
+            title: _selectedFilter == GoalFilter.active
+                ? 'No Active Goals'
+                : 'No Completed Goals',
+            message: _selectedFilter == GoalFilter.active
+                ? 'All your goals are completed or cancelled.'
+                : 'You haven\'t completed any goals yet. Keep walking!',
+          ),
+        ),
+      ],
     );
   }
 

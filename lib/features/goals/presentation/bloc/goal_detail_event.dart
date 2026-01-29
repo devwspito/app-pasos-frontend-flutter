@@ -118,3 +118,23 @@ final class GoalDetailRealtimeUpdateReceived extends GoalDetailEvent {
   @override
   List<Object?> get props => [update];
 }
+
+/// Event dispatched when the user requests to edit the goal.
+///
+/// This event is used to signal navigation to the edit goal page.
+/// The actual navigation is handled by the UI layer after listening
+/// to this event.
+final class GoalDetailEditRequested extends GoalDetailEvent {
+  /// Creates a [GoalDetailEditRequested] event.
+  ///
+  /// [goalId] - The ID of the goal to edit.
+  const GoalDetailEditRequested({
+    required this.goalId,
+  });
+
+  /// The ID of the goal to edit.
+  final String goalId;
+
+  @override
+  List<Object?> get props => [goalId];
+}

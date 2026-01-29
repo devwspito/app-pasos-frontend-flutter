@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 /// GoalProgressIndicator(
 ///   progress: 75.0,
 ///   size: 64,
+///   animate: true,
+///   animationDuration: Duration(milliseconds: 800),
 /// )
 /// ```
 class GoalProgressIndicator extends StatelessWidget {
@@ -33,6 +35,8 @@ class GoalProgressIndicator extends StatelessWidget {
     this.strokeWidth = 6,
     this.backgroundColor,
     this.showPercentage = true,
+    this.animate = false,
+    this.animationDuration = const Duration(milliseconds: 800),
     super.key,
   });
 
@@ -59,6 +63,17 @@ class GoalProgressIndicator extends StatelessWidget {
   /// Defaults to true.
   final bool showPercentage;
 
+  /// Whether to animate the progress arc drawing.
+  ///
+  /// When true, the progress arc animates from 0 to the target value
+  /// when first built. Defaults to false for backward compatibility.
+  final bool animate;
+
+  /// Duration of the animation when [animate] is true.
+  ///
+  /// Defaults to 800 milliseconds.
+  final Duration animationDuration;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -66,12 +81,45 @@ class GoalProgressIndicator extends StatelessWidget {
 
     // Clamp progress to 0-100 range
     final clampedProgress = progress.clamp(0.0, 100.0);
-    final progressRatio = clampedProgress / 100.0;
 
     final progressColor = _getProgressColor(colorScheme, clampedProgress);
     final trackColor = backgroundColor ??
         colorScheme.surfaceContainerHighest.withOpacity(0.5);
 
+    if (animate) {
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: clampedProgress / 100.0),
+        duration: animationDuration,
+        curve: Curves.easeOutCubic,
+        builder: (context, animatedProgress, child) {
+          return _buildIndicator(
+            theme: theme,
+            progressRatio: animatedProgress,
+            displayProgress: animatedProgress * 100,
+            progressColor: progressColor,
+            trackColor: trackColor,
+          );
+        },
+      );
+    }
+
+    return _buildIndicator(
+      theme: theme,
+      progressRatio: clampedProgress / 100.0,
+      displayProgress: clampedProgress,
+      progressColor: progressColor,
+      trackColor: trackColor,
+    );
+  }
+
+  /// Builds the indicator widget with the given parameters.
+  Widget _buildIndicator({
+    required ThemeData theme,
+    required double progressRatio,
+    required double displayProgress,
+    required Color progressColor,
+    required Color trackColor,
+  }) {
     return SizedBox(
       width: size,
       height: size,
@@ -92,7 +140,7 @@ class GoalProgressIndicator extends StatelessWidget {
           // Center content
           if (showPercentage)
             Text(
-              '${clampedProgress.toInt()}%',
+              '${displayProgress.toInt()}%',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: progressColor,
                 fontWeight: FontWeight.bold,

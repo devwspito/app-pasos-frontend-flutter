@@ -75,4 +75,7 @@ abstract final class RouteNames {
 
   /// Goal rankings route - displays member leaderboard for a goal.
   static const String goalRankings = '/goals/rankings';
+
+  /// Edit goal route - form for editing an existing group goal.
+  static const String editGoal = '/goals/edit';
 }

@@ -15,11 +15,14 @@ import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboar
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/create_goal_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/edit_goal_bloc.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/bloc/edit_goal_event.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_event.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_event.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/pages/create_goal_page.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/pages/edit_goal_page.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/pages/goal_detail_page.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/pages/goal_rankings_page.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/pages/goals_list_page.dart';
@@ -215,6 +218,18 @@ abstract final class AppRouter {
           create: (_) => sl<GoalDetailBloc>()
             ..add(GoalDetailLoadRequested(goalId: goalId)),
           child: GoalRankingsPage(goalId: goalId),
+        );
+      },
+    ),
+    GoRoute(
+      path: RouteNames.editGoal,
+      name: 'editGoal',
+      builder: (context, state) {
+        final goalId = state.uri.queryParameters['goalId'] ?? '';
+        return BlocProvider(
+          create: (_) => sl<EditGoalBloc>()
+            ..add(EditGoalLoadRequested(goalId: goalId)),
+          child: EditGoalPage(goalId: goalId),
         );
       },
     ),

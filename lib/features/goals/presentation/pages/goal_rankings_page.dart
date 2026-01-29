@@ -160,14 +160,22 @@ class GoalRankingsPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Rankings list
-          ...contributions.map(
-            (contribution) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: RankingListItem(
-                contribution: contribution,
-              ),
-            ),
+          // Rankings list with rank change indicators
+          ...contributions.asMap().entries.map(
+            (entry) {
+              final contribution = entry.value;
+              // Simulate rank change for demo (in production, this would come from API)
+              // Positive = improved (moved up), Negative = dropped (moved down)
+              final rankChange = _simulateRankChange(contribution.rank);
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _RankingListItemWithChange(
+                  contribution: contribution,
+                  rankChange: rankChange,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -274,6 +282,156 @@ class GoalRankingsPage extends StatelessWidget {
     context.read<GoalDetailBloc>().add(
           GoalDetailRefreshRequested(goalId: goalId),
         );
+  }
+
+  /// Simulates rank change for demo purposes.
+  ///
+  /// In production, this would come from the API comparing
+  /// current rank with previous rank.
+  /// Positive = improved (moved up), Negative = dropped (moved down), 0 = no change.
+  int _simulateRankChange(int currentRank) {
+    // Simulate some rank changes for visual demo
+    // In real app, this would be calculated from API data
+    if (currentRank == 1) return 0; // Leader usually stable
+    if (currentRank == 2) return 1; // Moved up 1 position
+    if (currentRank == 3) return -1; // Dropped 1 position
+    if (currentRank % 3 == 0) return 2; // Some improved by 2
+    if (currentRank % 4 == 0) return -2; // Some dropped by 2
+    return 0; // Most stable
+  }
+}
+
+/// A ranking list item with animated rank change indicator.
+class _RankingListItemWithChange extends StatelessWidget {
+  const _RankingListItemWithChange({
+    required this.contribution,
+    required this.rankChange,
+  });
+
+  final MemberContribution contribution;
+  final int rankChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        // Original ranking list item
+        Expanded(
+          child: RankingListItem(
+            contribution: contribution,
+          ),
+        ),
+
+        // Rank change indicator
+        if (rankChange != 0)
+          _AnimatedRankChangeIndicator(
+            rankChange: rankChange,
+          ),
+      ],
+    );
+  }
+}
+
+/// Animated indicator showing rank change direction and magnitude.
+class _AnimatedRankChangeIndicator extends StatefulWidget {
+  const _AnimatedRankChangeIndicator({
+    required this.rankChange,
+  });
+
+  final int rankChange;
+
+  @override
+  State<_AnimatedRankChangeIndicator> createState() =>
+      _AnimatedRankChangeIndicatorState();
+}
+
+class _AnimatedRankChangeIndicatorState
+    extends State<_AnimatedRankChangeIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _slideAnimation = Tween<double>(
+      begin: widget.rankChange > 0 ? 10 : -10,
+      end: 0,
+    ).chain(CurveTween(curve: Curves.elasticOut)).animate(_controller);
+
+    _opacityAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).chain(CurveTween(curve: Curves.easeOut)).animate(_controller);
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isImprovement = widget.rankChange > 0;
+    final color = isImprovement
+        ? const Color(0xFF4CAF50) // Green for improvement
+        : const Color(0xFFF44336); // Red for drop
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _slideAnimation.value),
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: Container(
+              margin: const EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: color.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isImprovement
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded,
+                    size: 14,
+                    color: color,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    widget.rankChange.abs().toString(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
