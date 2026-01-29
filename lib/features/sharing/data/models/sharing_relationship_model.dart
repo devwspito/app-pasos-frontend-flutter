@@ -35,6 +35,11 @@ class SharingRelationshipModel extends SharingRelationship {
     required super.status,
     required super.createdAt,
     super.acceptedAt,
+    super.isOnline,
+    super.realtimeSteps,
+    super.lastStepUpdate,
+    super.friendName,
+    super.friendAvatarUrl,
   });
 
   /// Creates a [SharingRelationshipModel] from a JSON map.
@@ -62,6 +67,13 @@ class SharingRelationshipModel extends SharingRelationship {
       acceptedAt: json['acceptedAt'] != null
           ? DateTime.parse(json['acceptedAt'] as String)
           : null,
+      isOnline: json['isOnline'] as bool?,
+      realtimeSteps: json['realtimeSteps'] as int?,
+      lastStepUpdate: json['lastStepUpdate'] != null
+          ? DateTime.parse(json['lastStepUpdate'] as String)
+          : null,
+      friendName: json['friendName'] as String?,
+      friendAvatarUrl: json['friendAvatarUrl'] as String?,
     );
   }
 
@@ -80,6 +92,11 @@ class SharingRelationshipModel extends SharingRelationship {
       status: relationship.status,
       createdAt: relationship.createdAt,
       acceptedAt: relationship.acceptedAt,
+      isOnline: relationship.isOnline,
+      realtimeSteps: relationship.realtimeSteps,
+      lastStepUpdate: relationship.lastStepUpdate,
+      friendName: relationship.friendName,
+      friendAvatarUrl: relationship.friendAvatarUrl,
     );
   }
 
@@ -90,6 +107,12 @@ class SharingRelationshipModel extends SharingRelationship {
         toUserId: '',
         status: '',
         createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        acceptedAt: null,
+        isOnline: null,
+        realtimeSteps: null,
+        lastStepUpdate: null,
+        friendName: null,
+        friendAvatarUrl: null,
       );
 
   /// Converts this model to a JSON map.
@@ -103,6 +126,12 @@ class SharingRelationshipModel extends SharingRelationship {
       'status': status,
       'createdAt': createdAt.toIso8601String(),
       if (acceptedAt != null) 'acceptedAt': acceptedAt!.toIso8601String(),
+      if (isOnline != null) 'isOnline': isOnline,
+      if (realtimeSteps != null) 'realtimeSteps': realtimeSteps,
+      if (lastStepUpdate != null)
+        'lastStepUpdate': lastStepUpdate!.toIso8601String(),
+      if (friendName != null) 'friendName': friendName,
+      if (friendAvatarUrl != null) 'friendAvatarUrl': friendAvatarUrl,
     };
   }
 
@@ -116,6 +145,11 @@ class SharingRelationshipModel extends SharingRelationship {
     String? status,
     DateTime? createdAt,
     DateTime? acceptedAt,
+    bool? isOnline,
+    int? realtimeSteps,
+    DateTime? lastStepUpdate,
+    String? friendName,
+    String? friendAvatarUrl,
   }) {
     return SharingRelationshipModel(
       id: id ?? this.id,
@@ -124,6 +158,11 @@ class SharingRelationshipModel extends SharingRelationship {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       acceptedAt: acceptedAt ?? this.acceptedAt,
+      isOnline: isOnline ?? this.isOnline,
+      realtimeSteps: realtimeSteps ?? this.realtimeSteps,
+      lastStepUpdate: lastStepUpdate ?? this.lastStepUpdate,
+      friendName: friendName ?? this.friendName,
+      friendAvatarUrl: friendAvatarUrl ?? this.friendAvatarUrl,
     );
   }
 
