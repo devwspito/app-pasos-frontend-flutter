@@ -1,0 +1,132 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "755214819d2c213608fe0167",
+    "timestamp": "2026-01-29T17:30:04.459Z",
+    "phase": "techlead",
+    "epicId": "epic-background-sync",
+    "savedAt": "2026-01-29T17:30:04.459Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-background-sync",
+    "storiesCount": 4,
+    "architecture": "## Background Step Sync Architecture\n\n### Overview\nImplements background synchronization of native health steps (from HealthKit/Health Connect) to the backend API using Flutter's workmanager package.\n\n### Architecture Pattern\nFollows existing **Service Abstraction Pattern** (same as HealthService):\n- `BackgroundSyncService` (abstract interface) → `BackgroundSyncServiceImpl` (concrete implementation)\n- Registered in DI container as lazy singleton\n- Uses existing `SyncNativeStepsUseCase` for actual sync logic\n\n### Component Flow\n```\n[App Startup]\n    ↓\nmain.dart → initializeDependencies()\n    ↓\nBackgroundSyncService.initialize() → Workmanager.initialize(callbackDispatcher)\n    ↓\nBackgroundSyncService.startPeriodicSync(1hr) → Workmanager.registerPeriodicTask()\n\n[Background Execution - System triggers every ~1hr]\n    ↓\ncallbackDispatcher() [top-level function]\n    ↓\nWorkmanager.executeTask()\n    ↓\ninitializeDependencies() [re-init in isolate]\n    ↓\nsl<SyncNativeStepsUseCase>().call()\n    ↓\nHealthService.getTodaySteps() → StepsRepository.recordSteps()\n```\n\n### Key Design Decisions\n1. **workmanager package**: Cross-platform background task scheduling (Android WorkManager + iOS BGTaskScheduler)\n2. **Re-initialize DI in background**: Background isolate has fresh memory, must re-init services\n3. **Reuse existing SyncNativeStepsUseCase**: No duplication of sync logic\n4. **Persist sync state in SecureStorage**: Survive app restarts\n\n### Native Permissions Required\n- **Android**: RECEIVE_BOOT_COMPLETED, WAKE_LOCK (for reliable background execution)\n- **iOS**: UIBackgroundModes: fetch, processing (for BGTaskScheduler)\n\n### SOLID Compliance\n- **SRP**: BackgroundSyncService only manages scheduling, SyncNativeStepsUseCase handles sync logic\n- **OCP**: Can extend sync behavior without modifying existing services\n- **DIP**: Depends on abstract BackgroundSyncService interface, not implementation",
+    "stories": [
+      {
+        "id": "epic-background-sync-story-1",
+        "title": "Create abstract BackgroundSyncService interface in lib/core/services/background_sync_service.dart",
+        "description": "Create the abstract interface for background sync service following the existing HealthService pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/services/health_service.dart (pattern reference)\n- Create: lib/core/services/background_sync_service.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `abstract interface class BackgroundSyncService` (same as HealthService pattern)\n- Follow the documentation style from health_service.dart with library directive and detailed dartdoc\n- Use Equatable for any value classes if needed\n\n📦 **REQUIRED INTERFACE METHODS:**\n- `Future<void> initialize()` - Initialize the background sync system\n- `Future<void> startPeriodicSync({required Duration interval})` - Start periodic background sync\n- `Future<void> stopPeriodicSync()` - Stop background sync\n- `Future<bool> isSyncEnabled()` - Check if sync is currently enabled\n- `Future<DateTime?> getLastSyncTime()` - Get timestamp of last successful sync\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- `abstract class` instead of `abstract interface class` ← WRONG (not following codebase pattern)\n- Missing dartdoc documentation ← WRONG\n- Importing implementation details in the interface ← WRONG\n\n🧪 **VERIFICATION:**\n```bash\ndart analyze lib/core/services/background_sync_service.dart\nflutter pub get && dart format --set-exit-if-changed lib/core/services/background_sync_service.dart\n```",
+        "epicId": "epic-background-sync",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/health_service.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/services/background_sync_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the codebase, When I open lib/core/services/background_sync_service.dart, Then it contains an abstract interface class BackgroundSyncService",
+          "Given the interface, When I check the methods, Then it has initialize(), startPeriodicSync(), stopPeriodicSync(), isSyncEnabled(), and getLastSyncTime()",
+          "Given the file, When I run dart analyze, Then there are no errors or warnings",
+          "Given the file, When I compare to health_service.dart, Then it follows the same documentation and structure pattern"
+        ]
+      },
+      {
+        "id": "epic-background-sync-story-2",
+        "title": "Add workmanager dependency to pubspec.yaml and create StepSyncWorker callback in lib/core/workers/step_sync_worker.dart",
+        "description": "Add the workmanager package for background task scheduling and create the worker callback function that will be invoked by the system.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify/create files listed below\n\n📁 **FILES:**\n- Read: lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart (understand sync logic)\n- Read: lib/core/di/injection_container.dart (understand how to access services)\n- Modify: pubspec.yaml (add workmanager dependency)\n- Create: lib/core/workers/step_sync_worker.dart\n\n🔧 **PATTERNS TO USE:**\n- Add `workmanager: ^0.5.2` to dependencies in pubspec.yaml\n- Create top-level function `@pragma('vm:entry-point') void callbackDispatcher()` as required by workmanager\n- Use `Workmanager().executeTask((task, inputData) async { ... })` pattern\n- Access services via `sl<SyncNativeStepsUseCase>()` from get_it\n\n📦 **REQUIRED IMPLEMENTATION:**\n- `callbackDispatcher()` - Top-level entry point for background execution\n- Inside executeTask: call SyncNativeStepsUseCase to sync steps\n- Handle the case where DI isn't initialized (re-initialize if needed)\n- Return `Future.value(true)` on success, `Future.value(false)` on failure\n- Define task name constant: `static const String stepSyncTaskName = 'com.apppasos.stepSync'`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Callback inside a class ← WRONG (workmanager requires top-level function)\n- Missing `@pragma('vm:entry-point')` annotation ← WRONG (required for release builds)\n- Not handling DI initialization ← WRONG (background isolate has fresh memory)\n\n🧪 **VERIFICATION:**\n```bash\nflutter pub get\ndart analyze lib/core/workers/step_sync_worker.dart\nflutter build apk --debug 2>&1 | head -50\n```",
+        "epicId": "epic-background-sync",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/domain/usecases/sync_native_steps_usecase.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/workers/step_sync_worker.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml, When I check dependencies, Then workmanager ^0.5.2 is listed",
+          "Given the worker file, When I check for callbackDispatcher, Then it exists as a top-level function with @pragma annotation",
+          "Given the worker, When executeTask runs, Then it calls SyncNativeStepsUseCase to sync steps",
+          "Given flutter pub get, When I run it, Then workmanager package is installed successfully",
+          "Given dart analyze, When I run it on the worker file, Then there are no errors"
+        ]
+      },
+      {
+        "id": "epic-background-sync-story-3",
+        "title": "Create BackgroundSyncServiceImpl in lib/core/services/background_sync_service_impl.dart and configure native permissions for background execution",
+        "description": "Implement the BackgroundSyncService using workmanager package and configure Android/iOS for background execution.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify/create files listed below\n\n📁 **FILES:**\n- Read: lib/core/services/background_sync_service.dart (interface to implement)\n- Read: lib/core/services/health_service_impl.dart (implementation pattern reference)\n- Read: lib/core/workers/step_sync_worker.dart (worker callback to register)\n- Create: lib/core/services/background_sync_service_impl.dart\n- Modify: android/app/src/main/AndroidManifest.xml (background permissions)\n- Modify: ios/Runner/Info.plist (background modes)\n\n🔧 **PATTERNS TO USE:**\n- `class BackgroundSyncServiceImpl implements BackgroundSyncService` (same as HealthServiceImpl)\n- Use `Workmanager().initialize(callbackDispatcher)` in initialize()\n- Use `Workmanager().registerPeriodicTask()` with unique name and frequency\n- Use `SecureStorageService` to persist last sync time and enabled state\n- Follow health_service_impl.dart documentation style\n\n📦 **REQUIRED IMPLEMENTATION:**\n- Constructor accepts optional Workmanager instance (for testing)\n- `initialize()` calls Workmanager().initialize(callbackDispatcher)\n- `startPeriodicSync(interval)` registers periodic task with given interval\n- `stopPeriodicSync()` cancels the registered task\n- `isSyncEnabled()` reads from secure storage\n- `getLastSyncTime()` reads timestamp from secure storage\n- Store sync state keys: `background_sync_enabled`, `background_sync_last_time`\n\n📱 **ANDROID MANIFEST CHANGES:**\n- Add `<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\"/>`\n- Add `<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>`\n\n🍎 **iOS INFO.PLIST CHANGES:**\n- Add UIBackgroundModes array with 'fetch' and 'processing'\n- Add BGTaskSchedulerPermittedIdentifiers with task identifier\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Hardcoding sync interval instead of accepting parameter ← WRONG\n- Not storing enabled state persistently ← WRONG (state lost on app restart)\n- Missing platform permissions ← WRONG (background tasks won't run)\n\n🧪 **VERIFICATION:**\n```bash\ndart analyze lib/core/services/background_sync_service_impl.dart\nflutter build apk --debug 2>&1 | head -50\nflutter build ios --debug --no-codesign 2>&1 | head -50\n```",
+        "epicId": "epic-background-sync",
+        "priority": 2,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-background-sync-story-1",
+          "epic-background-sync-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/services/health_service_impl.dart",
+          "lib/core/workers/step_sync_worker.dart"
+        ],
+        "filesToModify": [
+          "android/app/src/main/AndroidManifest.xml",
+          "ios/Runner/Info.plist"
+        ],
+        "filesToCreate": [
+          "lib/core/services/background_sync_service_impl.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the impl file, When I check the class, Then BackgroundSyncServiceImpl implements BackgroundSyncService",
+          "Given initialize(), When called, Then it initializes Workmanager with callbackDispatcher",
+          "Given startPeriodicSync(interval), When called, Then it registers a periodic task with workmanager",
+          "Given AndroidManifest.xml, When I check permissions, Then RECEIVE_BOOT_COMPLETED and WAKE_LOCK are present",
+          "Given Info.plist, When I check UIBackgroundModes, Then it includes 'fetch' and 'processing'",
+          "Given flutter build apk --debug, When I run it, Then it completes without errors"
+        ]
+      },
+      {
+        "id": "epic-background-sync-story-4",
+        "title": "Register BackgroundSyncService in injection_container.dart and initialize in main.dart",
+        "description": "Wire up the BackgroundSyncService in the dependency injection container and initialize background sync on app startup.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n\n📁 **FILES:**\n- Read: lib/core/services/background_sync_service.dart (interface)\n- Read: lib/core/services/background_sync_service_impl.dart (implementation)\n- Read: lib/core/workers/step_sync_worker.dart (worker callback)\n- Modify: lib/core/di/injection_container.dart (register service)\n- Modify: lib/main.dart (initialize background sync)\n\n🔧 **PATTERNS TO USE:**\n- Register as lazy singleton: `sl.registerLazySingleton<BackgroundSyncService>(BackgroundSyncServiceImpl.new)`\n- Follow existing import pattern in injection_container.dart\n- In main.dart, call `await sl<BackgroundSyncService>().initialize()` after `initializeDependencies()`\n- Optionally start sync with default interval: `sl<BackgroundSyncService>().startPeriodicSync(interval: Duration(hours: 1))`\n\n📦 **REQUIRED CHANGES:**\n\n**injection_container.dart:**\n- Add imports for BackgroundSyncService and BackgroundSyncServiceImpl\n- Register BackgroundSyncService in 'Core Services' section after HealthService\n\n**main.dart:**\n- Import BackgroundSyncService and injection_container\n- After `await initializeDependencies()`, add:\n  - `await sl<BackgroundSyncService>().initialize();`\n  - `// Start background sync with 1-hour interval`\n  - `await sl<BackgroundSyncService>().startPeriodicSync(interval: const Duration(hours: 1));`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Registering as factory instead of singleton ← WRONG (service should be singleton)\n- Not awaiting initialize() ← WRONG (workmanager must be initialized before use)\n- Initializing before initializeDependencies() ← WRONG (DI not ready)\n\n🧪 **VERIFICATION:**\n```bash\ndart analyze lib/core/di/injection_container.dart\ndart analyze lib/main.dart\nflutter run --debug -d chrome 2>&1 | head -100\n```",
+        "epicId": "epic-background-sync",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-background-sync-story-1",
+          "epic-background-sync-story-2",
+          "epic-background-sync-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/services/background_sync_service_impl.dart",
+          "lib/core/workers/step_sync_worker.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/main.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given injection_container.dart, When I check registrations, Then BackgroundSyncService is registered as lazy singleton",
+          "Given main.dart, When app starts, Then BackgroundSyncService.initialize() is called after initializeDependencies()",
+          "Given main.dart, When app starts, Then startPeriodicSync is called with 1-hour interval",
+          "Given dart analyze, When run on both files, Then there are no errors",
+          "Given the app, When I run flutter run, Then it starts without crashes"
+        ]
+      }
+    ]
+  }
+}
