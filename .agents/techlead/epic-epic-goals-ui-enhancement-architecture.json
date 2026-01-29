@@ -1,0 +1,151 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "755214819d2c213608fe0167",
+    "timestamp": "2026-01-29T19:26:23.869Z",
+    "phase": "techlead",
+    "epicId": "epic-goals-ui-enhancement",
+    "savedAt": "2026-01-29T19:26:23.869Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-goals-ui-enhancement",
+    "storiesCount": 4,
+    "architecture": "## Technical Architecture for Goals UI Enhancement\n\n### Overview\nThis epic enhances the Goals feature with three main capabilities:\n1. **Edit Goal Functionality**: Full CRUD support for goals\n2. **Animated Progress Charts**: Visual progress tracking using fl_chart\n3. **Realtime Progress Updates**: Live UI updates with animations\n\n### Architecture Patterns (EXISTING - MUST FOLLOW)\n\n#### BLoC Pattern (from create_goal_bloc.dart)\n```dart\n// Events: Use sealed classes with Equatable\nsealed class EditGoalEvent extends Equatable {\n  const EditGoalEvent();\n}\n\nfinal class EditGoalLoadRequested extends EditGoalEvent {\n  const EditGoalLoadRequested({required this.goalId});\n  final String goalId;\n  @override\n  List<Object?> get props => [goalId];\n}\n\n// States: Use sealed classes with Equatable\nsealed class EditGoalState extends Equatable {\n  const EditGoalState();\n}\n\nfinal class EditGoalLoaded extends EditGoalState {\n  const EditGoalLoaded({required this.goal});\n  final GroupGoal goal;\n  @override\n  List<Object?> get props => [goal];\n}\n\n// BLoC: Inject use cases, handle events with on<Event>\nclass EditGoalBloc extends Bloc<EditGoalEvent, EditGoalState> {\n  EditGoalBloc({required UpdateGoalUseCase updateGoalUseCase})\n      : _updateGoalUseCase = updateGoalUseCase,\n        super(const EditGoalInitial()) {\n    on<EditGoalLoadRequested>(_onLoadRequested);\n    on<EditGoalSubmitted>(_onSubmitted);\n  }\n}\n```\n\n#### Use Case Pattern (from create_goal_usecase.dart)\n```dart\nclass UpdateGoalUseCase {\n  UpdateGoalUseCase({required GoalsRepository repository})\n      : _repository = repository;\n  final GoalsRepository _repository;\n\n  Future<GroupGoal> call({\n    required String goalId,\n    String? name,\n    String? description,\n    int? targetSteps,\n    DateTime? startDate,\n    DateTime? endDate,\n  }) async {\n    return _repository.updateGoal(\n      goalId: goalId,\n      name: name,\n      description: description,\n      targetSteps: targetSteps,\n      startDate: startDate,\n      endDate: endDate,\n    );\n  }\n}\n```\n\n#### fl_chart Pattern (from weekly_chart.dart)\n```dart\nclass AnimatedProgressChart extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return LineChart(\n      LineChartData(\n        lineBarsData: [\n          LineChartBarData(\n            spots: _buildSpots(),\n            isCurved: true,\n            curveSmoothness: 0.3,\n            belowBarData: BarAreaData(\n              show: true,\n              gradient: LinearGradient(...),\n            ),\n          ),\n        ],\n        lineTouchData: LineTouchData(\n          touchTooltipData: LineTouchTooltipData(...),\n        ),\n      ),\n    );\n  }\n}\n```\n\n#### Router Pattern (from app_router.dart)\n```dart\nGoRoute(\n  path: RouteNames.editGoal,\n  name: 'editGoal',\n  builder: (context, state) {\n    final goalId = state.uri.queryParameters['goalId'] ?? '';\n    return BlocProvider(\n      create: (_) => sl<EditGoalBloc>()\n        ..add(EditGoalLoadRequested(goalId: goalId)),\n      child: EditGoalPage(goalId: goalId),\n    );\n  },\n),\n```\n\n### Dependency Injection (from injection_container.dart)\n```dart\n// Register use case\nsl.registerLazySingleton<UpdateGoalUseCase>(\n  () => UpdateGoalUseCase(repository: sl<GoalsRepository>()),\n);\n\n// Register bloc as factory (new instance per use)\nsl.registerFactory<EditGoalBloc>(\n  () => EditGoalBloc(\n    updateGoalUseCase: sl<UpdateGoalUseCase>(),\n    getGoalDetailsUseCase: sl<GetGoalDetailsUseCase>(),\n  ),\n);\n```\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n```bash\nflutter analyze lib/features/goals/\nflutter test\n```\n\n### File Structure\n```\nlib/features/goals/\n├── data/\n│   └── datasources/\n│       └── goals_remote_datasource.dart  # MODIFY: Add updateGoal\n├── domain/\n│   ├── repositories/\n│   │   └── goals_repository.dart          # MODIFY: Add updateGoal interface\n│   └── usecases/\n│       └── update_goal_usecase.dart       # CREATE: New use case\n└── presentation/\n    ├── bloc/\n    │   ├── edit_goal_bloc.dart            # CREATE: New BLoC\n    │   ├── edit_goal_event.dart           # CREATE: New events\n    │   ├── edit_goal_state.dart           # CREATE: New states\n    │   └── goal_detail_*.dart             # MODIFY: Add progress history\n    ├── pages/\n    │   ├── edit_goal_page.dart            # CREATE: New page\n    │   ├── goal_detail_page.dart          # MODIFY: Add chart + edit button\n    │   ├── goals_list_page.dart           # MODIFY: Add filter chips\n    │   └── goal_rankings_page.dart        # MODIFY: Add rank indicators\n    └── widgets/\n        ├── animated_progress_chart.dart   # CREATE: New chart widget\n        ├── realtime_progress_indicator.dart # CREATE: New indicator\n        ├── goal_progress_indicator.dart   # MODIFY: Add animation\n        └── goal_card.dart                 # MODIFY: Add long press\n```",
+    "stories": [
+      {
+        "id": "epic-goals-ui-enhancement-story-1",
+        "title": "Add updateGoal method to GoalsRepository and create UpdateGoalUseCase in lib/features/goals/domain/usecases/update_goal_usecase.dart",
+        "description": "Extend the GoalsRepository interface and GoalsRemoteDatasource implementation with updateGoal method, then create the UpdateGoalUseCase following the existing CreateGoalUseCase pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/goals/domain/usecases/create_goal_usecase.dart, lib/features/goals/domain/repositories/goals_repository.dart, lib/features/goals/data/datasources/goals_remote_datasource.dart\n- Modify: lib/features/goals/domain/repositories/goals_repository.dart, lib/features/goals/data/datasources/goals_remote_datasource.dart\n- Create: lib/features/goals/domain/usecases/update_goal_usecase.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `CreateGoalUseCase` from lib/features/goals/domain/usecases/create_goal_usecase.dart as template\n- Repository method signature: `Future<GroupGoal> updateGoal({required String goalId, String? name, String? description, int? targetSteps, DateTime? startDate, DateTime? endDate})`\n- Follow existing GoalsRemoteDatasourceImpl pattern for API call using `_client.put()`\n- Use `ApiEndpoints.withParams(ApiEndpoints.goalDetails, {'id': goalId})` for endpoint URL\n\n📦 **REQUIRED STRUCTURE:**\n- Repository interface method with proper docs and exceptions\n- Datasource implementation with PUT request\n- UseCase class with call() method accepting optional update parameters\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Creating a new datasource class instead of extending existing GoalsRemoteDatasourceImpl\n- Using POST instead of PUT for update operations\n- Not following the existing error handling pattern with ServerException\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- updateGoal must be async and return updated GroupGoal\n- All parameters except goalId should be optional (partial update)\n- Use ISO8601 format for date serialization (toIso8601String())\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/goals/\n- Check: No analysis errors\n- Verify: UpdateGoalUseCase follows same structure as CreateGoalUseCase",
+        "epicId": "epic-goals-ui-enhancement",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/goals/domain/usecases/create_goal_usecase.dart",
+          "lib/features/goals/domain/repositories/goals_repository.dart",
+          "lib/features/goals/data/datasources/goals_remote_datasource.dart"
+        ],
+        "filesToModify": [
+          "lib/features/goals/domain/repositories/goals_repository.dart",
+          "lib/features/goals/data/datasources/goals_remote_datasource.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/domain/usecases/update_goal_usecase.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the GoalsRepository interface, when updateGoal method is added, then it accepts goalId (required) and optional name, description, targetSteps, startDate, endDate parameters",
+          "Given the GoalsRemoteDatasource, when updateGoal is implemented, then it sends a PUT request to /goals/:id endpoint with the provided fields",
+          "Given the UpdateGoalUseCase, when call() is invoked with valid parameters, then it delegates to repository.updateGoal() and returns the updated GroupGoal"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-enhancement-story-2",
+        "title": "Create EditGoalBloc, EditGoalPage and register edit goal route in lib/core/router/app_router.dart",
+        "description": "Create the complete EditGoal feature including BLoC (with separate event/state files), the EditGoalPage UI, and route registration following the existing CreateGoal pattern.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/goals/presentation/bloc/create_goal_bloc.dart, lib/features/goals/presentation/bloc/create_goal_event.dart, lib/features/goals/presentation/bloc/create_goal_state.dart, lib/features/goals/presentation/pages/create_goal_page.dart, lib/features/goals/presentation/widgets/goal_form.dart, lib/core/router/app_router.dart, lib/core/router/route_names.dart, lib/core/di/injection_container.dart\n- Modify: lib/core/router/app_router.dart, lib/core/router/route_names.dart, lib/core/di/injection_container.dart\n- Create: lib/features/goals/presentation/bloc/edit_goal_bloc.dart, lib/features/goals/presentation/bloc/edit_goal_event.dart, lib/features/goals/presentation/bloc/edit_goal_state.dart, lib/features/goals/presentation/pages/edit_goal_page.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `CreateGoalBloc` from lib/features/goals/presentation/bloc/create_goal_bloc.dart as template for EditGoalBloc\n- Use sealed class pattern for EditGoalEvent and EditGoalState (Dart 3 feature)\n- Use `GoalForm` widget from lib/features/goals/presentation/widgets/goal_form.dart with pre-filled values\n- Register in injection_container.dart: `sl.registerFactory<EditGoalBloc>(() => EditGoalBloc(updateGoalUseCase: sl<UpdateGoalUseCase>(), getGoalDetailsUseCase: sl<GetGoalDetailsUseCase>()))`\n- Add route: `static const String editGoal = '/goals/edit';` in RouteNames\n- Router pattern: `GoRoute(path: RouteNames.editGoal, name: 'editGoal', builder: (context, state) { final goalId = state.uri.queryParameters['goalId'] ?? ''; return BlocProvider(create: (_) => sl<EditGoalBloc>()..add(EditGoalLoadRequested(goalId: goalId)), child: EditGoalPage(goalId: goalId));})`\n\n📦 **REQUIRED EVENTS:**\n- EditGoalLoadRequested(goalId) - Load existing goal data\n- EditGoalSubmitted(goalId, name, description, targetSteps, startDate, endDate)\n- EditGoalReset() - Reset form state\n\n📦 **REQUIRED STATES:**\n- EditGoalInitial\n- EditGoalLoading\n- EditGoalLoaded(goal: GroupGoal)\n- EditGoalSubmitting\n- EditGoalSuccess(goal: GroupGoal)\n- EditGoalError(message: String)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Not using sealed classes for events/states\n- Not extending Equatable for states\n- Creating form from scratch instead of reusing GoalForm with initialValues\n- Not registering bloc in injection_container.dart\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- EditGoalPage must show loading indicator while fetching existing goal data\n- Form fields must be pre-populated with existing goal values\n- Submit button should say 'Update Goal' not 'Create Goal'\n- On success, show snackbar and pop back to goal detail page\n- On error, show snackbar with error message\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/goals/presentation/bloc/edit_goal* lib/features/goals/presentation/pages/edit_goal_page.dart\n- Run: flutter analyze lib/core/router/\n- Check: No analysis errors\n- Verify: Route is registered correctly in app_router.dart",
+        "epicId": "epic-goals-ui-enhancement",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-ui-enhancement-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/goals/presentation/bloc/create_goal_bloc.dart",
+          "lib/features/goals/presentation/bloc/create_goal_event.dart",
+          "lib/features/goals/presentation/bloc/create_goal_state.dart",
+          "lib/features/goals/presentation/pages/create_goal_page.dart",
+          "lib/features/goals/presentation/widgets/goal_form.dart",
+          "lib/core/router/app_router.dart",
+          "lib/core/router/route_names.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart",
+          "lib/core/router/route_names.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/bloc/edit_goal_bloc.dart",
+          "lib/features/goals/presentation/bloc/edit_goal_event.dart",
+          "lib/features/goals/presentation/bloc/edit_goal_state.dart",
+          "lib/features/goals/presentation/pages/edit_goal_page.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the RouteNames class, when editGoal constant is added, then it equals '/goals/edit'",
+          "Given the AppRouter, when editGoal route is registered, then it accepts goalId query parameter and wraps EditGoalPage with BlocProvider<EditGoalBloc>",
+          "Given the EditGoalBloc, when EditGoalLoadRequested event is added, then it emits EditGoalLoading followed by EditGoalLoaded with the goal data",
+          "Given the EditGoalPage, when loaded with goalId, then it displays the GoalForm pre-populated with existing goal values and an 'Update Goal' submit button"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-enhancement-story-3",
+        "title": "Create AnimatedProgressChart widget using fl_chart and enhance goal_detail_page.dart with edit button",
+        "description": "Create a new AnimatedProgressChart widget using fl_chart for visualizing goal progress over time, and integrate it into the goal detail page along with an edit button.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/widgets/weekly_chart.dart, lib/features/goals/presentation/pages/goal_detail_page.dart, lib/features/goals/presentation/bloc/goal_detail_bloc.dart, lib/features/goals/presentation/bloc/goal_detail_event.dart, lib/features/goals/presentation/bloc/goal_detail_state.dart, lib/features/goals/domain/entities/goal_progress.dart\n- Modify: lib/features/goals/presentation/pages/goal_detail_page.dart, lib/features/goals/presentation/bloc/goal_detail_bloc.dart, lib/features/goals/presentation/bloc/goal_detail_event.dart, lib/features/goals/presentation/bloc/goal_detail_state.dart\n- Create: lib/features/goals/presentation/widgets/animated_progress_chart.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `WeeklyChart` from lib/features/dashboard/presentation/widgets/weekly_chart.dart as template for fl_chart usage\n- Use LineChart from fl_chart package for animated line visualization\n- Follow GoalDetailLoaded state pattern to add historicalProgress field\n- Use AnimatedContainer or TweenAnimationBuilder for smooth animations\n- Chart should show progress over time with gradient fill below line\n\n📦 **REQUIRED CHART FEATURES:**\n- LineChart showing goal progress percentage over time (0-100%)\n- Smooth curved line with `isCurved: true`\n- Gradient fill below the line using `belowBarData`\n- Touch tooltips showing date and progress percentage\n- Animated entry when widget builds\n- Empty state when no historical data\n\n📦 **REQUIRED STATE CHANGES:**\n- Add `List<GoalProgressPoint> progressHistory` to GoalDetailLoaded state (GoalProgressPoint: {date, currentSteps, progressPercentage})\n- Add `GoalDetailEditRequested` event for navigating to edit page\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Not using fl_chart package (already in pubspec.yaml)\n- Hardcoding colors instead of using Theme.of(context).colorScheme\n- Not handling empty data state\n- Using static values instead of animated transitions\n- Creating chart without touch interactivity\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Chart height: 200 pixels\n- X-axis: dates over the goal period\n- Y-axis: progress percentage (0-100%)\n- Animate line drawing on initial load\n- Add Edit IconButton in AppBar actions next to rankings button\n- Edit button navigates to RouteNames.editGoal with goalId\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/goals/presentation/widgets/animated_progress_chart.dart lib/features/goals/presentation/pages/goal_detail_page.dart\n- Check: No analysis errors\n- Verify: Chart renders with sample data",
+        "epicId": "epic-goals-ui-enhancement",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/presentation/widgets/weekly_chart.dart",
+          "lib/features/goals/presentation/pages/goal_detail_page.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_state.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart"
+        ],
+        "filesToModify": [
+          "lib/features/goals/presentation/pages/goal_detail_page.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_bloc.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_event.dart",
+          "lib/features/goals/presentation/bloc/goal_detail_state.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/widgets/animated_progress_chart.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the AnimatedProgressChart widget, when provided with progress history data, then it renders a LineChart with smooth curved line and gradient fill",
+          "Given the AnimatedProgressChart widget, when a user touches the chart, then it shows a tooltip with date and progress percentage",
+          "Given the GoalDetailLoaded state, when it includes progressHistory field, then it's a List of progress points with date, currentSteps, and progressPercentage",
+          "Given the goal_detail_page, when loaded state is displayed, then it shows the AnimatedProgressChart below the hero section",
+          "Given the goal_detail_page AppBar, when in loaded state, then it displays an Edit IconButton that navigates to edit goal page"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-enhancement-story-4",
+        "title": "Create RealtimeProgressIndicator widget and enhance GoalCard and goals list pages with live updates",
+        "description": "Create a new RealtimeProgressIndicator widget that shows live progress updates, enhance GoalProgressIndicator with animation support, and integrate the enhanced UI across goals list and rankings pages.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/goals/presentation/widgets/goal_progress_indicator.dart, lib/features/goals/presentation/widgets/goal_card.dart, lib/features/goals/presentation/pages/goals_list_page.dart, lib/features/goals/presentation/pages/goal_rankings_page.dart, lib/features/goals/domain/entities/realtime_goal_update.dart\n- Modify: lib/features/goals/presentation/widgets/goal_progress_indicator.dart, lib/features/goals/presentation/widgets/goal_card.dart, lib/features/goals/presentation/pages/goals_list_page.dart, lib/features/goals/presentation/pages/goal_rankings_page.dart\n- Create: lib/features/goals/presentation/widgets/realtime_progress_indicator.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `GoalProgressIndicator` from lib/features/goals/presentation/widgets/goal_progress_indicator.dart as base\n- Use TweenAnimationBuilder for smooth progress transitions\n- Use Stream-based approach for realtime updates (similar to RealtimeGoalUpdate entity pattern)\n- AnimatedContainer for size/color transitions\n\n📦 **REQUIRED REALTIME FEATURES:**\n- RealtimeProgressIndicator wraps GoalProgressIndicator with animation support\n- Smooth progress value transitions using TweenAnimationBuilder\n- Pulse animation when new update received\n- Optional `showDelta` parameter to display step count change (+500 steps)\n- Color flash animation on progress update\n\n📦 **REQUIRED ENHANCEMENTS:**\n- GoalProgressIndicator: Add `animate` parameter (default: false) for animated drawing\n- GoalProgressIndicator: Add `animationDuration` parameter (default: Duration(milliseconds: 800))\n- GoalCard: Add optional `onLongPress` callback for quick actions\n- GoalCard: Show last updated timestamp if available\n- goals_list_page: Add filter chips for Active/Completed/All goals\n- goal_rankings_page: Add animated rank change indicators (up/down arrows)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Using setState for animations instead of TweenAnimationBuilder or AnimationController\n- Not disposing animation controllers properly\n- Blocking UI during progress updates\n- Not using Theme colors for consistency\n- Hardcoding animation durations\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Progress value changes animate smoothly over 500ms\n- Pulse effect on update: scale 1.0 -> 1.05 -> 1.0 over 300ms\n- Filter chips in goals_list_page: All (default), Active, Completed\n- Filtering happens locally without re-fetching\n- Rank change arrows: green up arrow for rank improvement, red down for rank drop\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/goals/presentation/widgets/ lib/features/goals/presentation/pages/goals_list_page.dart lib/features/goals/presentation/pages/goal_rankings_page.dart\n- Check: No analysis errors\n- Verify: Progress indicator animates when progress value changes",
+        "epicId": "epic-goals-ui-enhancement",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/goal_card.dart",
+          "lib/features/goals/presentation/pages/goals_list_page.dart",
+          "lib/features/goals/presentation/pages/goal_rankings_page.dart",
+          "lib/features/goals/domain/entities/realtime_goal_update.dart"
+        ],
+        "filesToModify": [
+          "lib/features/goals/presentation/widgets/goal_progress_indicator.dart",
+          "lib/features/goals/presentation/widgets/goal_card.dart",
+          "lib/features/goals/presentation/pages/goals_list_page.dart",
+          "lib/features/goals/presentation/pages/goal_rankings_page.dart"
+        ],
+        "filesToCreate": [
+          "lib/features/goals/presentation/widgets/realtime_progress_indicator.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the RealtimeProgressIndicator widget, when progress value changes, then it animates smoothly from old value to new value over 500ms using TweenAnimationBuilder",
+          "Given the GoalProgressIndicator widget, when animate parameter is true, then it draws the progress arc with animation over animationDuration",
+          "Given the GoalCard widget, when onLongPress callback is provided, then long pressing the card triggers the callback",
+          "Given the goals_list_page, when filter chips are displayed, then tapping Active shows only active goals, Completed shows only completed goals, All shows all goals",
+          "Given the goal_rankings_page, when a member's rank changes, then it displays an animated up/down arrow indicator with appropriate color"
+        ]
+      }
+    ]
+  }
+}
