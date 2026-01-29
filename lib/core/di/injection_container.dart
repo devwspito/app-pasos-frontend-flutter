@@ -7,6 +7,8 @@ library;
 
 import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
+import 'package:app_pasos_frontend/core/services/health_service.dart';
+import 'package:app_pasos_frontend/core/services/health_service_impl.dart';
 import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
 import 'package:app_pasos_frontend/core/utils/logger.dart';
 import 'package:app_pasos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -25,6 +27,7 @@ import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_stats_
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_today_steps_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/get_weekly_trend_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/domain/usecases/record_steps_usecase.dart';
+import 'package:app_pasos_frontend/features/dashboard/domain/usecases/sync_native_steps_usecase.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/data/datasources/goals_remote_datasource.dart';
 import 'package:app_pasos_frontend/features/goals/data/repositories/goals_repository_impl.dart';
@@ -112,6 +115,12 @@ Future<void> initializeDependencies() async {
   );
 
   // ============================================================
+  // Health Service
+  // ============================================================
+
+  sl.registerLazySingleton<HealthService>(HealthServiceImpl.new);
+
+  // ============================================================
   // Auth Feature
   // ============================================================
 
@@ -183,6 +192,12 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<RecordStepsUseCase>(
     () => RecordStepsUseCase(repository: sl<StepsRepository>()),
   );
+  sl.registerLazySingleton<SyncNativeStepsUseCase>(
+    () => SyncNativeStepsUseCase(
+      healthService: sl<HealthService>(),
+      stepsRepository: sl<StepsRepository>(),
+    ),
+  );
 
   // Blocs (Factory - new instance per use)
   sl.registerFactory<DashboardBloc>(
@@ -192,6 +207,7 @@ Future<void> initializeDependencies() async {
       getWeeklyTrendUseCase: sl<GetWeeklyTrendUseCase>(),
       getHourlyPeaksUseCase: sl<GetHourlyPeaksUseCase>(),
       recordStepsUseCase: sl<RecordStepsUseCase>(),
+      syncNativeStepsUseCase: sl<SyncNativeStepsUseCase>(),
     ),
   );
 
