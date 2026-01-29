@@ -2,20 +2,20 @@
   "_metadata": {
     "agentType": "planning",
     "taskId": "293e943ff697e3becf05f46a",
-    "timestamp": "2026-01-29T23:24:39.002Z",
-    "phase": "Sandbox",
-    "savedAt": "2026-01-29T23:24:39.002Z",
+    "timestamp": "2026-01-29T23:31:05.529Z",
+    "phase": "Planning",
+    "savedAt": "2026-01-29T23:31:05.529Z",
     "version": "1.0"
   },
   "data": {
     "taskTitle": "fianl",
     "taskDescription": "🗺️ ROADMAP COMPLETO: App Pasos → 100% Funcional Combinando mi análisis con tu lista adicional: FASE 1: CRÍTICO (Bloquea funcionalidad) Prioridad: 🔴 INMEDIATA # Tarea Esfuerzo Descripción 1.1 PUT /goals/:id endpoint 2h Backend falta el update - frontend ya listo 1.2 Auth Guard en Router 2h Redirect automático login ↔ dashboard 1.3 Rate Limiting 3h express-rate-limit para proteger API 1.4 Eliminar FoundationReadyScreen 1h Reemplazar con SplashScreen + auth check Subtotal Fase 1: ~8 horas FASE 2: FUNCIONALIDAD CORE Prioridad: 🟠 ALTA # Tarea Esfuerzo Descripción 2.1 Profile Page 4h Ver/editar perfil usuario 2.2 Settings Page 3h Preferencias, notificaciones, tema 2.3 Backend Profile/Settings API 3h PUT /users/profile, GET/PUT /users/settings 2.4 Goal Rankings completo 2h Verificar y completar leaderboard 2.5 Push Notifications Backend 4h FCM handlers, token storage, send logic Subtotal Fase 2: ~16 horas FASE 3: ROBUSTEZ Prioridad: 🟡 MEDIA # Tarea Esfuerzo Descripción 3.1 Offline Support (Hive/SQLite) 6h Cache local, sync queue, conflict resolution 3.2 Database Migrations 3h migrate-mongo o similar 3.3 API Versioning 2h /api/v1/ prefix + versioning middleware 3.4 Swagger/OpenAPI 4h swagger-jsdoc + swagger-ui-express 3.5 Error Tracking 2h Sentry integration (frontend + backend) Subtotal Fase 3: ~17 horas FASE 4: DEVOPS & CALIDAD Prioridad: 🟡 MEDIA # Tarea Esfuerzo Descripción 4.1 Dockerfile Backend 2h Multi-stage build, optimized 4.2 Dockerfile Frontend (Web) 2h Flutter web build + nginx 4.3 docker-compose.yml 2h Backend + MongoDB + Redis (opcional) 4.4 GitHub Actions CI 3h Lint, test, build on PR 4.5 GitHub Actions CD 3h Deploy to staging/prod Subtotal Fase 4: ~12 horas FASE 5: TESTING Prioridad: 🔴 ALTA (para producción) # Tarea Esfuerzo Descripción 5.1 Unit Tests Backend 6h Services, validators, utils 5.2 Integration Tests Backend 4h API endpoints con supertest 5.3 BLoC Tests Frontend 4h Cada bloc con bloc_test 5.4 Widget Tests Frontend 4h Componentes críticos 5.5 E2E Tests 6h Flujos completos (integration_test) Subtotal Fase 5: ~24 horas FASE 6: POLISH & UX Prioridad: 🟢 BAJA # Tarea Esfuerzo Descripción 6.1 Onboarding Flow 4h 3-4 slides + health permission 6.2 Empty States mejorados 2h Ilustraciones, CTAs claros 6.3 Skeleton Loaders 2h Shimmer effects mientras carga 6.4 Dark Mode 3h Theme switching completo 6.5 Internacionalización (i18n) 4h ES/EN básico",
     "startedAt": "2026-01-29T23:21:18.106Z",
-    "currentPhase": "Sandbox",
+    "currentPhase": "Planning",
     "phasesCompleted": [],
     "epics": [],
     "totalCost": 0,
     "totalTokens": 0,
-    "lastUpdated": "2026-01-29T23:24:39.002Z"
+    "lastUpdated": "2026-01-29T23:31:05.529Z"
   }
 }
