@@ -194,6 +194,9 @@ class FriendsListPage extends StatelessWidget {
 }
 
 /// A friend card item that displays friend information from a relationship.
+///
+/// This widget integrates with the [SharingBloc] to display realtime
+/// step data and online status for friends.
 class _FriendCardItem extends StatelessWidget {
   const _FriendCardItem({
     required this.relationship,
@@ -218,10 +221,32 @@ class _FriendCardItem extends StatelessWidget {
       email: 'friend@example.com',
     );
 
+    // Get realtime data from BLoC state
+    final state = context.read<SharingBloc>().state;
+    bool? isOnline;
+    int? realtimeSteps;
+    bool isLive = false;
+
+    if (state is SharingLoaded) {
+      isOnline = state.isFriendOnline(friendId);
+      realtimeSteps = state.getRealtimeSteps(friendId);
+
+      // Determine if the data is "live" (updated within the last 5 minutes)
+      final realtimeUpdate = state.getRealtimeUpdate(friendId);
+      if (realtimeUpdate != null) {
+        final timeSinceUpdate =
+            DateTime.now().difference(realtimeUpdate.timestamp);
+        isLive = timeSinceUpdate.inMinutes < 5;
+      }
+    }
+
     return FriendCard(
       friend: friend,
       onTap: onTap,
       onRemove: onRemove,
+      isOnline: isOnline,
+      realtimeSteps: realtimeSteps,
+      isLive: isLive,
     );
   }
 }
