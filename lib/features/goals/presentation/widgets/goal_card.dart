@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 /// A card widget that displays a group goal's information.
 ///
 /// Shows the goal's name, description, progress indicator, and status.
-/// Supports tap interaction for navigation to goal details.
+/// Supports tap and long-press interactions for navigation and quick actions.
 ///
 /// Example usage:
 /// ```dart
@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 ///   goal: groupGoal,
 ///   progress: goalProgress,
 ///   onTap: () => navigateToGoalDetails(),
+///   onLongPress: () => showQuickActionsMenu(),
+///   lastUpdated: DateTime.now(),
 /// )
 /// ```
 class GoalCard extends StatelessWidget {
@@ -31,6 +33,8 @@ class GoalCard extends StatelessWidget {
     required this.goal,
     required this.onTap,
     this.progress,
+    this.onLongPress,
+    this.lastUpdated,
     super.key,
   });
 
@@ -43,13 +47,23 @@ class GoalCard extends StatelessWidget {
   /// Callback when the card is tapped.
   final VoidCallback onTap;
 
+  /// Optional callback when the card is long-pressed.
+  ///
+  /// Use this for showing quick actions like edit, share, or delete.
+  final VoidCallback? onLongPress;
+
+  /// Optional timestamp of the last update.
+  ///
+  /// When provided, displays a relative time indicator (e.g., "Updated 5m ago").
+  final DateTime? lastUpdated;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return AppCard(
-      onTap: onTap,
+    Widget card = AppCard(
+      onTap: onLongPress != null ? null : onTap,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,15 +80,25 @@ class GoalCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Goal name
-                Text(
-                  goal.name,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                // Goal name with optional timestamp
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        goal.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (lastUpdated != null) ...[
+                      const SizedBox(width: 8),
+                      _LastUpdatedBadge(timestamp: lastUpdated!),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
 
@@ -108,6 +132,71 @@ class GoalCard extends StatelessWidget {
         ],
       ),
     );
+
+    // Wrap with GestureDetector if onLongPress is provided
+    if (onLongPress != null) {
+      card = GestureDetector(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: card,
+      );
+    }
+
+    return card;
+  }
+}
+
+/// A badge widget displaying the last updated timestamp.
+class _LastUpdatedBadge extends StatelessWidget {
+  const _LastUpdatedBadge({required this.timestamp});
+
+  final DateTime timestamp;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.update,
+          size: 12,
+          color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+        ),
+        const SizedBox(width: 2),
+        Text(
+          _formatRelativeTime(timestamp),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Formats a timestamp as a relative time string.
+  String _formatRelativeTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      final mins = difference.inMinutes;
+      return '${mins}m ago';
+    } else if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      return '${hours}h ago';
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return '${days}d ago';
+    } else {
+      final weeks = (difference.inDays / 7).floor();
+      return '${weeks}w ago';
+    }
   }
 }
 
