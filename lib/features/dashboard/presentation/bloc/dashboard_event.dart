@@ -67,3 +67,38 @@ final class DashboardRecordStepsRequested extends DashboardEvent {
   @override
   List<Object?> get props => [count, source];
 }
+
+/// Event dispatched when user requests to sync steps from native health.
+///
+/// This event triggers the native health sync process, which fetches
+/// steps from HealthKit (iOS) or Health Connect (Android) and records
+/// them to the backend.
+final class DashboardSyncHealthRequested extends DashboardEvent {
+  /// Creates a [DashboardSyncHealthRequested] event.
+  const DashboardSyncHealthRequested();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// Event dispatched when health sync completes (success or failure).
+///
+/// This event is emitted after a health sync operation finishes,
+/// providing the result of the sync attempt.
+final class DashboardHealthSyncCompleted extends DashboardEvent {
+  /// Creates a [DashboardHealthSyncCompleted] event.
+  ///
+  /// [stepsSynced] - The number of steps synced, or null if sync failed.
+  const DashboardHealthSyncCompleted({required this.stepsSynced});
+
+  /// The number of steps synced from the native health platform.
+  ///
+  /// This value is `null` if the sync failed due to:
+  /// - Health platform not available on device
+  /// - User denied permission to access health data
+  /// - Sync operation failed for any other reason
+  final int? stepsSynced;
+
+  @override
+  List<Object?> get props => [stepsSynced];
+}
