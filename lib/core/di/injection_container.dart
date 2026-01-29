@@ -7,6 +7,8 @@ library;
 
 import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
+import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
+import 'package:app_pasos_frontend/core/services/background_sync_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/health_service.dart';
 import 'package:app_pasos_frontend/core/services/health_service_impl.dart';
 import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
@@ -119,6 +121,15 @@ Future<void> initializeDependencies() async {
   // ============================================================
 
   sl.registerLazySingleton<HealthService>(HealthServiceImpl.new);
+
+  // ============================================================
+  // Core Services
+  // ============================================================
+
+  // Background Sync Service - For periodic data synchronization
+  sl.registerLazySingleton<BackgroundSyncService>(
+    () => BackgroundSyncServiceImpl(storageService: sl<SecureStorageService>()),
+  );
 
   // ============================================================
   // Auth Feature

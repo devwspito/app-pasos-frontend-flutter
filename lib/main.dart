@@ -25,6 +25,7 @@ library;
 
 import 'package:app_pasos_frontend/app.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
+import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -67,6 +68,17 @@ Future<void> main() async {
   // This registers services like ApiClient, SecureStorage, etc.
   // Services are registered as lazy singletons for efficiency.
   await initializeDependencies();
+
+  // Initialize background sync service.
+  // This sets up the workmanager and registers background task handlers.
+  await sl<BackgroundSyncService>().initialize();
+
+  // Start background sync with 1-hour interval.
+  // This enables periodic synchronization of health data even when the app
+  // is in the background or terminated.
+  await sl<BackgroundSyncService>().startPeriodicSync(
+    interval: const Duration(hours: 1),
+  );
 
   // Start the application.
   runApp(const App());
