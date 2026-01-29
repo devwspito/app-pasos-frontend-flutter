@@ -117,4 +117,30 @@ abstract interface class GoalsRepository {
   /// Throws [NetworkException] on network failures.
   /// Throws [ServerException] on server errors.
   Future<void> leaveGoal({required String goalId});
+
+  /// Updates an existing group goal.
+  ///
+  /// [goalId] - The ID of the goal to update (required).
+  /// [name] - The new name of the goal (optional).
+  /// [description] - The new description of the goal (optional).
+  /// [targetSteps] - The new total step target for the group (optional).
+  /// [startDate] - The new start date for the goal period (optional).
+  /// [endDate] - The new end date for the goal period (optional).
+  ///
+  /// Only provided fields will be updated (partial update).
+  /// Returns the updated [GroupGoal].
+  /// Throws [UnauthorizedException] if user is not authenticated.
+  /// Throws [NotFoundException] if goal not found.
+  /// Throws [ForbiddenException] if user is not the goal creator.
+  /// Throws [ValidationException] if provided fields are invalid.
+  /// Throws [NetworkException] on network failures.
+  /// Throws [ServerException] on server errors.
+  Future<GroupGoal> updateGoal({
+    required String goalId,
+    String? name,
+    String? description,
+    int? targetSteps,
+    DateTime? startDate,
+    DateTime? endDate,
+  });
 }
