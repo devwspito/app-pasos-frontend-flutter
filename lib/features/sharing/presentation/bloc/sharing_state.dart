@@ -5,6 +5,7 @@
 /// exhaustive pattern matching.
 library;
 
+import 'package:app_pasos_frontend/features/sharing/domain/entities/realtime_step_update.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/sharing_relationship.dart';
 import 'package:equatable/equatable.dart';
 
@@ -86,12 +87,20 @@ final class SharingLoading extends SharingState {
 /// - [sentRequests] - Requests sent that are pending
 ///   (status == 'pending' && fromUserId == currentUserId)
 /// - [friends] - Accepted friendships (status == 'accepted')
+/// - [realtimeUpdates] - Map of userId to their latest realtime step update
+/// - [onlineFriendIds] - Set of currently online friend user IDs
 ///
 /// Example:
 /// ```dart
 /// if (state is SharingLoaded) {
 ///   final friendCount = state.friends.length;
 ///   return Text('You have $friendCount friends');
+///
+///   // Check realtime data
+///   if (state.isFriendOnline('user123')) {
+///     final steps = state.getRealtimeSteps('user123');
+///     print('Friend has $steps steps');
+///   }
 /// }
 /// ```
 final class SharingLoaded extends SharingState {
@@ -101,11 +110,15 @@ final class SharingLoaded extends SharingState {
   /// [pendingRequests] - Requests received that are pending acceptance.
   /// [sentRequests] - Requests sent that are awaiting response.
   /// [friends] - Accepted friendships.
+  /// [realtimeUpdates] - Map of userId to their latest realtime step update.
+  /// [onlineFriendIds] - Set of currently online friend user IDs.
   const SharingLoaded({
     required this.relationships,
     required this.pendingRequests,
     required this.sentRequests,
     required this.friends,
+    this.realtimeUpdates = const {},
+    this.onlineFriendIds = const {},
   });
 
   /// All sharing relationships.
@@ -128,6 +141,18 @@ final class SharingLoaded extends SharingState {
   /// These are relationships where status is 'accepted'.
   final List<SharingRelationship> friends;
 
+  /// Map of userId to their latest realtime step update.
+  ///
+  /// This map is populated when realtime updates are received via WebSocket.
+  /// Use [getRealtimeUpdate] or [getRealtimeSteps] for convenient access.
+  final Map<String, RealtimeStepUpdate> realtimeUpdates;
+
+  /// Set of currently online friend user IDs.
+  ///
+  /// A friend is considered online when a realtime update has been received
+  /// from them. Use [isFriendOnline] for convenient access.
+  final Set<String> onlineFriendIds;
+
   /// Whether the user has any pending requests to respond to.
   bool get hasPendingRequests => pendingRequests.isNotEmpty;
 
@@ -140,12 +165,59 @@ final class SharingLoaded extends SharingState {
   /// Total count of all relationships.
   int get totalCount => relationships.length;
 
+  /// Whether any friends are currently online.
+  bool get hasOnlineFriends => onlineFriendIds.isNotEmpty;
+
+  /// Count of currently online friends.
+  int get onlineFriendsCount => onlineFriendIds.length;
+
+  /// Checks if a specific friend is currently online.
+  ///
+  /// Returns `true` if [friendId] is in the [onlineFriendIds] set.
+  ///
+  /// Example:
+  /// ```dart
+  /// if (state.isFriendOnline('user123')) {
+  ///   showOnlineIndicator();
+  /// }
+  /// ```
+  bool isFriendOnline(String friendId) => onlineFriendIds.contains(friendId);
+
+  /// Gets the latest realtime step update for a specific friend.
+  ///
+  /// Returns `null` if no realtime update has been received for [friendId].
+  ///
+  /// Example:
+  /// ```dart
+  /// final update = state.getRealtimeUpdate('user123');
+  /// if (update != null) {
+  ///   print('Last activity: ${update.timestamp}');
+  /// }
+  /// ```
+  RealtimeStepUpdate? getRealtimeUpdate(String friendId) =>
+      realtimeUpdates[friendId];
+
+  /// Gets the latest realtime step count for a specific friend.
+  ///
+  /// Returns `null` if no realtime update has been received for [friendId].
+  ///
+  /// Example:
+  /// ```dart
+  /// final steps = state.getRealtimeSteps('user123');
+  /// if (steps != null) {
+  ///   print('Friend walked $steps steps');
+  /// }
+  /// ```
+  int? getRealtimeSteps(String friendId) => realtimeUpdates[friendId]?.stepCount;
+
   @override
   List<Object?> get props => [
         relationships,
         pendingRequests,
         sentRequests,
         friends,
+        realtimeUpdates,
+        onlineFriendIds,
       ];
 }
 
