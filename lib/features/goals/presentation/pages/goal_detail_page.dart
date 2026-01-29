@@ -4,6 +4,7 @@
 /// progress, members, and actions like invite, leave, and view rankings.
 library;
 
+import 'package:app_pasos_frontend/core/router/route_names.dart';
 import 'package:app_pasos_frontend/features/goals/domain/entities/goal_membership.dart';
 import 'package:app_pasos_frontend/features/goals/domain/entities/goal_progress.dart';
 import 'package:app_pasos_frontend/features/goals/domain/entities/group_goal.dart';
@@ -11,6 +12,7 @@ import 'package:app_pasos_frontend/features/goals/domain/entities/member_contrib
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_event.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_state.dart';
+import 'package:app_pasos_frontend/features/goals/presentation/widgets/animated_progress_chart.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/widgets/goal_progress_indicator.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/widgets/member_contribution_tile.dart';
 import 'package:app_pasos_frontend/shared/widgets/empty_state.dart';
@@ -19,10 +21,6 @@ import 'package:app_pasos_frontend/shared/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
-// TODO(goals): Add routes to RouteNames in router configuration
-const String _inviteMembersRoute = '/goals/invite';
-const String _goalRankingsRoute = '/goals/rankings';
 
 /// Goal detail page displaying comprehensive information about a goal.
 ///
@@ -92,10 +90,20 @@ class GoalDetailPage extends StatelessWidget {
             BlocBuilder<GoalDetailBloc, GoalDetailState>(
               builder: (context, state) {
                 if (state is GoalDetailLoaded) {
-                  return IconButton(
-                    icon: const Icon(Icons.leaderboard),
-                    onPressed: () => _navigateToRankings(context),
-                    tooltip: 'View Rankings',
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _navigateToEdit(context, state.goal.id),
+                        tooltip: 'Edit Goal',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.leaderboard),
+                        onPressed: () => _navigateToRankings(context),
+                        tooltip: 'View Rankings',
+                      ),
+                    ],
                   );
                 }
                 return const SizedBox.shrink();
@@ -113,9 +121,10 @@ class GoalDetailPage extends StatelessWidget {
               GoalDetailLoaded(
                 :final goal,
                 :final progress,
-                :final members
+                :final members,
+                :final progressHistory,
               ) =>
-                _buildLoadedState(context, goal, progress, members),
+                _buildLoadedState(context, goal, progress, members, progressHistory),
               GoalDetailError(:final message) => AppErrorWidget(
                   message: message,
                   onRetry: () => _onRefresh(context),
@@ -147,6 +156,7 @@ class GoalDetailPage extends StatelessWidget {
     GroupGoal goal,
     GoalProgress progress,
     List<GoalMembership> members,
+    List<GoalProgressPoint> progressHistory,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -159,6 +169,10 @@ class GoalDetailPage extends StatelessWidget {
         children: [
           // Hero section with progress indicator
           _buildHeroSection(context, goal, progress),
+          const SizedBox(height: 24),
+
+          // Progress chart section
+          _buildProgressChartSection(context, progressHistory),
           const SizedBox(height: 24),
 
           // Goal info section
@@ -197,6 +211,39 @@ class GoalDetailPage extends StatelessWidget {
 
           // Action buttons
           _buildActionButtons(context, goal, colorScheme),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the progress chart section.
+  Widget _buildProgressChartSection(
+    BuildContext context,
+    List<GoalProgressPoint> progressHistory,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Progress Over Time',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          AnimatedProgressChart(
+            progressHistory: progressHistory,
+          ),
         ],
       ),
     );
@@ -403,12 +450,17 @@ class GoalDetailPage extends StatelessWidget {
 
   /// Navigates to the invite members page.
   void _navigateToInvite(BuildContext context, GroupGoal goal) {
-    context.push('$_inviteMembersRoute?goalId=${goal.id}');
+    context.push('${RouteNames.inviteMembers}?goalId=${goal.id}');
   }
 
   /// Navigates to the goal rankings page.
   void _navigateToRankings(BuildContext context) {
-    context.push('$_goalRankingsRoute?goalId=$goalId');
+    context.push('${RouteNames.goalRankings}?goalId=$goalId');
+  }
+
+  /// Navigates to the edit goal page.
+  void _navigateToEdit(BuildContext context, String editGoalId) {
+    context.push('${RouteNames.editGoal}?goalId=$editGoalId');
   }
 
   /// Handles refresh action.

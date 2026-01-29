@@ -62,6 +62,7 @@ class GoalDetailBloc extends Bloc<GoalDetailEvent, GoalDetailState> {
     on<GoalDetailInviteUserRequested>(_onInviteUserRequested);
     on<GoalDetailLeaveRequested>(_onLeaveRequested);
     on<GoalDetailRealtimeUpdateReceived>(_onRealtimeUpdateReceived);
+    on<GoalDetailEditRequested>(_onEditRequested);
   }
 
   final GetGoalDetailsUseCase _getGoalDetailsUseCase;
@@ -160,6 +161,19 @@ class GoalDetailBloc extends Bloc<GoalDetailEvent, GoalDetailState> {
 
     // Refresh goal details to get the latest data
     await _fetchAndEmitGoalDetails(_currentGoalId!, emit);
+  }
+
+  /// Handles [GoalDetailEditRequested] events.
+  ///
+  /// This event is primarily for signaling intent to edit. The actual
+  /// navigation is handled by the UI layer via BlocListener.
+  /// This handler is a no-op as the UI handles navigation directly.
+  void _onEditRequested(
+    GoalDetailEditRequested event,
+    Emitter<GoalDetailState> emit,
+  ) {
+    // Navigation is handled by the UI layer via BlocListener or direct navigation
+    // This handler exists to satisfy the event registration requirement
   }
 
   /// Fetches goal details and progress and emits the result.
