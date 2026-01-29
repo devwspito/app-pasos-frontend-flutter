@@ -6,6 +6,7 @@
 library;
 
 import 'package:app_pasos_frontend/core/errors/app_exceptions.dart';
+import 'package:app_pasos_frontend/features/goals/domain/entities/realtime_goal_update.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/get_goal_details_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/get_goal_progress_usecase.dart';
 import 'package:app_pasos_frontend/features/goals/domain/usecases/invite_user_usecase.dart';
@@ -60,6 +61,7 @@ class GoalDetailBloc extends Bloc<GoalDetailEvent, GoalDetailState> {
     on<GoalDetailRefreshRequested>(_onRefreshRequested);
     on<GoalDetailInviteUserRequested>(_onInviteUserRequested);
     on<GoalDetailLeaveRequested>(_onLeaveRequested);
+    on<GoalDetailRealtimeUpdateReceived>(_onRealtimeUpdateReceived);
   }
 
   final GetGoalDetailsUseCase _getGoalDetailsUseCase;
@@ -67,14 +69,18 @@ class GoalDetailBloc extends Bloc<GoalDetailEvent, GoalDetailState> {
   final InviteUserUseCase _inviteUserUseCase;
   final LeaveGoalUseCase _leaveGoalUseCase;
 
+  /// Stores the currently loaded goal ID for real-time update filtering.
+  String? _currentGoalId;
+
   /// Handles [GoalDetailLoadRequested] events.
   ///
   /// Fetches detailed information about the goal including progress
-  /// and members.
+  /// and members. Also stores the goalId for real-time update filtering.
   Future<void> _onLoadRequested(
     GoalDetailLoadRequested event,
     Emitter<GoalDetailState> emit,
   ) async {
+    _currentGoalId = event.goalId;
     emit(const GoalDetailLoading());
     await _fetchAndEmitGoalDetails(event.goalId, emit);
   }
@@ -131,6 +137,29 @@ class GoalDetailBloc extends Bloc<GoalDetailEvent, GoalDetailState> {
     } catch (e) {
       emit(GoalDetailError(message: 'An unexpected error occurred: $e'));
     }
+  }
+
+  /// Handles [GoalDetailRealtimeUpdateReceived] events.
+  ///
+  /// Processes real-time goal updates from WebSocket. If the update
+  /// is for the currently viewed goal, it emits a success message
+  /// and triggers a refresh of the goal details.
+  Future<void> _onRealtimeUpdateReceived(
+    GoalDetailRealtimeUpdateReceived event,
+    Emitter<GoalDetailState> emit,
+  ) async {
+    final update = event.update;
+
+    // Only process updates for the currently viewed goal
+    if (_currentGoalId == null || update.goalId != _currentGoalId) {
+      return;
+    }
+
+    // Emit success notification
+    emit(const GoalDetailActionSuccess(message: 'Goal progress updated!'));
+
+    // Refresh goal details to get the latest data
+    await _fetchAndEmitGoalDetails(_currentGoalId!, emit);
   }
 
   /// Fetches goal details and progress and emits the result.
