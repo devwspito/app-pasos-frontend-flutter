@@ -89,4 +89,24 @@ class GoalsRepositoryImpl implements GoalsRepository {
     // Delegate to datasource - no return value needed
     await _datasource.leaveGoal(goalId: goalId);
   }
+
+  @override
+  Future<GroupGoal> updateGoal({
+    required String goalId,
+    String? name,
+    String? description,
+    int? targetSteps,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    // The datasource returns GroupGoalModel which extends GroupGoal
+    return _datasource.updateGoal(
+      goalId: goalId,
+      name: name,
+      description: description,
+      targetSteps: targetSteps,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
 }

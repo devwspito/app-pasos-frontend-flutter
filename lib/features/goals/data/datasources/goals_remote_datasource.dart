@@ -97,6 +97,32 @@ abstract interface class GoalsRemoteDatasource {
   /// Throws [NetworkException] on network failures.
   /// Throws [ServerException] on server errors.
   Future<void> leaveGoal({required String goalId});
+
+  /// Updates an existing group goal.
+  ///
+  /// [goalId] - The ID of the goal to update (required).
+  /// [name] - The new name of the goal (optional).
+  /// [description] - The new description of the goal (optional).
+  /// [targetSteps] - The new total step target for the group (optional).
+  /// [startDate] - The new start date for the goal period (optional).
+  /// [endDate] - The new end date for the goal period (optional).
+  ///
+  /// Only provided fields will be updated (partial update).
+  /// Returns the updated [GroupGoalModel].
+  /// Throws [UnauthorizedException] if not authenticated.
+  /// Throws [NotFoundException] if goal not found.
+  /// Throws [ForbiddenException] if user is not the goal creator.
+  /// Throws [ValidationException] if provided fields are invalid.
+  /// Throws [NetworkException] on network failures.
+  /// Throws [ServerException] on server errors.
+  Future<GroupGoalModel> updateGoal({
+    required String goalId,
+    String? name,
+    String? description,
+    int? targetSteps,
+    DateTime? startDate,
+    DateTime? endDate,
+  });
 }
 
 /// Implementation of [GoalsRemoteDatasource] using [ApiClient].
@@ -282,5 +308,46 @@ class GoalsRemoteDatasourceImpl implements GoalsRemoteDatasource {
 
     // Success response may contain { success: true } or similar
     // No return value needed for leave operation
+  }
+
+  @override
+  Future<GroupGoalModel> updateGoal({
+    required String goalId,
+    String? name,
+    String? description,
+    int? targetSteps,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final endpoint = ApiEndpoints.withParams(
+      ApiEndpoints.goalDetails,
+      {'id': goalId},
+    );
+
+    // Build the update data map with only provided fields
+    final updateData = <String, dynamic>{
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (targetSteps != null) 'targetSteps': targetSteps,
+      if (startDate != null) 'startDate': startDate.toIso8601String(),
+      if (endDate != null) 'endDate': endDate.toIso8601String(),
+    };
+
+    final response = await _client.put<Map<String, dynamic>>(
+      endpoint,
+      data: updateData,
+    );
+
+    final data = response.data;
+    if (data == null) {
+      throw const ServerException(
+        message: 'Invalid response from server',
+        code: 'INVALID_RESPONSE',
+      );
+    }
+
+    // Handle both wrapped and unwrapped responses
+    final goalData = data['goal'] as Map<String, dynamic>? ?? data;
+    return GroupGoalModel.fromJson(goalData);
   }
 }
