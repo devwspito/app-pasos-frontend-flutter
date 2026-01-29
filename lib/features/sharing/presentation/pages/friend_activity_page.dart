@@ -1,7 +1,8 @@
 /// Friend activity page for displaying a friend's step statistics.
 ///
 /// This page shows detailed step statistics for a specific friend,
-/// including their activity over different time periods.
+/// including their activity over different time periods with realtime
+/// updates and online status indicators.
 library;
 
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
@@ -9,10 +10,14 @@ import 'package:app_pasos_frontend/core/errors/app_exceptions.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/friend_stats.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/shared_user.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/usecases/get_friend_stats_usecase.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_bloc.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_state.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/widgets/friend_stats_card.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/widgets/realtime_step_badge.dart';
 import 'package:app_pasos_frontend/shared/widgets/error_widget.dart';
 import 'package:app_pasos_frontend/shared/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Friend activity page displaying a friend's step statistics.
 ///
@@ -183,18 +188,49 @@ class _FriendActivityPageState extends State<FriendActivityPage> {
       );
     }
 
+    // Try to get realtime data from SharingBloc if available
+    bool? isOnline;
+    int? realtimeSteps;
+    bool isLive = false;
+
+    try {
+      final sharingBloc = context.read<SharingBloc>();
+      final state = sharingBloc.state;
+      if (state is SharingLoaded) {
+        isOnline = state.isFriendOnline(widget.friendId);
+        realtimeSteps = state.getRealtimeSteps(widget.friendId);
+
+        // Determine if the data is "live" (updated within the last 5 minutes)
+        final realtimeUpdate = state.getRealtimeUpdate(widget.friendId);
+        if (realtimeUpdate != null) {
+          final timeSinceUpdate =
+              DateTime.now().difference(realtimeUpdate.timestamp);
+          isLive = timeSinceUpdate.inMinutes < 5;
+        }
+      }
+    } catch (_) {
+      // SharingBloc not available in context, use null values
+    }
+
     return RefreshIndicator(
       onRefresh: _loadFriendData,
       child: ListView(
         padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          // Friend stats card with real data
+          // Friend stats card with real data and online status
           FriendStatsCard(
             friend: _friend!,
             stats: _stats!,
+            isOnline: isOnline,
           ),
           const SizedBox(height: 24),
+
+          // Realtime step badge if available
+          if (realtimeSteps != null) ...[
+            _buildRealtimeBadge(context, realtimeSteps, isLive),
+            const SizedBox(height: 24),
+          ],
 
           // Activity summary section
           _buildActivitySummary(context, theme, colorScheme),
@@ -324,5 +360,54 @@ class _FriendActivityPageState extends State<FriendActivityPage> {
       return '${(steps / 1000).toStringAsFixed(1)}K';
     }
     return steps.toString();
+  }
+
+  /// Builds a realtime step badge section.
+  ///
+  /// Displays the friend's current realtime step count with live animation
+  /// when the data is fresh.
+  Widget _buildRealtimeBadge(BuildContext context, int steps, bool isLive) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(
+              Icons.trending_up,
+              size: 20,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Realtime Steps',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (isLive)
+                    Text(
+                      'Live updates',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            RealtimeStepBadge(
+              steps: steps,
+              isLive: isLive,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

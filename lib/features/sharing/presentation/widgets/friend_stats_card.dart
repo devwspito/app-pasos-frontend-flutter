@@ -1,25 +1,26 @@
 /// Friend stats card widget for displaying friend step statistics.
 ///
 /// This widget shows a friend's step statistics across different
-/// time periods in a grid format.
+/// time periods in a grid format with optional online status indicator.
 library;
 
 import 'package:app_pasos_frontend/features/sharing/domain/entities/friend_stats.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/entities/shared_user.dart';
+import 'package:app_pasos_frontend/features/sharing/presentation/widgets/friend_avatar.dart';
 import 'package:app_pasos_frontend/shared/widgets/app_card.dart';
-import 'package:app_pasos_frontend/shared/widgets/avatar_widget.dart';
 import 'package:flutter/material.dart';
 
 /// A card widget that displays a friend's step statistics.
 ///
-/// Shows the friend's avatar and name at the top, followed by
-/// a grid of stats: Today, Week, Month, and All-Time.
+/// Shows the friend's avatar with online status and name at the top,
+/// followed by a grid of stats: Today, Week, Month, and All-Time.
 ///
 /// Example usage:
 /// ```dart
 /// FriendStatsCard(
 ///   friend: sharedUser,
 ///   stats: friendStats,
+///   isOnline: true,
 /// )
 /// ```
 class FriendStatsCard extends StatelessWidget {
@@ -29,6 +30,7 @@ class FriendStatsCard extends StatelessWidget {
   const FriendStatsCard({
     required this.friend,
     required this.stats,
+    this.isOnline,
     super.key,
   });
 
@@ -37,6 +39,12 @@ class FriendStatsCard extends StatelessWidget {
 
   /// The step statistics to display.
   final FriendStats stats;
+
+  /// Whether the friend is currently online.
+  ///
+  /// When null, no online status indicator is displayed.
+  /// When true/false, shows the appropriate status indicator.
+  final bool? isOnline;
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +55,13 @@ class FriendStatsCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Friend header
+          // Friend header with online status
           Row(
             children: [
-              AvatarWidget(
+              FriendAvatar(
                 imageUrl: friend.avatarUrl,
                 name: friend.name,
+                isOnline: isOnline,
               ),
               const SizedBox(width: 12),
               Expanded(
