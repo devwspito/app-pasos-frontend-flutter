@@ -2,20 +2,64 @@
   "_metadata": {
     "agentType": "planning",
     "taskId": "a0519e08975e652cb83dcae3",
-    "timestamp": "2026-01-30T11:52:27.492Z",
-    "phase": "Approval",
-    "savedAt": "2026-01-30T11:52:27.492Z",
+    "timestamp": "2026-01-30T14:29:30.963Z",
+    "phase": "Sandbox",
+    "savedAt": "2026-01-30T14:29:30.964Z",
     "version": "1.0"
   },
   "data": {
     "taskTitle": "Complete MVP",
     "taskDescription": "PARTE 1: Backend (Node.js/Express)\n1.1 Auth - Logout\nArchivo: src/routes/auth.routes.ts\n\n\nAñadir: POST /auth/logout\nArchivo: src/services/auth.service.ts\n\n\nAñadir método: logout(refreshToken: string): Promise<void>\n- Opción simple: return success (stateless)\n- Opción completa: blacklist del token en MongoDB\n1.2 Users - Profile y Password\nArchivo: src/routes/users.routes.ts\n\n\nAñadir:\n- PUT /users/profile (auth required)\n- PUT /users/password (auth required)\nArchivo: src/controllers/users.controller.ts\n\n\nAñadir métodos:\n- updateProfile(req, res): actualizar username/email del usuario autenticado\n- updatePassword(req, res): verificar currentPassword, actualizar a newPassword\nArchivo: src/services/users.service.ts\n\n\nAñadir métodos:\n- updateProfile(userId, { username?, email? }): validar unicidad, actualizar\n- updatePassword(userId, currentPassword, newPassword): verificar actual, hashear nuevo\nArchivo: src/validators/users.validator.ts\n\n\nAñadir validadores:\n- updateProfileValidator: username opcional (3-30 chars), email opcional (formato válido)\n- updatePasswordValidator: currentPassword requerido, newPassword requerido (min 6 chars)\n1.3 Steps - Endpoints adicionales\nArchivo: src/routes/steps.routes.ts\n\n\nAñadir:\n- GET /steps (auth required) - query: page, limit, startDate, endDate\n- PUT /steps/:id/complete (auth required)\n- GET /steps/:id/history (auth required)\nArchivo: src/controllers/steps.controller.ts\n\n\nAñadir métodos:\n- getSteps: listar pasos paginados del usuario\n- markComplete: marcar stepId como verified/complete\n- getHistory: obtener historial de modificaciones de un step\nArchivo: src/services/steps.service.ts\n\n\nAñadir métodos correspondientes\n1.4 Goals - CRUD completo\nArchivo: src/routes/goals.routes.ts\n\n\nAñadir:\n- PUT /goals/:id (auth required) - solo creator puede editar\n- DELETE /goals/:id (auth required) - solo creator puede eliminar\n- GET /goals/:id/rankings (auth required)\nArchivo: src/controllers/goals.controller.ts\n\n\nAñadir métodos:\n- updateGoal: actualizar title, description, targetSteps, endDate\n- deleteGoal: eliminar goal y memberships asociadas\n- getRankings: lista de miembros ordenados por steps contribuidos\nArchivo: src/services/goals.service.ts\n\n\nAñadir métodos correspondientes\n1.5 Statistics - Módulo nuevo\nCrear archivos:\n\n\nsrc/routes/statistics.routes.ts\nsrc/controllers/statistics.controller.ts\nsrc/services/statistics.service.ts\nEndpoints:\n\n\nGET /statistics - stats generales (total steps, promedio diario, mejor día, racha actual)\nGET /statistics/daily?date=YYYY-MM-DD - desglose por hora\nGET /statistics/weekly?startDate=YYYY-MM-DD - resumen 7 días\nRegistrar en src/routes/index.ts:\n\n\nimport statisticsRoutes from './statistics.routes';\nrouter.use('/statistics', statisticsRoutes);\nPARTE 2: Frontend Flutter\n2.1 Sharing Datasource\nArchivo: lib/features/sharing/data/datasources/sharing_remote_datasource.dart\n\nMétodo acceptRequest (~línea 163):\n\n\n// Cambiar de:\nfinal response = await _client.post<Map<String, dynamic>>(\n  _sharingAccept,\n  data: {'relationshipId': relationshipId},\n);\n\n// A:\nfinal response = await _client.put<Map<String, dynamic>>(\n  '/sharing/$relationshipId/accept',\n);\nMétodo rejectRequest (~línea 186):\n\n\n// Cambiar de:\nfinal response = await _client.post<Map<String, dynamic>>(\n  _sharingReject,\n  data: {'relationshipId': relationshipId},\n);\n\n// A:\nfinal response = await _client.put<Map<String, dynamic>>(\n  '/sharing/$relationshipId/reject',\n);\nMétodo revokeSharing (~línea 205):\n\n\n// Cambiar de:\nfinal response = await _client.post<Map<String, dynamic>>(\n  _sharingRevoke,\n  data: {'relationshipId': relationshipId},\n);\n\n// A:\nfinal response = await _client.delete<Map<String, dynamic>>(\n  '/sharing/$relationshipId',\n);\nMétodo searchUsers (~línea 245):\n\n\n// Cambiar de:\nfinal response = await _client.get<Map<String, dynamic>>(\n  _sharingSearch,\n  queryParameters: {'query': query},\n);\n\n// A:\nfinal response = await _client.get<Map<String, dynamic>>(\n  '/users/search',\n  queryParameters: {'q': query},\n);\nEliminar constantes no usadas (~líneas 113-117):\n\n\n// Eliminar:\nstatic const String _sharingAccept = '/sharing/accept';\nstatic const String _sharingReject = '/sharing/reject';\nstatic const String _sharingRevoke = '/sharing/revoke';\nstatic const String _sharingSearch = '/sharing/search';\n2.2 Goals Datasource\nArchivo: lib/features/goals/data/datasources/goals_remote_datasource.dart\n\nMétodo joinGoal (~línea 276):\n\n\n// Cambiar de:\nfinal response = await _client.post<Map<String, dynamic>>(endpoint);\n\n// A:\nfinal response = await _client.put<Map<String, dynamic>>(endpoint);\nMétodo leaveGoal (~línea 299):\n\n\n// Cambiar de:\nfinal response = await _client.post<Map<String, dynamic>>(endpoint);\n\n// A:\nfinal response = await _client.delete<Map<String, dynamic>>(endpoint);\nCHECKLIST\nBackend:\n\n POST /auth/logout\n PUT /users/profile\n PUT /users/password\n GET /steps\n PUT /steps/:id/complete\n GET /steps/:id/history\n PUT /goals/:id\n DELETE /goals/:id\n GET /goals/:id/rankings\n GET /statistics\n GET /statistics/daily\n GET /statistics/weekly\nFrontend:\n\n sharing_remote_datasource.dart - acceptRequest (POST→PUT)\n sharing_remote_datasource.dart - rejectRequest (POST→PUT)\n sharing_remote_datasource.dart - revokeSharing (POST→DELETE)\n sharing_remote_datasource.dart - searchUsers (cambiar endpoint)\n goals_remote_datasource.dart - joinGoal (POST→PUT)\n goals_remote_datasource.dart - leaveGoal (POST→DELETE)",
     "startedAt": "2026-01-30T11:10:10.334Z",
-    "currentPhase": "Approval",
-    "phasesCompleted": [],
-    "epics": [],
+    "currentPhase": "Sandbox",
+    "phasesCompleted": [
+      {
+        "phase": "Planning",
+        "status": "completed",
+        "completedAt": "2026-01-30T11:27:07.589Z",
+        "cost": 0
+      },
+      {
+        "phase": "TechLead",
+        "status": "completed",
+        "completedAt": "2026-01-30T13:02:16.879Z",
+        "cost": 0
+      }
+    ],
+    "epics": [
+      {
+        "id": "epic-backend-auth-users",
+        "title": "Backend Auth & Users Endpoints",
+        "status": "pending",
+        "storiesCount": 4
+      },
+      {
+        "id": "epic-backend-steps",
+        "title": "Backend Steps Additional Endpoints",
+        "status": "pending",
+        "storiesCount": 3
+      },
+      {
+        "id": "epic-backend-goals",
+        "title": "Backend Goals CRUD Completion",
+        "status": "pending",
+        "storiesCount": 3
+      },
+      {
+        "id": "epic-backend-statistics",
+        "title": "Backend Statistics Module",
+        "status": "pending",
+        "storiesCount": 7
+      },
+      {
+        "id": "epic-frontend-datasource-fixes",
+        "title": "Frontend Datasource HTTP Method Fixes",
+        "status": "pending",
+        "storiesCount": 7
+      }
+    ],
     "totalCost": 0,
     "totalTokens": 0,
-    "lastUpdated": "2026-01-30T11:52:27.492Z"
+    "lastUpdated": "2026-01-30T14:29:30.963Z"
   }
 }
