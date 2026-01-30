@@ -7,6 +7,7 @@ library;
 
 import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
+import 'package:app_pasos_frontend/core/router/app_router.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/notification_handler.dart';
@@ -114,6 +115,9 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<SecureStorageService>(
     SecureStorageServiceImpl.new,
   );
+
+  // Initialize AppRouter with SecureStorageService for auth redirect
+  AppRouter.init(sl<SecureStorageService>());
 
   // ============================================================
   // Network Services
