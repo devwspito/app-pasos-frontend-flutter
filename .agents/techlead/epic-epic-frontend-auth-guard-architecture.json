@@ -1,0 +1,47 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "83297088d163ddcbc3096ea9",
+    "timestamp": "2026-01-30T01:29:38.506Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-auth-guard",
+    "savedAt": "2026-01-30T01:29:38.506Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-auth-guard",
+    "storiesCount": 1,
+    "architecture": "## Auth Guard Architecture\n\n### Pattern: GoRouter Async Redirect with SecureStorageService\n\nThe authentication guard uses GoRouter's built-in `redirect` callback with async support (GoRouter v14.0.0). This pattern checks authentication state at the router level BEFORE rendering any route.\n\n### Key Components:\n\n1. **SecureStorageService** (existing)\n   - `isAuthenticated()` → `Future<bool>` - checks if auth token exists\n   - Already registered in DI as singleton\n\n2. **AppRouter** (modified)\n   - Static `_storage` field for SecureStorageService reference\n   - Static `init()` method called from DI initialization\n   - `redirect` callback that awaits `isAuthenticated()` and returns redirect path\n\n3. **SplashScreen** (renamed from FoundationReadyScreen)\n   - Minimal loading UI shown during redirect processing\n   - CircularProgressIndicator + app branding\n   - User never stays here - redirect immediately navigates away\n\n### Route Protection Matrix:\n\n| Route | Requires Auth | Redirect If Auth |\n|-------|--------------|------------------|\n| / | N/A | → /login OR /dashboard |\n| /login | No | Yes → /dashboard |\n| /register | No | Yes → /dashboard |\n| /forgot-password | No | No |\n| /dashboard | Yes | No |\n| /goals/* | Yes | No |\n| /friends/* | Yes | No |\n| /profile | Yes | No |\n| /settings | Yes | No |\n\n### Data Flow:\n\n```\n1. App starts → GoRouter initialized with redirect callback\n2. User navigates to ANY route\n3. redirect() called → await SecureStorageService.isAuthenticated()\n4. Based on (isAuth, targetRoute):\n   - Protected + !auth → /login\n   - PublicOnly + auth → /dashboard  \n   - Home + !auth → /login\n   - Home + auth → /dashboard\n   - Otherwise → null (allow navigation)\n5. GoRouter renders final destination\n```\n\n### SOLID Compliance:\n- **SRP**: Router handles routing, StorageService handles auth state\n- **OCP**: New protected routes just add to array, no code changes\n- **DIP**: Router depends on SecureStorageService interface, not implementation",
+    "stories": [
+      {
+        "id": "epic-frontend-auth-guard-story-1",
+        "title": "Add GoRouter redirect guard with auth state checking in lib/core/router/app_router.dart",
+        "description": "Implement GoRouter redirect callback that checks authentication state using SecureStorageService and redirects users appropriately based on auth status and target route.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/presentation/bloc/auth_bloc.dart, lib/features/auth/presentation/bloc/auth_state.dart, lib/core/storage/secure_storage_service.dart, lib/core/router/route_names.dart\n- Modify: lib/core/router/app_router.dart, lib/core/di/injection_container.dart\n- Create: [] (NONE)\n\n🔧 **PATTERNS TO USE:**\n- Use `sl<SecureStorageService>()` from injection_container.dart for DI access\n- Use `SecureStorageService.isAuthenticated()` for async auth check (returns Future<bool>)\n- Use GoRouter's async `redirect: (context, state) async { ... }` callback pattern\n- Use `RouteNames.login`, `RouteNames.dashboard`, etc. from route_names.dart (NOT string literals)\n- Use `state.matchedLocation` to get current route path in redirect\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n1. **Modify AppRouter class (app_router.dart):**\n   - Add static getter or method to access SecureStorageService: `static late SecureStorageService _storage;`\n   - Add static `init(SecureStorageService storage)` method to inject the dependency\n   - Add `redirect` callback to GoRouter constructor that:\n     - Calls `await _storage.isAuthenticated()` to check auth state\n     - Defines protected routes list: `[RouteNames.dashboard, RouteNames.goals, RouteNames.goalDetail, RouteNames.createGoal, RouteNames.editGoal, RouteNames.goalRankings, RouteNames.inviteMembers, RouteNames.friends, RouteNames.friendRequests, RouteNames.friendActivity, RouteNames.addFriend, RouteNames.profile, RouteNames.settings]`\n     - Defines public-only routes list: `[RouteNames.login, RouteNames.register, RouteNames.forgotPassword]`\n     - If NOT authenticated AND going to protected route → return `RouteNames.login`\n     - If authenticated AND going to public-only route → return `RouteNames.dashboard`\n     - If going to home route '/' → return `RouteNames.login` if not auth, `RouteNames.dashboard` if auth\n     - Otherwise return `null` (no redirect)\n\n2. **Transform FoundationReadyScreen to SplashScreen (app_router.dart):**\n   - Rename `FoundationReadyScreen` class to `SplashScreen`\n   - Change the UI to show a centered `CircularProgressIndicator` with app branding\n   - Remove the 'Foundation Ready' text and detailed messages\n   - Keep it simple: AppBar with app name, centered loading spinner, 'Loading...' text\n   - The redirect will handle navigation away from this screen\n\n3. **Update injection_container.dart:**\n   - After registering SecureStorageService, call `AppRouter.init(sl<SecureStorageService>())`\n   - Add import for AppRouter: `import 'package:app_pasos_frontend/core/router/app_router.dart';`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use string literals for routes like '/login' → use RouteNames.login\n- DO NOT create new dart files → only modify existing ones\n- DO NOT use synchronous auth check (isAuthenticated is async, must await)\n- DO NOT check auth using AuthBloc state in redirect (BLoC may not be initialized)\n- DO NOT add BlocProvider at router level → use SecureStorageService directly\n- DO NOT create placeholder/Coming Soon screens → SplashScreen must be functional loading screen\n- DO NOT use `context.read<AuthBloc>()` in redirect → no BLoC context available\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- SplashScreen shows CircularProgressIndicator centered with 'App Pasos' branding\n- Unauthenticated users accessing /dashboard, /goals/*, /friends/*, /profile, /settings are immediately redirected to /login\n- Authenticated users accessing /login, /register, /forgot-password are immediately redirected to /dashboard\n- Home route '/' redirects based on auth: unauthenticated→/login, authenticated→/dashboard\n- Redirect is async and awaits isAuthenticated() before deciding\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-83297088d163ddcbc3096ea9/app-pasos-frontend-flutter\nflutter analyze lib/core/router/app_router.dart lib/core/di/injection_container.dart\nflutter test\n```\n- Verify no analysis errors\n- Verify SplashScreen shows loading indicator (not placeholder text)\n- Verify redirect logic handles all route cases",
+        "epicId": "epic-frontend-auth-guard",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/bloc/auth_bloc.dart",
+          "lib/features/auth/presentation/bloc/auth_state.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given a user is NOT authenticated, When they navigate to /dashboard, /goals, /friends, /profile, or /settings, Then they are redirected to /login",
+          "Given a user IS authenticated, When they navigate to /login, /register, or /forgot-password, Then they are redirected to /dashboard",
+          "Given the app starts at '/' route, When the user is not authenticated, Then they are redirected to /login",
+          "Given the app starts at '/' route, When the user is authenticated, Then they are redirected to /dashboard",
+          "Given the SplashScreen is displayed, Then it shows a CircularProgressIndicator with App Pasos branding (no placeholder text)",
+          "Given flutter analyze is run, Then there are no errors in app_router.dart or injection_container.dart"
+        ]
+      }
+    ]
+  }
+}
