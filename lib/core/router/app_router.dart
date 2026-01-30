@@ -7,6 +7,7 @@ library;
 import 'package:app_pasos_frontend/core/constants/app_constants.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/route_names.dart';
+import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/login_page.dart';
@@ -50,25 +51,102 @@ import 'package:go_router/go_router.dart';
 /// )
 /// ```
 abstract final class AppRouter {
+  /// Storage service for authentication checks in redirect.
+  static late SecureStorageService _storage;
+
+  /// Initializes the router with required dependencies.
+  ///
+  /// Must be called before accessing [router].
+  /// [storage] - The secure storage service for auth state checks.
+  static void init(SecureStorageService storage) {
+    _storage = storage;
+  }
+
+  /// Protected routes that require authentication.
+  static const List<String> _protectedRoutes = [
+    RouteNames.dashboard,
+    RouteNames.goals,
+    RouteNames.goalDetail,
+    RouteNames.createGoal,
+    RouteNames.editGoal,
+    RouteNames.goalRankings,
+    RouteNames.inviteMembers,
+    RouteNames.friends,
+    RouteNames.friendRequests,
+    RouteNames.friendActivity,
+    RouteNames.addFriend,
+    RouteNames.profile,
+    RouteNames.settings,
+  ];
+
+  /// Public-only routes that authenticated users should not access.
+  static const List<String> _publicOnlyRoutes = [
+    RouteNames.login,
+    RouteNames.register,
+    RouteNames.forgotPassword,
+  ];
+
   /// The main GoRouter instance for the application.
   ///
   /// This router is configured with:
   /// - Initial location set to home route
   /// - All application routes defined
   /// - Error page builder for unknown routes
+  /// - Redirect callback for authentication guards
   static final GoRouter router = GoRouter(
     initialLocation: RouteNames.home,
     debugLogDiagnostics: true,
     routes: _routes,
     errorBuilder: _errorBuilder,
+    redirect: _redirect,
   );
+
+  /// Redirect callback for authentication-based navigation.
+  ///
+  /// Handles route protection by checking auth state and redirecting:
+  /// - Unauthenticated users accessing protected routes → login
+  /// - Authenticated users accessing public-only routes → dashboard
+  /// - Home route → login or dashboard based on auth state
+  static Future<String?> _redirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final isAuthenticated = await _storage.isAuthenticated();
+    final currentLocation = state.matchedLocation;
+
+    // Check if current route is protected
+    final isProtectedRoute = _protectedRoutes.any(
+      (route) => currentLocation.startsWith(route),
+    );
+
+    // Check if current route is public-only
+    final isPublicOnlyRoute = _publicOnlyRoutes.contains(currentLocation);
+
+    // Home route redirect based on auth state
+    if (currentLocation == RouteNames.home) {
+      return isAuthenticated ? RouteNames.dashboard : RouteNames.login;
+    }
+
+    // Redirect unauthenticated users from protected routes to login
+    if (!isAuthenticated && isProtectedRoute) {
+      return RouteNames.login;
+    }
+
+    // Redirect authenticated users from public-only routes to dashboard
+    if (isAuthenticated && isPublicOnlyRoute) {
+      return RouteNames.dashboard;
+    }
+
+    // No redirect needed
+    return null;
+  }
 
   /// List of all application routes.
   static final List<RouteBase> _routes = [
     GoRoute(
       path: RouteNames.home,
       name: 'home',
-      builder: (context, state) => const FoundationReadyScreen(),
+      builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
       path: RouteNames.login,
@@ -316,13 +394,13 @@ class _PlaceholderScreen extends StatelessWidget {
   }
 }
 
-/// Home screen indicating the foundation is ready.
+/// Splash screen displayed while checking authentication status.
 ///
-/// This screen displays a confirmation that the app foundation is properly
-/// set up with dependency injection and core services.
-class FoundationReadyScreen extends StatelessWidget {
-  /// Creates the Foundation Ready screen.
-  const FoundationReadyScreen({super.key});
+/// This screen shows a loading indicator while the app determines
+/// the user's authentication state and redirects accordingly.
+class SplashScreen extends StatelessWidget {
+  /// Creates the Splash screen.
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -334,43 +412,26 @@ class FoundationReadyScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                size: 80,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'App Pasos',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(height: 24),
-              Text(
-                'App Pasos',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
+            ),
+            const SizedBox(height: 32),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Loading...',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Foundation Ready',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                'Dependency injection initialized\n'
-                'Core services registered\n'
-                'GoRouter navigation configured',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

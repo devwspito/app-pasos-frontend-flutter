@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "83297088d163ddcbc3096ea9",
+    "timestamp": "2026-01-30T02:34:04.519Z",
+    "phase": "judge",
+    "storyId": "epic-frontend-auth-guard-story-1",
+    "savedAt": "2026-01-30T02:34:04.519Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-frontend-auth-guard-story-1",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
