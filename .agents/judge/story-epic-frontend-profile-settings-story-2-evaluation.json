@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "1ebf92ad00258e0d4f08a5f4",
+    "timestamp": "2026-01-31T14:24:50.607Z",
+    "phase": "judge",
+    "storyId": "epic-frontend-profile-settings-story-2",
+    "savedAt": "2026-01-31T14:24:50.607Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-frontend-profile-settings-story-2",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
