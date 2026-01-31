@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "1ebf92ad00258e0d4f08a5f4",
+    "timestamp": "2026-01-31T13:25:01.173Z",
+    "phase": "judge",
+    "storyId": "epic-devops-docker-story-1",
+    "savedAt": "2026-01-31T13:25:01.173Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-devops-docker-story-1",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
