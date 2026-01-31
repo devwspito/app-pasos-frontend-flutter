@@ -7,10 +7,12 @@ library;
 import 'package:app_pasos_frontend/core/constants/app_constants.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/route_names.dart';
+import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/register_page.dart';
+import 'package:app_pasos_frontend/features/auth/presentation/pages/splash_page.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:app_pasos_frontend/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -56,19 +58,68 @@ abstract final class AppRouter {
   /// - Initial location set to home route
   /// - All application routes defined
   /// - Error page builder for unknown routes
+  /// - Auth redirect guard for protected routes
   static final GoRouter router = GoRouter(
     initialLocation: RouteNames.home,
     debugLogDiagnostics: true,
     routes: _routes,
     errorBuilder: _errorBuilder,
+    redirect: _guardRedirect,
   );
+
+  /// Authentication guard redirect handler.
+  ///
+  /// Checks authentication status and redirects:
+  /// - Unauthenticated users from protected routes to login
+  /// - Authenticated users from auth routes (login/register) to dashboard
+  ///
+  /// Public routes that don't require auth: /, /login, /register, /forgot-password
+  /// Protected routes: /dashboard, /goals, /friends, /profile, /settings and sub-routes
+  static Future<String?> _guardRedirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final storage = sl<SecureStorageService>();
+    final isAuthenticated = await storage.isAuthenticated();
+    final currentPath = state.matchedLocation;
+
+    // Routes that don't require authentication
+    final publicRoutes = [
+      RouteNames.home,
+      RouteNames.login,
+      RouteNames.register,
+      RouteNames.forgotPassword,
+    ];
+
+    // Auth-only routes (redirect away if already logged in)
+    final authRoutes = [
+      RouteNames.login,
+      RouteNames.register,
+    ];
+
+    final isPublicRoute = publicRoutes.contains(currentPath);
+    final isAuthRoute = authRoutes.contains(currentPath);
+
+    // Redirect unauthenticated users from protected routes to login
+    if (!isAuthenticated && !isPublicRoute) {
+      return '${RouteNames.login}?redirect=$currentPath';
+    }
+
+    // Redirect authenticated users from auth routes to dashboard
+    if (isAuthenticated && isAuthRoute) {
+      return RouteNames.dashboard;
+    }
+
+    // No redirect needed
+    return null;
+  }
 
   /// List of all application routes.
   static final List<RouteBase> _routes = [
     GoRoute(
       path: RouteNames.home,
       name: 'home',
-      builder: (context, state) => const FoundationReadyScreen(),
+      builder: (context, state) => const SplashPage(),
     ),
     GoRoute(
       path: RouteNames.login,
