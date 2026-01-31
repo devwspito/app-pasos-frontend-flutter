@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "1ebf92ad00258e0d4f08a5f4",
+    "timestamp": "2026-01-31T13:58:50.447Z",
+    "phase": "judge",
+    "storyId": "story-cicd-backend-cd",
+    "savedAt": "2026-01-31T13:58:50.447Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "story-cicd-backend-cd",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
