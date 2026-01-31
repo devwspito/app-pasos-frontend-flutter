@@ -135,6 +135,23 @@ abstract final class ApiEndpoints {
   static const String deleteAccount = '/users/account';
 
   // ============================================================
+  // Settings Endpoints
+  // ============================================================
+
+  /// GET: Get user settings.
+  ///
+  /// Requires authentication header.
+  /// Response: `{ settings: UserSettings }`
+  static const String settings = '/users/settings';
+
+  /// PUT: Update user settings.
+  ///
+  /// Requires authentication header.
+  /// Request body: `{ notificationsEnabled?: boolean, dailyGoalReminder?: string, themePreference?: string }`
+  /// Response: `{ settings: UserSettings }`
+  static const String updateSettings = '/users/settings';
+
+  // ============================================================
   // Steps/Habits Endpoints (Core Feature)
   // ============================================================
 

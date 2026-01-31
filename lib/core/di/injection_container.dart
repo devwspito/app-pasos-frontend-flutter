@@ -57,6 +57,10 @@ import 'package:app_pasos_frontend/features/profile/data/repositories/profile_re
 import 'package:app_pasos_frontend/features/profile/domain/repositories/profile_repository.dart';
 import 'package:app_pasos_frontend/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:app_pasos_frontend/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:app_pasos_frontend/features/settings/data/datasources/settings_remote_datasource.dart';
+import 'package:app_pasos_frontend/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:app_pasos_frontend/features/settings/domain/repositories/settings_repository.dart';
+import 'package:app_pasos_frontend/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/data/datasources/sharing_remote_datasource.dart';
 import 'package:app_pasos_frontend/features/sharing/data/repositories/sharing_repository_impl.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/repositories/sharing_repository.dart';
@@ -401,6 +405,28 @@ Future<void> initializeDependencies() async {
   );
   sl.registerLazySingleton<UpdateProfileUseCase>(
     () => UpdateProfileUseCase(repository: sl<ProfileRepository>()),
+  );
+
+  // ============================================================
+  // Settings Feature
+  // ============================================================
+
+  // Data Sources
+  sl.registerLazySingleton<SettingsRemoteDatasource>(
+    () => SettingsRemoteDatasourceImpl(client: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(datasource: sl<SettingsRemoteDatasource>()),
+  );
+
+  // Blocs (Factory - new instance per use)
+  sl.registerFactory<SettingsBloc>(
+    () => SettingsBloc(
+      repository: sl<SettingsRepository>(),
+      authRepository: sl<AuthRepository>(),
+    ),
   );
 }
 
