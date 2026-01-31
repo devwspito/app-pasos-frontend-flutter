@@ -1,0 +1,154 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-01-31T21:30:59.542Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-offline-support",
+    "savedAt": "2026-01-31T21:30:59.542Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-offline-support",
+    "storiesCount": 4,
+    "architecture": "## Offline-First Architecture with Hive\n\n### Pattern: Cache-First with Background Sync\n\n**Data Flow:**\n1. READ: Hive Cache → API (fallback) → Update Cache\n2. WRITE Online: API → Cache\n3. WRITE Offline: SyncQueue → Optimistic Cache → Background Sync when online\n\n### Service Layer Structure:\n```\nlib/core/\n├── storage/\n│   ├── hive_service.dart          # Hive initialization & management\n│   ├── sync_queue.dart            # Pending operations queue\n│   └── boxes/\n│       ├── steps_box.dart         # Steps data box wrapper\n│       ├── goals_box.dart         # Goals data box wrapper\n│       └── user_box.dart          # User data box wrapper\n└── services/\n    ├── connectivity_service.dart  # Network status monitoring\n    └── sync_service.dart          # Queue processing & conflict resolution\n```\n\n### Key Design Decisions:\n1. **Hive over SQLite**: Faster, simpler API, no native dependencies\n2. **Map storage over TypeAdapters**: Flexibility, easier migration\n3. **Server-timestamp-wins**: Simpler conflict resolution, server is source of truth\n4. **Exponential backoff**: [1s, 2s, 4s] with max 3 retries\n5. **FIFO queue**: Operations processed in order of creation\n\n### Dependencies Added:\n- hive: ^2.2.3\n- hive_flutter: ^1.1.0\n\n### SOLID Compliance:\n- **SRP**: Each box handles one entity type\n- **OCP**: New boxes can be added without modifying HiveService\n- **DIP**: Repository depends on abstract SyncQueue, not implementation",
+    "stories": [
+      {
+        "id": "epic-frontend-offline-support-story-1",
+        "title": "Create HiveService and typed storage boxes in lib/core/storage/",
+        "description": "**Description:**\nSetup Hive database infrastructure with typed boxes for offline storage of steps, goals, and user data.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/storage/secure_storage_service.dart` (understand storage service pattern)\n- Read: `lib/core/services/background_sync_service.dart` (understand interface pattern)\n- Read: `lib/core/services/background_sync_service_impl.dart` (understand impl pattern)\n- Read: `lib/features/dashboard/data/models/step_record_model.dart` (understand model structure for StepsBox)\n- Read: `lib/features/goals/data/models/group_goal_model.dart` (understand model structure for GoalsBox)\n- Read: `lib/features/auth/domain/entities/user.dart` (understand user structure for UserBox)\n- Modify: `pubspec.yaml` (add hive: ^2.2.3, hive_flutter: ^1.1.0 to dependencies)\n- Create: `lib/core/storage/hive_service.dart`\n- Create: `lib/core/storage/boxes/steps_box.dart`\n- Create: `lib/core/storage/boxes/goals_box.dart`\n- Create: `lib/core/storage/boxes/user_box.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use interface + implementation pattern like `BackgroundSyncService` / `BackgroundSyncServiceImpl`\n- Create `abstract interface class HiveService` with `initialize()`, `openBoxes()`, `closeBoxes()` methods\n- Create `HiveServiceImpl` that implements `HiveService`\n- Each box class should be a wrapper with typed methods: `Future<void> save(key, data)`, `T? get(key)`, `Future<void> delete(key)`, `List<T> getAll()`\n- Use `Hive.box<Map<dynamic, dynamic>>('boxName')` pattern for storing JSON-like data\n- StepsBox key format: date string 'YYYY-MM-DD'\n- GoalsBox key format: goal ID string\n- UserBox keys: 'profile', 'settings'\n\n📦 **REQUIRED STRUCTURE:**\n```dart\n// hive_service.dart\nabstract interface class HiveService {\n  Future<void> initialize();\n  Future<void> openBoxes();\n  Future<void> closeBoxes();\n  bool get isInitialized;\n}\n\nclass HiveServiceImpl implements HiveService {\n  // Initialize Hive with path\n  // Open all boxes during initialize()\n}\n```\n\n```dart\n// steps_box.dart\nclass StepsBox {\n  static const String boxName = 'steps_box';\n  \n  Future<void> saveStepRecord(String date, Map<String, dynamic> record);\n  Map<String, dynamic>? getStepRecord(String date);\n  List<Map<String, dynamic>> getAllRecords();\n  Future<void> deleteRecord(String date);\n  Future<void> clearAll();\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use Hive type adapters for this story - store as Map<String, dynamic>\n- DO NOT open boxes in constructor - use lazy initialization in service\n- DO NOT import flutter_secure_storage in Hive files\n- DO NOT register services in DI yet - that's Story 4\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- HiveService.initialize() must be idempotent (safe to call multiple times)\n- All box operations must handle null/empty cases gracefully\n- StepsBox must store step records keyed by date string (YYYY-MM-DD)\n- GoalsBox must store goal data keyed by goal ID\n- UserBox must store profile and settings separately\n- Include `getLastSyncTimestamp()` and `setLastSyncTimestamp()` in each box\n\n🧪 **VERIFICATION:**\n```bash\nflutter pub get\nflutter analyze lib/core/storage/\nflutter test --no-pub\n```",
+        "epicId": "epic-frontend-offline-support",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/services/background_sync_service_impl.dart",
+          "lib/features/dashboard/data/models/step_record_model.dart",
+          "lib/features/goals/data/models/group_goal_model.dart",
+          "lib/features/auth/domain/entities/user.dart"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/storage/hive_service.dart",
+          "lib/core/storage/boxes/steps_box.dart",
+          "lib/core/storage/boxes/goals_box.dart",
+          "lib/core/storage/boxes/user_box.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml, When dependencies are checked, Then hive: ^2.2.3 and hive_flutter: ^1.1.0 are present",
+          "Given HiveServiceImpl, When initialize() is called, Then Hive.initFlutter() is called and isInitialized returns true",
+          "Given HiveServiceImpl, When initialize() is called twice, Then no error is thrown (idempotent)",
+          "Given StepsBox, When saveStepRecord('2024-01-15', record) is called, Then getStepRecord('2024-01-15') returns the same record",
+          "Given GoalsBox, When saveGoal('goal123', goalData) is called, Then getGoal('goal123') returns the same data",
+          "Given UserBox, When saveProfile(userData) is called, Then getProfile() returns the same data",
+          "Given any box, When getLastSyncTimestamp() is called after setLastSyncTimestamp(), Then the correct timestamp is returned"
+        ]
+      },
+      {
+        "id": "epic-frontend-offline-support-story-2",
+        "title": "Create SyncQueue and ConnectivityService in lib/core/",
+        "description": "**Description:**\nImplement a sync queue that stores pending operations when offline and a connectivity service that monitors network status.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/storage/hive_service.dart` (from Story 1)\n- Read: `lib/core/services/background_sync_service.dart` (interface pattern)\n- Read: `lib/core/services/background_sync_service_impl.dart` (impl pattern)\n- Create: `lib/core/storage/sync_queue.dart`\n- Create: `lib/core/services/connectivity_service.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use interface + implementation pattern like existing services\n- Create `abstract interface class ConnectivityService` with stream-based connectivity monitoring\n- SyncQueue should use Hive box to persist operations\n- Operation structure: `{id, type, payload, timestamp, retryCount, status}`\n- Use `connectivity_plus` package for network monitoring (add to pubspec.yaml in Story 1 did NOT add it, so DO NOT add dependencies - use dart:io InternetAddress.lookup instead)\n\n📦 **REQUIRED STRUCTURE:**\n```dart\n// connectivity_service.dart\nabstract interface class ConnectivityService {\n  Stream<bool> get onConnectivityChanged;\n  Future<bool> get isConnected;\n  Future<void> initialize();\n  void dispose();\n}\n\nclass ConnectivityServiceImpl implements ConnectivityService {\n  final _connectivityController = StreamController<bool>.broadcast();\n  Timer? _checkTimer;\n  \n  // Check connectivity by attempting DNS lookup\n  // Emit changes to stream\n  // Poll every 5 seconds when app is active\n}\n```\n\n```dart\n// sync_queue.dart\nenum SyncOperationType { createStep, updateStep, createGoal, updateGoal, updateProfile }\nenum SyncOperationStatus { pending, inProgress, failed, completed }\n\nclass SyncOperation {\n  final String id;\n  final SyncOperationType type;\n  final Map<String, dynamic> payload;\n  final DateTime timestamp;\n  int retryCount;\n  SyncOperationStatus status;\n}\n\nabstract interface class SyncQueue {\n  Future<void> initialize(HiveService hiveService);\n  Future<void> enqueue(SyncOperation operation);\n  Future<SyncOperation?> dequeue();\n  Future<List<SyncOperation>> getPendingOperations();\n  Future<void> markCompleted(String operationId);\n  Future<void> markFailed(String operationId);\n  Future<void> incrementRetry(String operationId);\n  Future<int> get pendingCount;\n  Stream<int> get onQueueChanged;\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use connectivity_plus package - use dart:io InternetAddress.lookup\n- DO NOT register services in DI yet - that's Story 4\n- DO NOT create UI components for offline indicator - that's Story 4\n- DO NOT import ApiClient or make network calls - this is storage only\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- SyncQueue persists to Hive box named 'sync_queue'\n- Operations are dequeued in FIFO order (oldest first by timestamp)\n- ConnectivityService emits true/false on connectivity changes\n- ConnectivityService.isConnected checks actual network availability\n- SyncQueue.onQueueChanged emits count when operations added/removed\n- Each operation has unique ID (use UUID or timestamp-based)\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/storage/sync_queue.dart\nflutter analyze lib/core/services/connectivity_service.dart\nflutter test --no-pub\n```",
+        "epicId": "epic-frontend-offline-support",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-offline-support-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/storage/hive_service.dart",
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/services/background_sync_service_impl.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/storage/sync_queue.dart",
+          "lib/core/services/connectivity_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SyncQueue, When enqueue(operation) is called, Then getPendingOperations() includes the operation",
+          "Given SyncQueue with operations [A at t1, B at t2] where t1 < t2, When dequeue() is called, Then A is returned first (FIFO)",
+          "Given SyncQueue, When markCompleted(id) is called, Then operation is removed from pending list",
+          "Given SyncQueue, When incrementRetry(id) is called, Then operation.retryCount increases by 1",
+          "Given ConnectivityService, When network becomes available, Then onConnectivityChanged emits true",
+          "Given ConnectivityService, When network becomes unavailable, Then onConnectivityChanged emits false",
+          "Given SyncQueue persisted in Hive, When app restarts and initialize() is called, Then pending operations are restored"
+        ]
+      },
+      {
+        "id": "epic-frontend-offline-support-story-3",
+        "title": "Create SyncService with conflict resolution in lib/core/services/",
+        "description": "**Description:**\nImplement SyncService that processes the sync queue when connectivity is restored, handles conflicts using server-timestamp-wins strategy, and implements exponential backoff retry.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/storage/sync_queue.dart` (from Story 2)\n- Read: `lib/core/services/connectivity_service.dart` (from Story 2)\n- Read: `lib/core/services/background_sync_service.dart` (interface pattern)\n- Read: `lib/core/services/background_sync_service_impl.dart` (impl pattern)\n- Read: `lib/core/network/api_client.dart` (understand API call pattern)\n- Read: `lib/features/dashboard/data/datasources/steps_remote_datasource.dart` (understand datasource pattern)\n- Create: `lib/core/services/sync_service.dart`\n\n🔧 **PATTERNS TO USE:**\n- Use interface + implementation pattern\n- Inject dependencies: `SyncQueue`, `ConnectivityService`, `ApiClient`\n- Use `ApiClient.post()` / `ApiClient.put()` for syncing data to server\n- Exponential backoff: delays of [1s, 2s, 4s] for retries (max 3 retries)\n- Conflict resolution: compare local `timestamp` with server `updatedAt`, server wins\n\n📦 **REQUIRED STRUCTURE:**\n```dart\n// sync_service.dart\nenum SyncStatus { idle, syncing, error, offline }\n\nabstract interface class SyncService {\n  Future<void> initialize();\n  Future<void> startSync();\n  Future<void> stopSync();\n  Stream<SyncStatus> get onSyncStatusChanged;\n  Stream<String> get onSyncMessage; // For user notifications\n  SyncStatus get currentStatus;\n  bool get isSyncing;\n  void dispose();\n}\n\nclass SyncServiceImpl implements SyncService {\n  SyncServiceImpl({\n    required SyncQueue syncQueue,\n    required ConnectivityService connectivityService,\n    required ApiClient apiClient,\n  });\n  \n  StreamSubscription? _connectivitySubscription;\n  final _statusController = StreamController<SyncStatus>.broadcast();\n  final _messageController = StreamController<String>.broadcast();\n  \n  // Listen to connectivity changes\n  // When online, process queue\n  // For each operation:\n  //   1. Mark as inProgress\n  //   2. Send to server\n  //   3. Handle conflict (server timestamp wins)\n  //   4. On success: markCompleted\n  //   5. On failure: incrementRetry, if retryCount >= 3 markFailed\n  //   6. Exponential backoff between retries\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT register service in DI yet - that's Story 4\n- DO NOT modify repository files - that's Story 4\n- DO NOT create new datasource files - use ApiClient directly\n- DO NOT use try/catch without proper error transformation\n- DO NOT forget to dispose stream subscriptions\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- SyncService listens to ConnectivityService.onConnectivityChanged\n- When connectivity restored (true emitted), startSync() is called automatically\n- Each operation synced via appropriate API endpoint based on SyncOperationType\n- Conflict detection: if server returns 409 or has newer `updatedAt`, discard local\n- Exponential backoff: wait 1s, 2s, 4s between retry attempts\n- Max 3 retries before marking operation as permanently failed\n- onSyncMessage emits user-friendly strings: 'Syncing...', 'Sync complete', 'Sync failed'\n- onSyncStatusChanged emits SyncStatus changes for UI binding\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze lib/core/services/sync_service.dart\nflutter test --no-pub\n```",
+        "epicId": "epic-frontend-offline-support",
+        "priority": 3,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-frontend-offline-support-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/storage/sync_queue.dart",
+          "lib/core/services/connectivity_service.dart",
+          "lib/core/services/background_sync_service.dart",
+          "lib/core/services/background_sync_service_impl.dart",
+          "lib/core/network/api_client.dart",
+          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/core/services/sync_service.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given SyncService initialized, When ConnectivityService emits true, Then SyncService.startSync() is triggered automatically",
+          "Given SyncService with pending operations, When startSync() is called, Then operations are processed in FIFO order",
+          "Given operation fails on server, When retryCount < 3, Then operation is retried with exponential backoff (1s, 2s, 4s)",
+          "Given operation fails 3 times, When incrementRetry is called, Then operation is marked as failed and not retried",
+          "Given local operation with timestamp T1 and server has updatedAt T2 where T2 > T1, When conflict detected, Then server version wins",
+          "Given SyncService syncing, When onSyncStatusChanged is listened to, Then SyncStatus.syncing is emitted",
+          "Given SyncService completes sync, When onSyncMessage is listened to, Then 'Sync complete' message is emitted"
+        ]
+      },
+      {
+        "id": "epic-frontend-offline-support-story-4",
+        "title": "Integrate offline support into DI and StepsRepository",
+        "description": "**Description:**\nRegister all new services in the dependency injection container and update StepsRepositoryImpl to use Hive cache with offline operation queuing.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: `lib/core/storage/hive_service.dart` (from Story 1)\n- Read: `lib/core/storage/boxes/steps_box.dart` (from Story 1)\n- Read: `lib/core/storage/sync_queue.dart` (from Story 2)\n- Read: `lib/core/services/connectivity_service.dart` (from Story 2)\n- Read: `lib/core/services/sync_service.dart` (from Story 3)\n- Read: `lib/features/dashboard/data/datasources/steps_remote_datasource.dart`\n- Read: `lib/main.dart` (understand initialization flow)\n- Modify: `lib/core/di/injection_container.dart`\n- Modify: `lib/features/dashboard/data/repositories/steps_repository_impl.dart`\n\n🔧 **PATTERNS TO USE:**\n- Follow existing DI registration pattern in `injection_container.dart`\n- Register services as `sl.registerLazySingleton<Interface>(() => Impl())`\n- Initialize HiveService BEFORE other services that depend on it\n- StepsRepository: read from Hive first, then API as fallback\n- Use SyncQueue to queue write operations when offline\n\n📦 **REQUIRED DI REGISTRATION ORDER:**\n```dart\n// In initializeDependencies(), add after Storage Services section:\n\n// ============================================================\n// Hive Storage Services\n// ============================================================\n\n// Hive Service - Must be initialized first\nsl.registerLazySingleton<HiveService>(HiveServiceImpl.new);\n\n// Storage Boxes - Depend on HiveService\nsl.registerLazySingleton<StepsBox>(() => StepsBox());\nsl.registerLazySingleton<GoalsBox>(() => GoalsBox());\nsl.registerLazySingleton<UserBox>(() => UserBox());\n\n// Sync Queue - Persisted in Hive\nsl.registerLazySingleton<SyncQueue>(() => SyncQueueImpl());\n\n// ============================================================\n// Connectivity & Sync Services\n// ============================================================\n\nsl.registerLazySingleton<ConnectivityService>(ConnectivityServiceImpl.new);\n\nsl.registerLazySingleton<SyncService>(\n  () => SyncServiceImpl(\n    syncQueue: sl<SyncQueue>(),\n    connectivityService: sl<ConnectivityService>(),\n    apiClient: sl<ApiClient>(),\n  ),\n);\n```\n\n📦 **REQUIRED REPOSITORY CHANGES:**\n```dart\n// steps_repository_impl.dart - Add new dependencies\nclass StepsRepositoryImpl implements StepsRepository {\n  StepsRepositoryImpl({\n    required StepsRemoteDatasource datasource,\n    required StepsBox stepsBox,          // NEW\n    required SyncQueue syncQueue,        // NEW\n    required ConnectivityService connectivity, // NEW\n  });\n  \n  @override\n  Future<int> getTodaySteps() async {\n    // 1. Try to get from Hive cache first\n    final cached = _stepsBox.getStepRecord(_todayDateKey);\n    if (cached != null) {\n      // Return cached while fetching fresh data\n      _refreshFromApi(); // Fire and forget\n      return cached['totalSteps'] as int;\n    }\n    \n    // 2. If no cache, fetch from API\n    final steps = await _datasource.getTodaySteps();\n    // 3. Cache the result\n    await _stepsBox.saveStepRecord(_todayDateKey, {'totalSteps': steps});\n    return steps;\n  }\n  \n  @override\n  Future<StepRecord> recordSteps({required int count, required StepSource source}) async {\n    final isOnline = await _connectivity.isConnected;\n    \n    if (isOnline) {\n      // Online: send to API and cache\n      final record = await _datasource.recordSteps(count: count, source: source);\n      await _cacheStepRecord(record);\n      return record;\n    } else {\n      // Offline: queue for sync and return optimistic result\n      final operation = SyncOperation(\n        id: _generateId(),\n        type: SyncOperationType.createStep,\n        payload: {'count': count, 'source': source.name},\n        timestamp: DateTime.now(),\n        retryCount: 0,\n        status: SyncOperationStatus.pending,\n      );\n      await _syncQueue.enqueue(operation);\n      \n      // Return optimistic local record\n      return _createOptimisticRecord(count, source);\n    }\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT forget to update the StepsRepository registration in DI with new dependencies\n- DO NOT block UI when refreshing from API - use fire-and-forget pattern\n- DO NOT throw errors when offline - queue and return cached/optimistic data\n- DO NOT forget to import all new files in injection_container.dart\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- All new services registered in proper order in injection_container.dart\n- StepsRepositoryImpl reads from Hive first (cache-first strategy)\n- Write operations queue to SyncQueue when offline\n- Optimistic responses returned when offline (local temporary record)\n- Cache refreshed when API calls succeed\n- Add `isStale` flag or `lastFetched` metadata for UI to show stale data indicator\n\n🧪 **VERIFICATION:**\n```bash\nflutter analyze\nflutter test --no-pub\n```",
+        "epicId": "epic-frontend-offline-support",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-frontend-offline-support-story-1",
+          "epic-frontend-offline-support-story-2",
+          "epic-frontend-offline-support-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/storage/hive_service.dart",
+          "lib/core/storage/boxes/steps_box.dart",
+          "lib/core/storage/sync_queue.dart",
+          "lib/core/services/connectivity_service.dart",
+          "lib/core/services/sync_service.dart",
+          "lib/features/dashboard/data/datasources/steps_remote_datasource.dart",
+          "lib/main.dart"
+        ],
+        "filesToModify": [
+          "lib/core/di/injection_container.dart",
+          "lib/features/dashboard/data/repositories/steps_repository_impl.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given injection_container.dart, When initializeDependencies() is called, Then HiveService, StepsBox, GoalsBox, UserBox, SyncQueue, ConnectivityService, SyncService are all registered",
+          "Given StepsRepositoryImpl with cached data, When getTodaySteps() is called, Then cached value is returned immediately",
+          "Given StepsRepositoryImpl online, When recordSteps() is called, Then API is called and result is cached in StepsBox",
+          "Given StepsRepositoryImpl offline, When recordSteps() is called, Then operation is queued in SyncQueue and optimistic response returned",
+          "Given StepsRepositoryImpl returns cached data, When data is older than 5 minutes, Then a background refresh is triggered",
+          "Given flutter analyze command, When run on project, Then no errors are reported"
+        ]
+      }
+    ]
+  }
+}
