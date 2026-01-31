@@ -1,0 +1,45 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1ebf92ad00258e0d4f08a5f4",
+    "timestamp": "2026-01-31T13:27:02.229Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-web-docker",
+    "savedAt": "2026-01-31T13:27:02.229Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-web-docker",
+    "storiesCount": 1,
+    "architecture": "## Architecture Overview\n\n### Multi-Stage Docker Build for Flutter Web\n\nThis architecture uses a two-stage Docker build:\n\n**Stage 1 - Build Stage:**\n- Uses `ghcr.io/cirruslabs/flutter:stable` (well-maintained Flutter Docker image)\n- Copies pubspec files first for dependency caching\n- Runs `flutter pub get` then `flutter build web --release`\n- Produces optimized web assets in `/app/build/web`\n\n**Stage 2 - Production Stage:**\n- Uses `nginx:alpine` (~20MB base image)\n- Copies only the built web assets from Stage 1\n- Custom nginx.conf for SPA routing and performance\n\n### Why This Approach:\n1. **Small Image Size**: Alpine-based nginx keeps final image < 50MB\n2. **SPA Routing**: try_files directive ensures all routes load index.html\n3. **Performance**: Gzip compression and cache headers for static assets\n4. **Security**: No build tools in production image, minimal attack surface\n\n### Key Technical Decisions:\n- `ghcr.io/cirruslabs/flutter:stable` over official images (more reliable)\n- `nginx:alpine` over `nginx:latest` (5x smaller image)\n- Separate nginx.conf file for maintainability\n- Comprehensive .dockerignore for fast builds\n\n### Verification Commands:\n```bash\n# Flutter SDK version check (from pubspec.yaml)\n# SDK: ^3.5.0 - compatible with ghcr.io/cirruslabs/flutter:stable\n\n# Build verification\ndocker build -t app-pasos-web .\ndocker images app-pasos-web\n\n# Runtime verification  \ndocker run -p 8080:80 app-pasos-web\ncurl http://localhost:8080/\n```",
+    "stories": [
+      {
+        "id": "epic-frontend-web-docker-story-1",
+        "title": "Create Dockerfile, nginx.conf, and .dockerignore for Flutter web deployment",
+        "epicId": "epic-frontend-web-docker",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          ".gitignore"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "Dockerfile",
+          "nginx.conf",
+          ".dockerignore"
+        ],
+        "acceptanceCriteria": [
+          "Given the Flutter project, When docker build -t app-pasos-web . is run, Then the image builds successfully without errors",
+          "Given the built Docker image, When docker run -p 8080:80 app-pasos-web is executed, Then nginx serves the Flutter web app on port 80",
+          "Given a SPA route like /dashboard, When accessed directly via browser, Then nginx returns index.html (SPA fallback routing)",
+          "Given the built Docker image, When docker images is run, Then the image size is under 50MB",
+          "Given the .dockerignore file, When docker build runs, Then .git, build/, android/, ios/ are excluded from the build context"
+        ],
+        "description": "Create complete Docker configuration for Flutter web deployment.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: [pubspec.yaml](.pubspec.yaml) (SDK version: ^3.5.0), [.gitignore](.gitignore)\n- Modify: NONE\n- Create: [Dockerfile](Dockerfile), [nginx.conf](nginx.conf), [.dockerignore](.dockerignore)\n\n🔧 **PATTERNS TO USE:**\n\n**Dockerfile (Multi-stage build):**\n```dockerfile\n# Stage 1: Build Flutter web app\nFROM ghcr.io/cirruslabs/flutter:stable AS builder\nWORKDIR /app\nCOPY pubspec.* ./\nRUN flutter pub get\nCOPY . .\nRUN flutter build web --release\n\n# Stage 2: Serve with nginx\nFROM nginx:alpine\nCOPY --from=builder /app/build/web /usr/share/nginx/html\nCOPY nginx.conf /etc/nginx/conf.d/default.conf\nEXPOSE 80\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n```\n\n**nginx.conf (SPA routing):**\n```nginx\nserver {\n    listen 80;\n    server_name localhost;\n    root /usr/share/nginx/html;\n    index index.html;\n    \n    # Enable gzip compression\n    gzip on;\n    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript;\n    \n    # SPA fallback - all routes return index.html\n    location / {\n        try_files $uri $uri/ /index.html;\n    }\n    \n    # Cache static assets\n    location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {\n        expires 1y;\n        add_header Cache-Control \"public, immutable\";\n    }\n}\n```\n\n**.dockerignore (exclude unnecessary files):**\n```\n.git\n.gitignore\n.idea\n.vscode\n.dart_tool\n.pub-cache\nbuild\nandroid\nios\nlinux\nmacos\nwindows\ntest\n*.md\n*.log\n.env.example\n.agents\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- ❌ Using `FROM flutter:latest` - this image doesn't exist officially\n- ❌ Using `apt-get install flutter` - use pre-built flutter image\n- ❌ Single-stage Dockerfile - results in huge image with Flutter SDK\n- ❌ Missing `try_files` in nginx - breaks SPA routing\n- ❌ Including .git in Docker context - bloats build time\n- ❌ Missing gzip compression - poor performance\n- ❌ Not exposing port 80 - container won't be accessible\n\n📦 **REQUIRED STRUCTURE:**\n- Dockerfile MUST use multi-stage build\n- Stage 1: Flutter build (ghcr.io/cirruslabs/flutter:stable or similar)\n- Stage 2: nginx:alpine (MUST be alpine for size < 50MB)\n- nginx.conf MUST have try_files for SPA fallback\n- .dockerignore MUST exclude .git, build/, android/, ios/, windows/, linux/, macos/\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Container exposes port 80\n- nginx serves index.html for all non-file routes (SPA behavior)\n- Static assets cached with proper headers\n- Gzip compression enabled\n- Final image size under 50MB (nginx:alpine ~20MB + web assets)\n\n🧪 **VERIFICATION:**\n```bash\n# Build the image\ndocker build -t app-pasos-web .\n\n# Check image size (should be < 50MB)\ndocker images app-pasos-web --format \"{{.Size}}\"\n\n# Run container\ndocker run -d -p 8080:80 app-pasos-web\n\n# Test SPA routing (should return HTML, not 404)\ncurl -I http://localhost:8080/dashboard\n# Expected: HTTP/1.1 200 OK, Content-Type: text/html\n\n# Test static file caching\ncurl -I http://localhost:8080/main.dart.js\n# Expected: Cache-Control header present\n```"
+      }
+    ]
+  }
+}
