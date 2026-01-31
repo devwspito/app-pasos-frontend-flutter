@@ -1,0 +1,78 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1ebf92ad00258e0d4f08a5f4",
+    "timestamp": "2026-01-31T12:16:42.849Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-critical",
+    "savedAt": "2026-01-31T12:16:42.849Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-critical",
+    "storiesCount": 2,
+    "architecture": "## Architecture Design: Auth Guard & SplashPage\n\n### Overview\nThis epic implements two critical frontend security features:\n1. **SplashPage**: Initial screen that checks stored auth token and routes users\n2. **Auth Guard**: GoRouter redirect logic protecting routes based on auth state\n\n### Technical Approach\n\n#### 1. SplashPage (StatefulWidget)\n- Uses `initState()` to trigger async auth check\n- Calls `SecureStorageService.isAuthenticated()` via DI (`sl<SecureStorageService>()`)\n- Navigates using GoRouter's `context.go()` method\n- Displays app logo + LoadingIndicator during check\n- Includes `mounted` check to prevent async navigation issues\n\n#### 2. GoRouter Redirect Guard\n- Uses GoRouter's `redirect` parameter (async function)\n- Checks auth state via `SecureStorageService.isAuthenticated()`\n- Defines public routes: /, /login, /register, /forgot-password\n- Protected routes: /dashboard, /goals, /friends, /profile, /settings\n- Preserves intended destination via query parameter for post-login redirect\n\n### Patterns Used\n- **Clean Architecture**: Presentation layer (pages) separate from domain (storage service)\n- **BLoC Pattern**: AuthBloc already exists for login/logout/register\n- **Dependency Injection**: GetIt service locator via `sl<T>()`\n- **GoRouter**: Declarative routing with redirect guards\n\n### File Changes Summary\n- **CREATE**: `lib/features/auth/presentation/pages/splash_page.dart` (Story 1)\n- **MODIFY**: `lib/core/router/app_router.dart` (Story 2)\n\n### No File Overlap\nStory 1 creates a new file. Story 2 modifies the router. No overlap = no merge conflicts.\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n```bash\nflutter analyze\nflutter build apk --debug\n# or for web:\nflutter build web\n```",
+    "stories": [
+      {
+        "id": "epic-frontend-critical-story-1",
+        "title": "Create SplashPage widget in lib/features/auth/presentation/pages/splash_page.dart",
+        "description": "Create SplashPage that displays app logo, loading indicator, checks stored auth token on init, and navigates to appropriate route.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create the file listed in filesToCreate\n- DO NOT modify app_router.dart - that happens in story-2\n\n📁 **FILES:**\n- Read: lib/features/auth/presentation/pages/login_page.dart (page pattern), lib/shared/widgets/loading_indicator.dart (loading widget), lib/core/storage/secure_storage_service.dart (auth check), lib/core/router/route_names.dart (navigation constants), lib/core/constants/app_constants.dart (app name)\n- Create: lib/features/auth/presentation/pages/splash_page.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `sl<SecureStorageService>()` from lib/core/di/injection_container.dart for DI\n- Use `SecureStorageService.isAuthenticated()` method (returns Future<bool>)\n- Use `LoadingIndicator` widget from lib/shared/widgets/loading_indicator.dart\n- Use `context.go(RouteNames.dashboard)` for authenticated users\n- Use `context.go(RouteNames.login)` for unauthenticated users\n- Use `AppConstants.appName` from lib/core/constants/app_constants.dart for app name\n- Follow StatelessWidget pattern from login_page.dart\n\n📦 **REQUIRED STRUCTURE:**\n```dart\nclass SplashPage extends StatefulWidget {\n  const SplashPage({super.key});\n  @override\n  State<SplashPage> createState() => _SplashPageState();\n}\n\nclass _SplashPageState extends State<SplashPage> {\n  @override\n  void initState() {\n    super.initState();\n    _checkAuthAndNavigate();\n  }\n\n  Future<void> _checkAuthAndNavigate() async {\n    final storage = sl<SecureStorageService>();\n    final isAuthenticated = await storage.isAuthenticated();\n    if (!mounted) return;\n    if (isAuthenticated) {\n      context.go(RouteNames.dashboard);\n    } else {\n      context.go(RouteNames.login);\n    }\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    // Display app logo icon + app name + LoadingIndicator\n  }\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `Navigator.push()` - use GoRouter's `context.go()`\n- DO NOT hardcode route paths - use RouteNames constants\n- DO NOT use CircularProgressIndicator directly - use LoadingIndicator widget\n- DO NOT modify any router files - that's story-2's responsibility\n- DO NOT add 'Coming Soon' or placeholder text\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Scaffold with centered Column containing:\n  - Icon(Icons.directions_walk, size: 80) with theme primary color\n  - SizedBox(height: 24)\n  - Text with AppConstants.appName in headlineMedium style\n  - SizedBox(height: 48)\n  - LoadingIndicator(message: 'Loading...')\n- Auth check executes on initState\n- Navigation completes within 2 seconds\n- Uses mounted check before navigation to avoid async gap issues\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/features/auth/presentation/pages/splash_page.dart\n- Run: flutter build apk --debug (or flutter build web for web)\n- Check: File compiles without errors\n- Check: No linter warnings from very_good_analysis",
+        "epicId": "epic-frontend-critical",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/pages/login_page.dart",
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/router/route_names.dart",
+          "lib/core/constants/app_constants.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "lib/features/auth/presentation/pages/splash_page.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given the app launches, When SplashPage loads, Then it displays app logo icon and loading indicator",
+          "Given SplashPage is displayed, When auth check runs, Then it uses SecureStorageService.isAuthenticated()",
+          "Given user has valid stored token, When auth check completes, Then navigation to /dashboard occurs within 2 seconds",
+          "Given user has no stored token, When auth check completes, Then navigation to /login occurs within 2 seconds",
+          "Given async auth check, When component unmounts before completion, Then no navigation occurs (mounted check)"
+        ]
+      },
+      {
+        "id": "epic-frontend-critical-story-2",
+        "title": "Add SplashPage to router and implement GoRouter redirect auth guard in lib/core/router/app_router.dart",
+        "description": "Modify app_router.dart to replace FoundationReadyScreen with SplashPage at home route AND add redirect logic for auth protection.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify app_router.dart\n- DO NOT create new files\n\n📁 **FILES:**\n- Read: lib/features/auth/presentation/pages/splash_page.dart (created in story-1), lib/core/storage/secure_storage_service.dart (for auth check in redirect)\n- Modify: lib/core/router/app_router.dart\n\n🔧 **PATTERNS TO USE:**\n- Import SplashPage: `import 'package:app_pasos_frontend/features/auth/presentation/pages/splash_page.dart';`\n- Use GoRouter's `redirect` parameter for auth guard\n- Use `sl<SecureStorageService>()` for auth check in redirect\n- Protected routes: /dashboard, /goals, /friends, /profile, /settings and their sub-routes\n- Auth routes: /login, /register, /forgot-password\n\n📦 **REQUIRED CHANGES:**\n\n1. **Add import for SplashPage** at top of file:\n```dart\nimport 'package:app_pasos_frontend/features/auth/presentation/pages/splash_page.dart';\n```\n\n2. **Replace FoundationReadyScreen with SplashPage** in home route:\n```dart\nGoRoute(\n  path: RouteNames.home,\n  name: 'home',\n  builder: (context, state) => const SplashPage(),\n),\n```\n\n3. **Add redirect parameter to GoRouter**:\n```dart\nstatic final GoRouter router = GoRouter(\n  initialLocation: RouteNames.home,\n  debugLogDiagnostics: true,\n  routes: _routes,\n  errorBuilder: _errorBuilder,\n  redirect: _guardRedirect,\n);\n\nstatic Future<String?> _guardRedirect(\n  BuildContext context,\n  GoRouterState state,\n) async {\n  final storage = sl<SecureStorageService>();\n  final isAuthenticated = await storage.isAuthenticated();\n  final currentPath = state.matchedLocation;\n  \n  // Routes that don't require auth\n  final publicRoutes = [\n    RouteNames.home,\n    RouteNames.login,\n    RouteNames.register,\n    RouteNames.forgotPassword,\n  ];\n  \n  // Auth-only routes (redirect away if already logged in)\n  final authRoutes = [\n    RouteNames.login,\n    RouteNames.register,\n  ];\n  \n  final isPublicRoute = publicRoutes.contains(currentPath);\n  final isAuthRoute = authRoutes.contains(currentPath);\n  \n  // Redirect unauthenticated users from protected routes to login\n  if (!isAuthenticated && !isPublicRoute) {\n    return '${RouteNames.login}?redirect=$currentPath';\n  }\n  \n  // Redirect authenticated users from auth routes to dashboard\n  if (isAuthenticated && isAuthRoute) {\n    return RouteNames.dashboard;\n  }\n  \n  // No redirect needed\n  return null;\n}\n```\n\n4. **Remove or keep FoundationReadyScreen class** (can keep for reference or remove since no longer used)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use synchronous auth check - redirect must be async\n- DO NOT remove _PlaceholderScreen or _ErrorScreen - they're still used\n- DO NOT change route paths - only the redirect logic and home route builder\n- DO NOT hardcode route strings - use RouteNames constants\n- DO NOT break existing route definitions\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n- Home route ('/' ) now shows SplashPage instead of FoundationReadyScreen\n- Unauthenticated user accessing /dashboard → redirects to /login?redirect=/dashboard\n- Unauthenticated user accessing /goals → redirects to /login?redirect=/goals\n- Unauthenticated user accessing /friends → redirects to /login?redirect=/friends\n- Authenticated user accessing /login → redirects to /dashboard\n- Authenticated user accessing /register → redirects to /dashboard\n- Public routes (/, /login, /register, /forgot-password) accessible without auth\n\n🧪 **VERIFICATION:**\n- Run: flutter analyze lib/core/router/app_router.dart\n- Run: flutter build apk --debug\n- Check: No compilation errors\n- Check: No linter warnings",
+        "epicId": "epic-frontend-critical",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-critical-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/pages/splash_page.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/router/route_names.dart",
+          "lib/core/di/injection_container.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given the home route ('/'), When accessed, Then SplashPage is displayed (not FoundationReadyScreen)",
+          "Given unauthenticated user, When accessing /dashboard, Then redirect to /login with redirect query parameter",
+          "Given unauthenticated user, When accessing /goals, Then redirect to /login",
+          "Given unauthenticated user, When accessing /friends, Then redirect to /login",
+          "Given authenticated user, When accessing /login, Then redirect to /dashboard",
+          "Given authenticated user, When accessing /register, Then redirect to /dashboard",
+          "Given public route (/forgot-password), When accessed by anyone, Then no redirect occurs"
+        ]
+      }
+    ]
+  }
+}
