@@ -4,9 +4,12 @@
 /// using GoRouter for declarative routing.
 library;
 
+import 'dart:async';
+
 import 'package:app_pasos_frontend/core/constants/app_constants.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/route_names.dart';
+import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:app_pasos_frontend/features/auth/presentation/pages/login_page.dart';
@@ -38,6 +41,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+/// Notifier that triggers GoRouter to re-evaluate redirect logic.
+///
+/// This class extends [ChangeNotifier] and is used with GoRouter's
+/// [refreshListenable] parameter. When [notify] is called, GoRouter
+/// will re-run its redirect logic for the current route.
+///
+/// Example usage:
+/// ```dart
+/// // After login/logout:
+/// AppRouter.notifyAuthChange();
+/// ```
+class _AuthRefreshNotifier extends ChangeNotifier {
+  /// Current authentication status cache.
+  bool _isAuthenticated = false;
+
+  /// Returns the cached authentication status.
+  bool get isAuthenticated => _isAuthenticated;
+
+  /// Checks the current authentication status from secure storage.
+  ///
+  /// Updates the internal [_isAuthenticated] flag and notifies listeners
+  /// if the status has changed.
+  Future<void> checkAuth() async {
+    final wasAuthenticated = _isAuthenticated;
+    _isAuthenticated = await sl<SecureStorageService>().isAuthenticated();
+    if (wasAuthenticated != _isAuthenticated) {
+      notifyListeners();
+    }
+  }
+
+  /// Notifies all listeners that the auth state may have changed.
+  ///
+  /// Call this after login, logout, or any auth state change to trigger
+  /// GoRouter to re-evaluate its redirect logic.
+  void notify() {
+    notifyListeners();
+  }
+}
+
 /// Main application router configuration.
 ///
 /// Provides a configured [GoRouter] instance with all application routes.
@@ -50,17 +92,95 @@ import 'package:go_router/go_router.dart';
 /// )
 /// ```
 abstract final class AppRouter {
+  /// Auth state notifier for triggering navigation refreshes.
+  static final _AuthRefreshNotifier _authNotifier = _AuthRefreshNotifier();
+
+  /// List of routes that require authentication.
+  ///
+  /// Users not authenticated will be redirected to login when accessing these.
+  static const List<String> _protectedRoutePrefixes = [
+    RouteNames.dashboard,
+    RouteNames.profile,
+    RouteNames.settings,
+    RouteNames.friends,
+    RouteNames.goals,
+  ];
+
+  /// List of auth routes where authenticated users should not access.
+  ///
+  /// Authenticated users will be redirected to dashboard when accessing these.
+  static const List<String> _authRoutes = [
+    RouteNames.login,
+    RouteNames.register,
+  ];
+
+  /// Notifies the router that authentication state has changed.
+  ///
+  /// Call this after login, logout, or token refresh to trigger
+  /// the router to re-evaluate redirect logic.
+  ///
+  /// Example:
+  /// ```dart
+  /// await authService.login(credentials);
+  /// AppRouter.notifyAuthChange();
+  /// ```
+  static void notifyAuthChange() => _authNotifier.notify();
+
+  /// Checks if a given path is a protected route.
+  static bool _isProtectedRoute(String path) {
+    return _protectedRoutePrefixes.any((prefix) => path.startsWith(prefix));
+  }
+
+  /// Checks if a given path is an auth route.
+  static bool _isAuthRoute(String path) {
+    return _authRoutes.contains(path);
+  }
+
+  /// Redirect callback for handling authentication-based navigation.
+  ///
+  /// Returns:
+  /// - [RouteNames.login] if user is NOT authenticated and on protected route
+  /// - [RouteNames.dashboard] if user IS authenticated and on auth route
+  /// - `null` to allow navigation to proceed normally
+  static FutureOr<String?> _redirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final currentPath = state.uri.path;
+    final isAuthenticated = await sl<SecureStorageService>().isAuthenticated();
+
+    // Update the notifier's cached auth state
+    _authNotifier._isAuthenticated = isAuthenticated;
+
+    // If NOT authenticated and trying to access protected route → redirect to login
+    if (!isAuthenticated && _isProtectedRoute(currentPath)) {
+      return RouteNames.login;
+    }
+
+    // If authenticated and trying to access auth route → redirect to dashboard
+    if (isAuthenticated && _isAuthRoute(currentPath)) {
+      return RouteNames.dashboard;
+    }
+
+    // No redirect needed
+    return null;
+  }
+
   /// The main GoRouter instance for the application.
   ///
   /// This router is configured with:
   /// - Initial location set to home route
   /// - All application routes defined
   /// - Error page builder for unknown routes
+  /// - Authentication redirect logic
+  /// - Refresh listenable for auth state changes
   static final GoRouter router = GoRouter(
     initialLocation: RouteNames.home,
     debugLogDiagnostics: true,
     routes: _routes,
     errorBuilder: _errorBuilder,
+    redirect: _redirect,
+    refreshListenable: _authNotifier,
   );
 
   /// List of all application routes.
