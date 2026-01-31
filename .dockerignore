@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# IDE and editor files
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Flutter/Dart build artifacts
+.dart_tool
+.pub-cache
+.pub
+build
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Platform-specific directories (not needed for web build)
+android
+ios
+linux
+macos
+windows
+
+# Test files
+test
+integration_test
+
+# Documentation
+*.md
+doc
+
+# Logs and misc
+*.log
+.DS_Store
+.atom
+.buildlog
+.history
+.svn
+
+# Environment files (use build args instead)
+.env.example
+.env.local
+.env.development
+.env.production
+
+# Agent and CI files
+.agents
+.github
+.circleci
+
+# Symbolication and obfuscation
+app.*.symbols
+app.*.map.json
