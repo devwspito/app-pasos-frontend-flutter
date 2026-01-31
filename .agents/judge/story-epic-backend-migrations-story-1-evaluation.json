@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-01-31T22:20:43.936Z",
+    "phase": "judge",
+    "storyId": "epic-backend-migrations-story-1",
+    "savedAt": "2026-01-31T22:20:43.936Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-backend-migrations-story-1",
+    "verdict": "rejected",
+    "feedback": "🚨 AUTOMATIC REJECTION: Developer did not create required files.\n\nMissing files:\n- migrations/.gitkeep (empty file)\n\nThe developer must create these files before the code can be reviewed.",
+    "issues": [
+      "Failed after 3 attempts - human intervention required"
+    ]
+  }
+}
