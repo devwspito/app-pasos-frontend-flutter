@@ -6,7 +6,6 @@ library;
 
 import 'dart:async';
 
-import 'package:app_pasos_frontend/core/constants/app_constants.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/route_names.dart';
 import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
@@ -37,6 +36,7 @@ import 'package:app_pasos_frontend/features/sharing/presentation/pages/add_frien
 import 'package:app_pasos_frontend/features/sharing/presentation/pages/friend_activity_page.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/pages/friend_requests_page.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/pages/friends_list_page.dart';
+import 'package:app_pasos_frontend/features/splash/presentation/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -188,7 +188,7 @@ abstract final class AppRouter {
     GoRoute(
       path: RouteNames.home,
       name: 'home',
-      builder: (context, state) => const FoundationReadyScreen(),
+      builder: (context, state) => const SplashPage(),
     ),
     GoRoute(
       path: RouteNames.login,
@@ -347,8 +347,8 @@ abstract final class AppRouter {
       builder: (context, state) {
         final goalId = state.uri.queryParameters['goalId'] ?? '';
         return BlocProvider(
-          create: (_) => sl<EditGoalBloc>()
-            ..add(EditGoalLoadRequested(goalId: goalId)),
+          create: (_) =>
+              sl<EditGoalBloc>()..add(EditGoalLoadRequested(goalId: goalId)),
           child: EditGoalPage(goalId: goalId),
         );
       },
@@ -433,67 +433,6 @@ class _PlaceholderScreen extends StatelessWidget {
       default:
         return '/unknown';
     }
-  }
-}
-
-/// Home screen indicating the foundation is ready.
-///
-/// This screen displays a confirmation that the app foundation is properly
-/// set up with dependency injection and core services.
-class FoundationReadyScreen extends StatelessWidget {
-  /// Creates the Foundation Ready screen.
-  const FoundationReadyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                size: 80,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'App Pasos',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Foundation Ready',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                'Dependency injection initialized\n'
-                'Core services registered\n'
-                'GoRouter navigation configured',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-01-31T18:07:15.103Z",
+    "phase": "judge",
+    "storyId": "epic-frontend-splash-auth-story-1",
+    "savedAt": "2026-01-31T18:07:15.103Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-frontend-splash-auth-story-1",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
