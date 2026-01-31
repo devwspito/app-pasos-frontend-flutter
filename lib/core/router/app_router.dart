@@ -29,6 +29,9 @@ import 'package:app_pasos_frontend/features/goals/presentation/pages/goal_detail
 import 'package:app_pasos_frontend/features/goals/presentation/pages/goal_rankings_page.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/pages/goals_list_page.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/pages/invite_members_page.dart';
+import 'package:app_pasos_frontend/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:app_pasos_frontend/features/profile/presentation/bloc/profile_event.dart';
+import 'package:app_pasos_frontend/features/profile/presentation/pages/profile_page.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/bloc/friend_search_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/presentation/bloc/sharing_event.dart';
@@ -217,9 +220,9 @@ abstract final class AppRouter {
     GoRoute(
       path: RouteNames.profile,
       name: 'profile',
-      builder: (context, state) => const _PlaceholderScreen(
-        routeName: 'Profile',
-        icon: Icons.person,
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<ProfileBloc>()..add(const ProfileLoadRequested()),
+        child: const ProfilePage(),
       ),
     ),
     GoRoute(
