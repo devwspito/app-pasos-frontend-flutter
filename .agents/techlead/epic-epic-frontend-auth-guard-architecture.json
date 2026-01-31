@@ -1,0 +1,45 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-01-31T15:57:58.918Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-auth-guard",
+    "savedAt": "2026-01-31T15:57:58.918Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-auth-guard",
+    "storiesCount": 1,
+    "architecture": "## Auth Guard Architecture\n\n### Overview\nImplement GoRouter-based auth guard using the existing BLoC pattern and SecureStorageService for token validation.\n\n### Key Components\n\n1. **SecureStorageService** (existing)\n   - `isAuthenticated()`: async method checking if auth token exists\n   - Path: lib/core/storage/secure_storage_service.dart\n\n2. **_AuthRefreshNotifier** (new, inside app_router.dart)\n   - Extends ChangeNotifier\n   - Provides Listenable for GoRouter refresh\n   - Called when auth state changes\n\n3. **GoRouter Configuration** (modified)\n   - `redirect`: Async callback using SecureStorageService\n   - `refreshListenable`: Connected to _AuthRefreshNotifier\n\n### Route Protection Matrix\n| Route Pattern | Protected? | Redirect (unauth) | Redirect (auth) |\n|--------------|------------|-------------------|------------------|\n| / | No | - | - |\n| /login | No | - | /dashboard |\n| /register | No | - | /dashboard |\n| /forgot-password | No | - | - |\n| /dashboard | Yes | /login | - |\n| /profile | Yes | /login | - |\n| /settings | Yes | /login | - |\n| /friends/* | Yes | /login | - |\n| /goals/* | Yes | /login | - |\n\n### SOLID Compliance\n- **SRP**: Auth guard logic isolated in redirect callback\n- **OCP**: New routes can be added to protection list without modifying core logic\n- **DIP**: Depends on SecureStorageService abstraction, not implementation\n\n### Verification Commands\n```bash\nflutter analyze\nflutter test\n```",
+    "stories": [
+      {
+        "id": "epic-frontend-auth-guard-story-1",
+        "title": "Add GoRouter redirect callback and refreshListenable to lib/core/router/app_router.dart",
+        "description": "Implement complete auth guard functionality in GoRouter with redirect logic and auth state refresh.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/presentation/bloc/auth_bloc.dart, lib/features/auth/presentation/bloc/auth_state.dart, lib/core/storage/secure_storage_service.dart\n- Modify: lib/core/router/app_router.dart, lib/core/di/injection_container.dart\n- Create: [] (NONE - only modify existing files)\n\n🔧 **PATTERNS TO USE:**\n- Use `sl<SecureStorageService>().isAuthenticated()` for auth check (async method, GoRouter redirect supports FutureOr)\n- Use `sl<T>()` pattern from injection_container.dart for DI\n- Use `RouteNames.login`, `RouteNames.dashboard`, `RouteNames.register` from route_names.dart\n- GoRouter redirect callback signature: `FutureOr<String?> redirect(BuildContext context, GoRouterState state)`\n\n📦 **REQUIRED IMPLEMENTATION:**\n\n**Part 1: AuthRefreshNotifier (inside app_router.dart)**\n- Create private class `_AuthRefreshNotifier extends ChangeNotifier`\n- Add `bool _isAuthenticated = false` property\n- Add `Future<void> checkAuth()` method that calls `sl<SecureStorageService>().isAuthenticated()`\n- Add `void notify()` method that calls `notifyListeners()`\n\n**Part 2: GoRouter redirect callback**\n- Protected routes: /dashboard, /profile, /settings, /friends, /friends/*, /goals, /goals/*\n- Auth routes: /login, /register, /forgot-password\n- Public routes: / (home)\n- Logic:\n  1. Check `await sl<SecureStorageService>().isAuthenticated()`\n  2. If NOT authenticated AND on protected route → redirect to /login\n  3. If authenticated AND on auth route (/login, /register) → redirect to /dashboard\n  4. Otherwise → return null (no redirect)\n\n**Part 3: refreshListenable**\n- Create static `_AuthRefreshNotifier _authNotifier = _AuthRefreshNotifier()` in AppRouter\n- Pass `refreshListenable: _authNotifier` to GoRouter constructor\n- Export `static void notifyAuthChange() => _authNotifier.notify()` method\n\n**Part 4: injection_container.dart changes**\n- NO CHANGES NEEDED - SecureStorageService already registered\n- The notifier is internal to AppRouter, not DI-registered\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- ❌ DO NOT create new files - modify existing only\n- ❌ DO NOT use `context.read<AuthBloc>()` in redirect (no BuildContext with BLoC provider)\n- ❌ DO NOT create infinite redirect loops (check current path before redirecting)\n- ❌ DO NOT make redirect synchronous - `isAuthenticated()` is async\n- ❌ DO NOT use hardcoded route strings - use RouteNames constants\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Unauthenticated users on /dashboard, /profile, /settings, /friends/*, /goals/* redirect to /login\n2. Authenticated users on /login, /register redirect to /dashboard\n3. Auth state checked via SecureStorageService.isAuthenticated()\n4. GoRouter refreshes navigation when notifyAuthChange() is called\n5. No infinite redirect loops (if on /login and unauthenticated, stay on /login)\n\n🧪 **VERIFICATION:**\n```bash\ncd /home/luiscorrea2368/agent-workspace-prod/task-1bb751c1ac1b94470511c071/app-pasos-frontend-flutter\nflutter analyze lib/core/router/app_router.dart lib/core/di/injection_container.dart\nflutter test --no-pub\n```\n- Typecheck passes with no errors\n- All route names use RouteNames constants\n- No infinite redirect possible",
+        "epicId": "epic-frontend-auth-guard",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/bloc/auth_bloc.dart",
+          "lib/features/auth/presentation/bloc/auth_state.dart",
+          "lib/core/storage/secure_storage_service.dart",
+          "lib/core/router/route_names.dart"
+        ],
+        "filesToModify": [
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given an unauthenticated user, When they navigate to /dashboard, Then they are redirected to /login",
+          "Given an unauthenticated user, When they navigate to any protected route (/profile, /settings, /friends, /goals), Then they are redirected to /login",
+          "Given an authenticated user, When they navigate to /login or /register, Then they are redirected to /dashboard",
+          "Given a user on /login who is unauthenticated, When the page loads, Then they stay on /login (no infinite redirect)",
+          "Given auth state changes (login/logout), When AppRouter.notifyAuthChange() is called, Then GoRouter refreshes and applies redirect rules"
+        ]
+      }
+    ]
+  }
+}
