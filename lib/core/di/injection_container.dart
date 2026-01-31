@@ -9,14 +9,14 @@ import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service_impl.dart';
+import 'package:app_pasos_frontend/core/services/health_service.dart';
+import 'package:app_pasos_frontend/core/services/health_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/notification_handler.dart';
 import 'package:app_pasos_frontend/core/services/notification_service.dart';
 import 'package:app_pasos_frontend/core/services/notification_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/websocket_event_handler.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service_impl.dart';
-import 'package:app_pasos_frontend/core/services/health_service.dart';
-import 'package:app_pasos_frontend/core/services/health_service_impl.dart';
 import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
 import 'package:app_pasos_frontend/core/utils/logger.dart';
 import 'package:app_pasos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -52,6 +52,15 @@ import 'package:app_pasos_frontend/features/goals/presentation/bloc/create_goal_
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/edit_goal_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goal_detail_bloc.dart';
 import 'package:app_pasos_frontend/features/goals/presentation/bloc/goals_list_bloc.dart';
+import 'package:app_pasos_frontend/features/profile/data/datasources/profile_remote_datasource.dart';
+import 'package:app_pasos_frontend/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:app_pasos_frontend/features/profile/domain/repositories/profile_repository.dart';
+import 'package:app_pasos_frontend/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:app_pasos_frontend/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:app_pasos_frontend/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:app_pasos_frontend/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:app_pasos_frontend/features/settings/domain/repositories/settings_repository.dart';
+import 'package:app_pasos_frontend/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:app_pasos_frontend/features/sharing/data/datasources/sharing_remote_datasource.dart';
 import 'package:app_pasos_frontend/features/sharing/data/repositories/sharing_repository_impl.dart';
 import 'package:app_pasos_frontend/features/sharing/domain/repositories/sharing_repository.dart';
@@ -374,6 +383,52 @@ Future<void> initializeDependencies() async {
       updateGoalUseCase: sl<UpdateGoalUseCase>(),
       getGoalDetailsUseCase: sl<GetGoalDetailsUseCase>(),
     ),
+  );
+
+  // ============================================================
+  // Profile Feature
+  // ============================================================
+
+  // Data Sources
+  sl.registerLazySingleton<ProfileRemoteDatasource>(
+    () => ProfileRemoteDatasourceImpl(client: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      datasource: sl<ProfileRemoteDatasource>(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetProfileUseCase>(
+    () => GetProfileUseCase(repository: sl<ProfileRepository>()),
+  );
+  sl.registerLazySingleton<UpdateProfileUseCase>(
+    () => UpdateProfileUseCase(repository: sl<ProfileRepository>()),
+  );
+
+  // Blocs (Factory - new instance per use)
+  sl.registerFactory<ProfileBloc>(
+    () => ProfileBloc(
+      getProfileUseCase: sl<GetProfileUseCase>(),
+      updateProfileUseCase: sl<UpdateProfileUseCase>(),
+    ),
+  );
+
+  // ============================================================
+  // Settings Feature
+  // ============================================================
+
+  // Repositories (Settings uses storage only, no remote datasource)
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(storage: sl<SecureStorageService>()),
+  );
+
+  // Blocs (Factory - new instance per use)
+  sl.registerFactory<SettingsBloc>(
+    () => SettingsBloc(settingsRepository: sl<SettingsRepository>()),
   );
 }
 
