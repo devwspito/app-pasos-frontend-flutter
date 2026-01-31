@@ -9,15 +9,20 @@ import 'package:app_pasos_frontend/core/errors/error_handler.dart';
 import 'package:app_pasos_frontend/core/network/api_client.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service_impl.dart';
+import 'package:app_pasos_frontend/core/services/connectivity_service.dart';
 import 'package:app_pasos_frontend/core/services/notification_handler.dart';
 import 'package:app_pasos_frontend/core/services/notification_service.dart';
 import 'package:app_pasos_frontend/core/services/notification_service_impl.dart';
+import 'package:app_pasos_frontend/core/services/sync_service.dart';
 import 'package:app_pasos_frontend/core/services/websocket_event_handler.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service.dart';
 import 'package:app_pasos_frontend/core/services/websocket_service_impl.dart';
 import 'package:app_pasos_frontend/core/services/health_service.dart';
 import 'package:app_pasos_frontend/core/services/health_service_impl.dart';
+import 'package:app_pasos_frontend/core/storage/boxes/steps_box.dart';
+import 'package:app_pasos_frontend/core/storage/hive_service.dart';
 import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
+import 'package:app_pasos_frontend/core/storage/sync_queue.dart';
 import 'package:app_pasos_frontend/core/utils/logger.dart';
 import 'package:app_pasos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:app_pasos_frontend/features/auth/data/repositories/auth_repository_impl.dart';
@@ -125,12 +130,42 @@ Future<void> initializeDependencies() async {
   );
 
   // ============================================================
+  // Hive Storage Services
+  // ============================================================
+
+  // Hive Service - Must be initialized first for offline storage
+  sl.registerLazySingleton<HiveService>(HiveServiceImpl.new);
+
+  // Storage Boxes - Depend on HiveService being initialized
+  sl.registerLazySingleton<StepsBox>(StepsBox.new);
+
+  // Sync Queue - Persisted in Hive for offline operation queuing
+  sl.registerLazySingleton<SyncQueue>(SyncQueueImpl.new);
+
+  // ============================================================
+  // Connectivity & Sync Services
+  // ============================================================
+
+  // Connectivity Service - For monitoring network status
+  sl.registerLazySingleton<ConnectivityService>(ConnectivityServiceImpl.new);
+
+  // ============================================================
   // Network Services
   // ============================================================
 
   // API Client - Depends on SecureStorageService for auth token management
   sl.registerLazySingleton<ApiClient>(
     () => ApiClient(storage: sl<SecureStorageService>()),
+  );
+
+  // Sync Service - For processing offline operations when online
+  // Depends on SyncQueue, ConnectivityService, and ApiClient
+  sl.registerLazySingleton<SyncService>(
+    () => SyncServiceImpl(
+      syncQueue: sl<SyncQueue>(),
+      connectivityService: sl<ConnectivityService>(),
+      apiClient: sl<ApiClient>(),
+    ),
   );
 
   // ============================================================
@@ -227,7 +262,12 @@ Future<void> initializeDependencies() async {
 
   // Repositories
   sl.registerLazySingleton<StepsRepository>(
-    () => StepsRepositoryImpl(datasource: sl<StepsRemoteDatasource>()),
+    () => StepsRepositoryImpl(
+      datasource: sl<StepsRemoteDatasource>(),
+      stepsBox: sl<StepsBox>(),
+      syncQueue: sl<SyncQueue>(),
+      connectivity: sl<ConnectivityService>(),
+    ),
   );
 
   // Use Cases
