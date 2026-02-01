@@ -1,0 +1,49 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-01-31T23:58:48.064Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-dockerfile",
+    "savedAt": "2026-01-31T23:58:48.064Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-dockerfile",
+    "storiesCount": 1,
+    "architecture": "Multi-stage Docker build architecture for Flutter web:\n\n**Stage 1 - Build Stage (Flutter SDK):**\n- Base image: ghcr.io/cirruslabs/flutter:3.24.0 (official Cirrus Labs Flutter image)\n- Dependency caching: Copy pubspec.yaml/pubspec.lock first, run pub get\n- Environment injection: Build args (API_BASE_URL, ENV, ENABLE_ANALYTICS) create .env file\n- Build command: flutter build web --release --base-href \"/\"\n- Output: /app/build/web (static HTML/JS/CSS files)\n\n**Stage 2 - Runtime Stage (nginx):**\n- Base image: nginx:alpine (minimal footprint ~23MB)\n- Custom nginx.conf with SPA routing (try_files $uri $uri/ /index.html)\n- Gzip compression enabled for text/css/javascript/json\n- Static asset caching (1 year for immutable assets)\n- Security headers (X-Frame-Options, X-Content-Type-Options)\n- Healthcheck: wget to localhost:80 every 30s\n\n**Docker Context Optimization:**\n- .dockerignore excludes ~500MB of unnecessary files (android/, ios/, .dart_tool/, build/)\n- Final image size: ~25MB (nginx:alpine + built web assets)\n- Build time: ~2-3 minutes (with dependency caching)\n\n**Environment Configuration:**\n- Build-time injection via --build-arg (secrets never stored in image layers)\n- flutter_dotenv reads .env created during build\n- Supports API_BASE_URL, ENV, ENABLE_ANALYTICS, and other vars from .env.example",
+    "stories": [
+      {
+        "id": "epic-frontend-dockerfile-story-1",
+        "title": "Create multi-stage Dockerfile, nginx.conf, and .dockerignore for Flutter web",
+        "description": "Create complete Docker configuration for building and serving Flutter web application.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: [pubspec.yaml](pubspec.yaml), [.gitignore](.gitignore), [web/index.html](web/index.html), [.env.example](.env.example)\n- Modify: None\n- Create: [Dockerfile](Dockerfile), [nginx.conf](nginx.conf), [.dockerignore](.dockerignore)\n\n🔧 **PATTERNS TO USE:**\n\n**Dockerfile (multi-stage):**\n```dockerfile\n# Stage 1: Build Flutter web\nFROM ghcr.io/cirruslabs/flutter:3.24.0 AS build\nWORKDIR /app\n\n# Copy dependency files first (cache layer)\nCOPY pubspec.yaml pubspec.lock ./\nRUN flutter pub get\n\n# Copy source and build\nCOPY . .\n\n# Build args for environment configuration\nARG API_BASE_URL=http://localhost:3000/api\nARG ENV=production\nARG ENABLE_ANALYTICS=true\n\n# Create .env file from build args\nRUN echo \"API_BASE_URL=$API_BASE_URL\" > .env && \\\n    echo \"ENV=$ENV\" >> .env && \\\n    echo \"ENABLE_ANALYTICS=$ENABLE_ANALYTICS\" >> .env\n\n# Build web release\nRUN flutter build web --release --base-href \"/\"\n\n# Stage 2: Serve with nginx\nFROM nginx:alpine\n\n# Copy custom nginx config\nCOPY nginx.conf /etc/nginx/nginx.conf\n\n# Copy built web files\nCOPY --from=build /app/build/web /usr/share/nginx/html\n\n# Healthcheck\nHEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1\n\nEXPOSE 80\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n```\n\n**nginx.conf (SPA routing):**\n```nginx\nworker_processes auto;\nerror_log /var/log/nginx/error.log warn;\npid /var/run/nginx.pid;\n\nevents {\n    worker_connections 1024;\n}\n\nhttp {\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n\n    # Logging\n    log_format main '$remote_addr - $remote_user [$time_local] \"$request\" '\n                    '$status $body_bytes_sent \"$http_referer\" '\n                    '\"$http_user_agent\"';\n    access_log /var/log/nginx/access.log main;\n\n    sendfile on;\n    keepalive_timeout 65;\n\n    # Gzip compression\n    gzip on;\n    gzip_vary on;\n    gzip_min_length 1024;\n    gzip_types text/plain text/css text/javascript application/javascript application/json;\n\n    server {\n        listen 80;\n        server_name localhost;\n        root /usr/share/nginx/html;\n        index index.html;\n\n        # SPA fallback - all routes to index.html\n        location / {\n            try_files $uri $uri/ /index.html;\n        }\n\n        # Cache static assets\n        location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {\n            expires 1y;\n            add_header Cache-Control \"public, immutable\";\n        }\n\n        # Security headers\n        add_header X-Frame-Options \"SAMEORIGIN\" always;\n        add_header X-Content-Type-Options \"nosniff\" always;\n    }\n}\n```\n\n**.dockerignore:**\n```\n# Git\n.git\n.gitignore\n\n# Build artifacts\nbuild/\n.dart_tool/\n.pub-cache/\n.pub/\n\n# Platform-specific (not needed for web)\nandroid/\nios/\nlinux/\nmacos/\nwindows/\n\n# IDE\n.idea/\n.vscode/\n*.iml\n*.ipr\n*.iws\n\n# Logs and temp\n*.log\n*.class\n*.pyc\n*.swp\n.DS_Store\n\n# Secrets (use build args instead)\n.env\n\n# Flutter generated\n.flutter-plugins\n.flutter-plugins-dependencies\n\n# Documentation and test\n*.md\ntest/\n.agents/\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- ❌ DO NOT use `flutter/flutter` Docker image - it's deprecated, use `ghcr.io/cirruslabs/flutter`\n- ❌ DO NOT copy .env file directly into image - use build args for secrets\n- ❌ DO NOT skip the healthcheck - required for container orchestration\n- ❌ DO NOT forget try_files fallback - SPA routing will break without it\n- ❌ DO NOT include android/ios folders in Docker context - wastes build time\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Dockerfile Stage 1 uses Flutter SDK to build web release\n2. Dockerfile Stage 2 uses nginx:alpine to serve build/web output\n3. Build args allow passing API_BASE_URL, ENV, ENABLE_ANALYTICS at build time\n4. nginx.conf configures SPA routing with try_files fallback to index.html\n5. nginx.conf enables gzip compression for text/css/javascript\n6. nginx.conf sets cache headers for static assets (1 year for js/css/images)\n7. Healthcheck verifies nginx is responding on port 80\n8. .dockerignore excludes build artifacts, platform folders, IDE files, secrets\n\n🧪 **VERIFICATION:**\n```bash\n# Build the image\ndocker build -t app-pasos-web \\\n  --build-arg API_BASE_URL=http://api.example.com/api \\\n  --build-arg ENV=production .\n\n# Run container\ndocker run -d -p 8080:80 --name pasos-test app-pasos-web\n\n# Test healthcheck\ncurl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/\n# Should return 200\n\n# Test SPA routing (should return index.html, not 404)\ncurl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/some/spa/route\n# Should return 200\n\n# Cleanup\ndocker stop pasos-test && docker rm pasos-test\n```",
+        "epicId": "epic-frontend-dockerfile",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "pubspec.yaml",
+          ".gitignore",
+          "web/index.html",
+          ".env.example"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "Dockerfile",
+          "nginx.conf",
+          ".dockerignore"
+        ],
+        "acceptanceCriteria": [
+          "Given a Flutter web project, when building with Dockerfile, then Stage 1 uses Flutter SDK (ghcr.io/cirruslabs/flutter:3.24.0) to run flutter build web --release",
+          "Given the Dockerfile build, when Stage 2 runs, then nginx:alpine serves the built files from /usr/share/nginx/html",
+          "Given the nginx.conf, when any route is requested (e.g., /dashboard, /settings), then try_files falls back to index.html for SPA routing",
+          "Given the .dockerignore, when Docker builds, then build/, .dart_tool/, android/, ios/, linux/, macos/, windows/, .git/, .env are excluded",
+          "Given the Dockerfile, when building, then build args API_BASE_URL, ENV, ENABLE_ANALYTICS can be passed to configure the app",
+          "Given the container is running, when healthcheck runs, then wget verifies port 80 responds successfully",
+          "Given the nginx.conf, when serving static assets (js/css/images), then Cache-Control headers set 1 year expiry"
+        ]
+      }
+    ]
+  }
+}
