@@ -4,7 +4,8 @@
 /// 1. Ensuring Flutter bindings are ready
 /// 2. Loading environment variables from .env file
 /// 3. Initializing dependency injection
-/// 4. Running the main App widget
+/// 4. Initializing Sentry for error tracking (if enabled)
+/// 5. Running the main App widget
 ///
 /// ## Shared Widgets Exports
 ///
@@ -24,6 +25,7 @@
 library;
 
 import 'package:app_pasos_frontend/app.dart';
+import 'package:app_pasos_frontend/core/config/sentry_config.dart';
 import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/notification_handler.dart';
@@ -31,6 +33,7 @@ import 'package:app_pasos_frontend/core/services/notification_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// Application entry point.
 ///
@@ -113,6 +116,23 @@ Future<void> main() async {
     debugPrint('Running on web - skipping native service initialization');
   }
 
-  // Start the application.
-  runApp(const App());
+  // Start the application with Sentry error tracking if enabled.
+  // Sentry wraps the app to capture uncaught errors and performance data.
+  if (SentryConfig.isEnabled) {
+    await SentryFlutter.init(
+      (options) {
+        options
+          ..dsn = SentryConfig.dsn
+          ..environment = SentryConfig.environment
+          ..tracesSampleRate = SentryConfig.tracesSampleRate
+          ..attachScreenshot = true
+          ..attachViewHierarchy = true;
+      },
+      appRunner: () => runApp(const App()),
+    );
+  } else {
+    // Sentry not configured - run app directly
+    debugPrint('Sentry not enabled - DSN not configured');
+    runApp(const App());
+  }
 }
