@@ -1,0 +1,100 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-02-01T03:10:38.575Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-error-tracking",
+    "savedAt": "2026-02-01T03:10:38.576Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-error-tracking",
+    "storiesCount": 3,
+    "architecture": "## Sentry Flutter Integration Architecture\n\n### Overview\nThis epic integrates Sentry error tracking into the existing Flutter app following established codebase patterns.\n\n### File Structure\n```\nlib/\n├── core/\n│   ├── config/\n│   │   └── sentry_config.dart  # NEW: Sentry configuration\n│   ├── errors/\n│   │   ├── error_handler.dart  # MODIFY: Add Sentry capture\n│   │   └── app_exceptions.dart # READ: Exception types\n│   └── network/\n│       └── api_endpoints.dart  # READ: Pattern reference\n├── main.dart                    # MODIFY: SentryFlutter.init wrapper\n└── app.dart                     # MODIFY: Add navigator observer\n```\n\n### Key Patterns Used\n1. **Environment Variables**: `String.fromEnvironment('SENTRY_DSN')` pattern from ApiEndpoints\n2. **Abstract Final Class**: Static getters for config, no instantiation needed\n3. **Conditional Initialization**: Check `SentryConfig.isEnabled` before Sentry calls\n4. **Existing Error Handler Extension**: Add Sentry capture alongside existing logging\n\n### Setup Commands\n```bash\nflutter pub get\n```\n\n### Verification Commands\n- Typecheck: `dart analyze lib/`\n- Build: `flutter build apk --debug`\n\n### Environment Variables Required\nAdd to `.env` and compile-time args:\n- `SENTRY_DSN` - Sentry project DSN (leave empty to disable)\n- `ENV` - Environment name (development/staging/production)\n\n### SOLID Compliance\n- **SRP**: SentryConfig only handles Sentry configuration\n- **OCP**: ErrorHandler extended with new methods, existing behavior preserved\n- **DIP**: SentryConfig abstracts Sentry configuration details",
+    "stories": [
+      {
+        "id": "epic-frontend-error-tracking-story-1",
+        "title": "Add sentry_flutter dependency and create SentryConfig class in lib/core/config/sentry_config.dart",
+        "description": "Install sentry_flutter SDK and create the SentryConfig configuration class.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/network/api_endpoints.dart (for String.fromEnvironment pattern), .env (for environment variables pattern)\n- Modify: pubspec.yaml\n- Create: lib/core/config/sentry_config.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `String.fromEnvironment()` pattern from `ApiEndpoints` for compile-time env vars\n- Create abstract final class `SentryConfig` following `ApiEndpoints` pattern\n- DSN should have fallback empty string (disabled if not provided)\n- Environment detection: use existing `ENV` variable pattern\n\n📦 **IMPLEMENTATION DETAILS:**\n1. In `pubspec.yaml`, add `sentry_flutter: ^8.0.0` under dependencies\n2. Create `lib/core/config/sentry_config.dart` with:\n   - `static String get dsn` using `String.fromEnvironment('SENTRY_DSN', defaultValue: '')`\n   - `static String get environment` using `String.fromEnvironment('ENV', defaultValue: 'development')`\n   - `static double get tracesSampleRate` returning 1.0 for dev, 0.2 for prod\n   - `static bool get isEnabled` returning `dsn.isNotEmpty`\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `dotenv.env['SENTRY_DSN']` - this is runtime, use compile-time `String.fromEnvironment()`\n- DO NOT hardcode DSN values - use environment variables\n- DO NOT create a class that needs instantiation - use `abstract final class` with static getters\n\n🧪 **VERIFICATION:**\n1. Run: `flutter pub get`\n2. Run: `dart analyze lib/core/config/sentry_config.dart`\n3. The sentry_config.dart should have no analysis errors",
+        "epicId": "epic-frontend-error-tracking",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/network/api_endpoints.dart",
+          ".env"
+        ],
+        "filesToModify": [
+          "pubspec.yaml"
+        ],
+        "filesToCreate": [
+          "lib/core/config/sentry_config.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given pubspec.yaml, When I check dependencies, Then sentry_flutter ^8.0.0 is listed",
+          "Given lib/core/config/sentry_config.dart exists, When I read it, Then it has static dsn getter using String.fromEnvironment",
+          "Given SentryConfig.dsn is empty string, When I check SentryConfig.isEnabled, Then it returns false",
+          "Given SentryConfig.environment is 'development', When I check tracesSampleRate, Then it returns 1.0",
+          "Given flutter pub get runs, When completed, Then no errors occur"
+        ]
+      },
+      {
+        "id": "epic-frontend-error-tracking-story-2",
+        "title": "Wrap runApp with SentryFlutter.init in lib/main.dart and add Navigator observer",
+        "description": "Configure Sentry initialization in main.dart with proper error zones and navigator observer.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/config/sentry_config.dart (for config access), lib/app.dart (for App widget structure)\n- Modify: lib/main.dart, lib/app.dart\n- Create: none\n\n🔧 **PATTERNS TO USE:**\n- Import: `import 'package:sentry_flutter/sentry_flutter.dart';`\n- Import: `import 'package:app_pasos_frontend/core/config/sentry_config.dart';`\n- Use `SentryFlutter.init()` to wrap the app initialization\n- Use `SentryNavigatorObserver()` in GoRouter for route tracking\n- Preserve existing try/catch patterns for background services\n\n📦 **IMPLEMENTATION DETAILS:**\n1. In `lib/main.dart`:\n   - Add Sentry imports at top\n   - Check `SentryConfig.isEnabled` before initializing Sentry\n   - If enabled, wrap existing initialization with:\n   ```dart\n   await SentryFlutter.init(\n     (options) {\n       options.dsn = SentryConfig.dsn;\n       options.environment = SentryConfig.environment;\n       options.tracesSampleRate = SentryConfig.tracesSampleRate;\n       options.attachScreenshot = true;\n       options.attachViewHierarchy = true;\n     },\n     appRunner: () => runApp(const App()),\n   );\n   ```\n   - If Sentry not enabled, call `runApp(const App())` directly\n   - Keep all existing background service initialization BEFORE runApp\n\n2. In `lib/app.dart`:\n   - Add `SentryNavigatorObserver()` to `GoRouter.observers` in `AppRouter.router`\n   - This requires modifying the router initialization\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT remove existing error handling with debugPrint\n- DO NOT initialize Sentry if DSN is empty - check `SentryConfig.isEnabled` first\n- DO NOT put background service init inside SentryFlutter.init's appRunner\n- DO NOT use deprecated Sentry APIs\n\n🧪 **VERIFICATION:**\n1. Run: `dart analyze lib/main.dart lib/app.dart`\n2. Run: `flutter build apk --debug` (should compile without errors)\n3. Verify SentryFlutter.init wraps runApp when enabled",
+        "epicId": "epic-frontend-error-tracking",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-error-tracking-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/config/sentry_config.dart",
+          "lib/core/router/app_router.dart"
+        ],
+        "filesToModify": [
+          "lib/main.dart",
+          "lib/app.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given SentryConfig.isEnabled is true, When main() runs, Then SentryFlutter.init wraps runApp",
+          "Given SentryConfig.isEnabled is false, When main() runs, Then runApp is called directly without Sentry",
+          "Given SentryConfig has dsn/environment/tracesSampleRate, When Sentry initializes, Then options use those values",
+          "Given GoRouter.router configuration, When I check observers, Then SentryNavigatorObserver is included",
+          "Given flutter build apk --debug runs, When completed, Then build succeeds without errors"
+        ]
+      },
+      {
+        "id": "epic-frontend-error-tracking-story-3",
+        "title": "Update ErrorHandler in lib/core/errors/error_handler.dart to capture exceptions in Sentry",
+        "description": "Extend existing ErrorHandler class to send exceptions to Sentry with context.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/errors/app_exceptions.dart (for exception types), lib/core/config/sentry_config.dart (for isEnabled check)\n- Modify: lib/core/errors/error_handler.dart\n- Create: none\n\n🔧 **PATTERNS TO USE:**\n- Use existing `_logger.error()` pattern for local logging\n- Add `Sentry.captureException()` after local logging\n- Use `Sentry.addBreadcrumb()` for navigation events\n- Use `Sentry.configureScope()` for user context\n- Import: `import 'package:sentry_flutter/sentry_flutter.dart';`\n- Import: `import 'package:app_pasos_frontend/core/config/sentry_config.dart';`\n\n📦 **IMPLEMENTATION DETAILS:**\n1. Add imports for sentry_flutter and sentry_config\n\n2. Update `handleError()` method:\n   - After `_logger.error()`, add:\n   ```dart\n   if (SentryConfig.isEnabled) {\n     Sentry.captureException(\n       error,\n       stackTrace: stackTrace,\n       hint: Hint.withMap({\n         'error_type': error.runtimeType.toString(),\n         if (error is AppException) 'error_code': error.code,\n       }),\n     );\n   }\n   ```\n\n3. Add new method `setUserContext({String? userId, String? email})`:\n   ```dart\n   void setUserContext({String? userId, String? email}) {\n     if (SentryConfig.isEnabled) {\n       Sentry.configureScope((scope) {\n         if (userId != null || email != null) {\n           scope.setUser(SentryUser(id: userId, email: email));\n         } else {\n           scope.setUser(null);\n         }\n       });\n     }\n   }\n   ```\n\n4. Add new method `addBreadcrumb({required String message, String? category, Map<String, dynamic>? data})`:\n   ```dart\n   void addBreadcrumb({\n     required String message,\n     String? category,\n     Map<String, dynamic>? data,\n   }) {\n     if (SentryConfig.isEnabled) {\n       Sentry.addBreadcrumb(Breadcrumb(\n         message: message,\n         category: category,\n         data: data,\n       ));\n     }\n   }\n   ```\n\n5. Update `handleSilently()` to optionally capture to Sentry:\n   - Add optional `captureToSentry` parameter defaulting to false\n   - Only send to Sentry if explicitly requested\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT remove existing `_logger.error()` calls - Sentry is additional, not replacement\n- DO NOT call Sentry methods when `SentryConfig.isEnabled` is false\n- DO NOT capture PII without consent - only userId and email if authenticated\n- DO NOT use deprecated Sentry APIs like `Sentry.captureException` without stackTrace\n\n🧪 **VERIFICATION:**\n1. Run: `dart analyze lib/core/errors/error_handler.dart`\n2. Verify ErrorHandler has setUserContext, addBreadcrumb methods\n3. Verify handleError calls Sentry.captureException when enabled",
+        "epicId": "epic-frontend-error-tracking",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-error-tracking-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/errors/app_exceptions.dart",
+          "lib/core/config/sentry_config.dart"
+        ],
+        "filesToModify": [
+          "lib/core/errors/error_handler.dart"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given an error occurs, When handleError is called, Then Sentry.captureException is called if SentryConfig.isEnabled",
+          "Given SentryConfig.isEnabled is false, When handleError is called, Then Sentry.captureException is NOT called",
+          "Given ErrorHandler instance, When setUserContext(userId: '123', email: 'test@example.com') is called, Then Sentry scope has user set",
+          "Given ErrorHandler instance, When addBreadcrumb is called, Then Sentry breadcrumb is added",
+          "Given dart analyze runs on error_handler.dart, When completed, Then no analysis errors occur"
+        ]
+      }
+    ]
+  }
+}
