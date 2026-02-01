@@ -236,6 +236,18 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "hive",
+      "rootUri": "file:///home/ubuntu/.pub-cache/hosted/pub.dev/hive-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "hive_flutter",
+      "rootUri": "file:///home/ubuntu/.pub-cache/hosted/pub.dev/hive_flutter-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "http_parser",
       "rootUri": "file:///home/ubuntu/.pub-cache/hosted/pub.dev/http_parser-4.0.2",
       "packageUri": "lib/",
@@ -488,7 +500,7 @@
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2026-01-29T22:35:41.319842Z",
+  "generated": "2026-02-01T01:20:18.832553Z",
   "generator": "pub",
   "generatorVersion": "3.5.0",
   "flutterRoot": "file:///sdks/flutter",

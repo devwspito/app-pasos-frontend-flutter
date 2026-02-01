@@ -1,0 +1,65 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    🔓 AUTHENTICATION BYPASS MODE ENABLED                  ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+⚠️  THIS IS FOR PREVIEW/DEVELOPMENT PURPOSES ONLY
+
+═══════════════════════════════════════════════════════════════════════════
+
+CHANGES MADE TO BYPASS AUTHENTICATION:
+
+1. 📱 Router Authentication Guard DISABLED
+   File: lib/core/router/app_router.dart
+   Change: redirect: null (was: redirect: _redirect)
+   Effect: Users can access all routes without authentication checks
+
+2. 🚀 Splash Page AUTO-NAVIGATION to Dashboard
+   File: lib/features/splash/presentation/pages/splash_page.dart
+   Change: Always navigates to dashboard (context.go(RouteNames.dashboard))
+   Effect: App goes directly to dashboard after splash screen
+
+3. 🔑 API Authentication Token DISABLED
+   File: lib/core/network/api_interceptors.dart
+   Change: if (false) { // BYPASS: Skip auth token requirement
+   Effect: API requests don't require authentication tokens
+
+═══════════════════════════════════════════════════════════════════════════
+
+HOW TO ACCESS THE DASHBOARD:
+
+1. Start the Flutter web app:
+   flutter run -d chrome --web-port 8080
+
+2. Or build and serve:
+   flutter build web --release
+   cd build/web && python3 -m http.server 8080
+
+3. Open browser: http://localhost:8080
+
+4. You should see:
+   - Brief splash screen with "App Pasos" branding
+   - Automatic navigation to dashboard after 1.5 seconds
+   - Dashboard displays (even without backend API running)
+
+═══════════════════════════════════════════════════════════════════════════
+
+TO RESTORE NORMAL AUTHENTICATION:
+
+If you want to re-enable authentication, restore these backup files:
+
+1. cp lib/core/router/app_router.dart.backup lib/core/router/app_router.dart
+2. cp lib/features/splash/presentation/pages/splash_page.dart.backup lib/features/splash/presentation/pages/splash_page.dart
+3. cp lib/core/network/api_interceptors.dart.backup lib/core/network/api_interceptors.dart
+
+Or manually revert the changes by searching for "BYPASS" comments.
+
+═══════════════════════════════════════════════════════════════════════════
+
+NOTES:
+
+• The dashboard may show empty data if backend API is not running
+• All navigation within the app works normally
+• Backend at http://localhost:3001/api is expected (from .env)
+• This bypass is safe for development but should NEVER be deployed
+
+═══════════════════════════════════════════════════════════════════════════

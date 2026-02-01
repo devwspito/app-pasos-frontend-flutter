@@ -148,7 +148,7 @@ abstract final class AppRouter {
   /// - [RouteNames.login] if user is NOT authenticated and on protected route
   /// - [RouteNames.dashboard] if user IS authenticated and on auth route
   /// - `null` to allow navigation to proceed normally
-  static FutureOr<String?> _redirect_disabled(
+  static FutureOr<String?> _redirect(
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -185,7 +185,7 @@ abstract final class AppRouter {
     debugLogDiagnostics: true,
     routes: _routes,
     errorBuilder: _errorBuilder,
-    redirect: null, // _redirect,
+    redirect: _redirect,
     refreshListenable: _authNotifier,
   );
 

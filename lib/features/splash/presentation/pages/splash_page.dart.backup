@@ -2,12 +2,12 @@
 ///
 /// This page displays the application branding while checking authentication
 /// status and navigating to the appropriate screen (dashboard or login).
-///
-/// ⚠️ BYPASS MODE: Always navigates to dashboard for preview
 library;
 
 import 'package:app_pasos_frontend/core/constants/app_constants.dart';
+import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/router/route_names.dart';
+import 'package:app_pasos_frontend/core/storage/secure_storage_service.dart';
 import 'package:app_pasos_frontend/shared/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -44,7 +44,9 @@ class _SplashPageState extends State<SplashPage> {
 
   /// Checks authentication status and navigates to the appropriate screen.
   ///
-  /// 🔓 BYPASS MODE: Always navigates to dashboard for preview purposes
+  /// Waits for a minimum splash duration (1.5 seconds) for branding visibility,
+  /// then checks if the user is authenticated via [SecureStorageService].
+  /// Navigates to dashboard if authenticated, otherwise to login.
   Future<void> _checkAuthAndNavigate() async {
     // Minimum splash duration for branding visibility
     await Future<void>.delayed(const Duration(milliseconds: 1500));
@@ -52,18 +54,19 @@ class _SplashPageState extends State<SplashPage> {
     // Check if widget is still mounted before proceeding
     if (!mounted) return;
 
-    // 🔓 BYPASS: Always go to dashboard (no auth check)
-    context.go(RouteNames.dashboard);
+    // Check authentication status using the DI service locator
+    final storageService = sl<SecureStorageService>();
+    final isAuthenticated = await storageService.isAuthenticated();
 
-    // Original code (commented out for bypass):
-    // final storageService = sl<SecureStorageService>();
-    // final isAuthenticated = await storageService.isAuthenticated();
-    // if (!mounted) return;
-    // if (isAuthenticated) {
-    //   context.go(RouteNames.dashboard);
-    // } else {
-    //   context.go(RouteNames.login);
-    // }
+    // Verify mounted state again after async operation
+    if (!mounted) return;
+
+    // Navigate based on authentication status
+    if (isAuthenticated) {
+      context.go(RouteNames.dashboard);
+    } else {
+      context.go(RouteNames.login);
+    }
   }
 
   @override
