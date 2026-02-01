@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "08dcdf5faee57236fb7f0687",
+    "timestamp": "2026-02-01T19:51:30.999Z",
+    "phase": "judge",
+    "storyId": "epic-backend-gamification-story-1",
+    "savedAt": "2026-02-01T19:51:30.999Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-backend-gamification-story-1",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
