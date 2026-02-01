@@ -1,0 +1,166 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-02-01T02:31:31.587Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-widget-tests",
+    "savedAt": "2026-02-01T02:31:31.587Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-widget-tests",
+    "storiesCount": 5,
+    "architecture": "## Widget Testing Architecture for App Pasos Flutter\n\n### Testing Framework\n- **flutter_test** (SDK) for widget testing\n- **Equatable** for entity comparison in test assertions\n\n### Test Structure Pattern\n```\ntest/\n├── helpers/\n│   └── widget_test_helpers.dart    # Reusable test utilities\n├── shared/\n│   └── widgets/\n│       ├── app_button_test.dart\n│       ├── app_text_field_test.dart\n│       ├── loading_indicator_test.dart\n│       └── error_widget_test.dart\n├── features/\n│   ├── auth/\n│   │   └── presentation/\n│   │       └── widgets/\n│   │           └── auth_form_test.dart\n│   ├── dashboard/\n│   │   └── presentation/\n│   │       └── widgets/\n│   │           └── step_counter_card_test.dart\n│   └── goals/\n│       └── presentation/\n│           └── widgets/\n│               └── goal_card_test.dart\n└── widget_test.dart                # Existing app smoke test\n```\n\n### Core Test Helper Pattern (widget_test_helpers.dart)\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:flutter_test/flutter_test.dart';\nimport 'package:app_pasos_frontend/core/theme/app_theme.dart';\n\n/// Pumps a widget with MaterialApp and theme wrapper\nFuture<void> pumpApp(WidgetTester tester, Widget child) async {\n  await tester.pumpWidget(\n    MaterialApp(\n      theme: AppTheme.lightTheme,\n      home: Scaffold(body: child),\n    ),\n  );\n  await tester.pumpAndSettle();\n}\n\n/// Creates test GroupGoal instance\nGroupGoal createTestGroupGoal({\n  String id = 'test-goal-1',\n  String name = 'Test Goal',\n  String? description,\n  int targetSteps = 10000,\n  String status = 'active',\n}) => GroupGoal(...);\n```\n\n### Widget Test Pattern\n```dart\nvoid main() {\n  group('AppButton', () {\n    testWidgets('renders with text', (tester) async {\n      await pumpApp(\n        tester,\n        AppButton(text: 'Submit', onPressed: () {}),\n      );\n      expect(find.text('Submit'), findsOneWidget);\n    });\n\n    testWidgets('handles tap', (tester) async {\n      var tapped = false;\n      await pumpApp(\n        tester,\n        AppButton(text: 'Tap', onPressed: () => tapped = true),\n      );\n      await tester.tap(find.text('Tap'));\n      await tester.pump();\n      expect(tapped, isTrue);\n    });\n  });\n}\n```\n\n### Key Testing Principles\n1. **Always use pumpApp()** - Never raw pumpWidget without theme\n2. **Use factory helpers** - createTestGroupGoal(), createTestGoalProgress()\n3. **Test all states** - loading, error, success, disabled\n4. **Test interactions** - tap, long press, text input\n5. **Test validation** - form validation error messages\n\n### Verification Commands\n- **Type check**: flutter analyze\n- **Run tests**: flutter test\n- **Run specific test**: flutter test test/shared/widgets/app_button_test.dart\n- **Test coverage**: flutter test --coverage",
+    "stories": [
+      {
+        "id": "epic-frontend-widget-tests-story-1",
+        "title": "Create widget_test_helpers.dart with pumpApp and mock providers",
+        "description": "Create reusable test helpers for widget testing with proper theme and localization setup.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/core/theme/app_theme.dart, test/widget_test.dart\n- Modify: test/widget_test.dart\n- Create: test/helpers/widget_test_helpers.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `AppTheme.lightTheme` from lib/core/theme/app_theme.dart for test theme\n- Follow existing pumpWidget pattern from test/widget_test.dart\n- Use MaterialApp wrapper with theme for proper widget testing\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use `tester.pumpWidget(Widget())` without MaterialApp wrapper\n- DO NOT hardcode theme colors - import from AppTheme\n- DO NOT create mock BLoC without proper state handling\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Create `pumpApp(WidgetTester tester, Widget child)` helper that:\n   - Wraps widget with MaterialApp\n   - Uses AppTheme.lightTheme\n   - Calls pumpAndSettle after pumping\n2. Create `createMockBloc<B extends Bloc, S>()` helper for BLoC mocking\n3. Create `createTestGroupGoal()` factory for test data\n4. Create `createTestGoalProgress()` factory for test data\n5. Update test/widget_test.dart to import and use pumpApp helper\n\n🧪 **VERIFICATION:**\n- Run: flutter test test/widget_test.dart\n- Check: Test passes with new pumpApp helper\n- Check: No linting errors in helpers file",
+        "epicId": "epic-frontend-widget-tests",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "lib/core/theme/app_theme.dart",
+          "test/widget_test.dart",
+          "lib/features/goals/domain/entities/group_goal.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart"
+        ],
+        "filesToModify": [
+          "test/widget_test.dart"
+        ],
+        "filesToCreate": [
+          "test/helpers/widget_test_helpers.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given a widget needs testing, When pumpApp is called with the widget, Then it renders with MaterialApp and AppTheme.lightTheme",
+          "Given test helpers file exists, When imported in tests, Then createTestGroupGoal() returns valid GroupGoal instance",
+          "Given test helpers file exists, When imported in tests, Then createTestGoalProgress() returns valid GoalProgress instance",
+          "Given widget_test.dart is updated, When flutter test is run, Then all tests pass using pumpApp helper"
+        ]
+      },
+      {
+        "id": "epic-frontend-widget-tests-story-2",
+        "title": "Create app_button_test.dart and app_text_field_test.dart widget tests",
+        "description": "Write comprehensive tests for AppButton and AppTextField shared widgets.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/shared/widgets/app_button.dart, lib/shared/widgets/app_text_field.dart, test/helpers/widget_test_helpers.dart\n- Modify: [none]\n- Create: test/shared/widgets/app_button_test.dart, test/shared/widgets/app_text_field_test.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `pumpApp()` from test/helpers/widget_test_helpers.dart\n- Use `find.text()`, `find.byType()`, `find.byIcon()` for widget finding\n- Use `tester.tap()` and `tester.pump()` for interaction testing\n- Use `tester.enterText()` for text input testing\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use raw pumpWidget without pumpApp helper\n- DO NOT skip testing loading states\n- DO NOT skip testing disabled states\n\n🎯 **FUNCTIONAL REQUIREMENTS FOR app_button_test.dart:**\n1. Test: renders button with correct text label\n2. Test: handles tap callback when pressed\n3. Test: shows CircularProgressIndicator when isLoading is true\n4. Test: button is disabled when onPressed is null\n5. Test: button is disabled when isLoading is true\n6. Test: renders with different ButtonVariant styles\n7. Test: renders leading and trailing icons when provided\n\n🎯 **FUNCTIONAL REQUIREMENTS FOR app_text_field_test.dart:**\n1. Test: renders with hint text\n2. Test: renders with label text\n3. Test: calls onChanged callback when text changes\n4. Test: shows error text when provided\n5. Test: validates input using validator function\n6. Test: prefixIcon renders when provided\n7. Test: obscureText hides password input\n\n🧪 **VERIFICATION:**\n- Run: flutter test test/shared/widgets/\n- Check: All AppButton tests pass\n- Check: All AppTextField tests pass",
+        "epicId": "epic-frontend-widget-tests",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-widget-tests-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/app_button.dart",
+          "lib/shared/widgets/app_text_field.dart",
+          "test/helpers/widget_test_helpers.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "test/shared/widgets/app_button_test.dart",
+          "test/shared/widgets/app_text_field_test.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AppButton with text 'Submit', When rendered, Then find.text('Submit') finds one widget",
+          "Given AppButton with onPressed callback, When tapped, Then callback is invoked",
+          "Given AppButton with isLoading true, When rendered, Then CircularProgressIndicator is visible",
+          "Given AppTextField with hintText 'Enter email', When rendered, Then hint text is visible",
+          "Given AppTextField with validator, When invalid input entered, Then error message displays",
+          "Given AppTextField with onChanged, When text entered, Then callback receives new value"
+        ]
+      },
+      {
+        "id": "epic-frontend-widget-tests-story-3",
+        "title": "Create loading_indicator_test.dart and error_widget_test.dart tests",
+        "description": "Write comprehensive tests for LoadingIndicator and AppErrorWidget shared widgets.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/shared/widgets/loading_indicator.dart, lib/shared/widgets/error_widget.dart, test/helpers/widget_test_helpers.dart\n- Modify: [none]\n- Create: test/shared/widgets/loading_indicator_test.dart, test/shared/widgets/error_widget_test.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `pumpApp()` from test/helpers/widget_test_helpers.dart\n- Use `find.text()`, `find.byType()`, `find.byIcon()` for widget finding\n- Use `tester.tap()` for retry button interaction\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use raw pumpWidget without pumpApp helper\n- DO NOT skip testing overlay mode for LoadingIndicator\n- DO NOT skip testing retry callback for AppErrorWidget\n\n🎯 **FUNCTIONAL REQUIREMENTS FOR loading_indicator_test.dart:**\n1. Test: renders CircularProgressIndicator\n2. Test: shows message text when message parameter provided\n3. Test: does not show message when null\n4. Test: overlay mode shows semi-transparent background\n5. Test: respects custom size parameter\n\n🎯 **FUNCTIONAL REQUIREMENTS FOR error_widget_test.dart:**\n1. Test: shows error title text\n2. Test: shows error message text\n3. Test: shows error icon (Icons.error_outline by default)\n4. Test: shows 'Try Again' button when onRetry provided\n5. Test: hides retry button when onRetry is null\n6. Test: onRetry callback invoked when retry button tapped\n7. Test: custom icon renders when provided\n\n🧪 **VERIFICATION:**\n- Run: flutter test test/shared/widgets/\n- Check: All LoadingIndicator tests pass\n- Check: All AppErrorWidget tests pass",
+        "epicId": "epic-frontend-widget-tests",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-frontend-widget-tests-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/shared/widgets/loading_indicator.dart",
+          "lib/shared/widgets/error_widget.dart",
+          "test/helpers/widget_test_helpers.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "test/shared/widgets/loading_indicator_test.dart",
+          "test/shared/widgets/error_widget_test.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given LoadingIndicator with no message, When rendered, Then only CircularProgressIndicator is visible",
+          "Given LoadingIndicator with message 'Loading...', When rendered, Then text 'Loading...' is visible",
+          "Given AppErrorWidget with message 'Network error', When rendered, Then message text is visible",
+          "Given AppErrorWidget with onRetry callback, When 'Try Again' tapped, Then callback is invoked",
+          "Given AppErrorWidget with onRetry null, When rendered, Then no retry button is visible"
+        ]
+      },
+      {
+        "id": "epic-frontend-widget-tests-story-4",
+        "title": "Create auth_form_test.dart widget tests",
+        "description": "Write comprehensive tests for AuthForm feature widget testing login and register forms.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/auth/presentation/widgets/auth_form.dart, lib/features/auth/presentation/widgets/password_field.dart, lib/core/utils/validators.dart, test/helpers/widget_test_helpers.dart\n- Modify: [none]\n- Create: test/features/auth/presentation/widgets/auth_form_test.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `pumpApp()` from test/helpers/widget_test_helpers.dart\n- Use `tester.enterText()` for form field input\n- Use `tester.tap()` for button interaction\n- Use `Form` widget key for form validation testing\n- Use `Validators.email` and `Validators.password` patterns for validation expectations\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use raw pumpWidget without pumpApp helper\n- DO NOT skip testing both login AND register form types\n- DO NOT skip testing form validation error messages\n- DO NOT skip testing isLoading state\n\n🎯 **FUNCTIONAL REQUIREMENTS:**\n1. Test LOGIN form type:\n   - Renders email field with label 'Email'\n   - Renders password field with label 'Password'\n   - Does NOT render name field\n   - Does NOT render confirm password field\n   - Shows 'Login' button text\n   - Validates email format (shows 'Please enter a valid email address')\n   - Validates password (shows 'Password is required')\n   - Calls onSubmit with email, password, null when valid\n\n2. Test REGISTER form type:\n   - Renders name field with label 'Full Name'\n   - Renders email field\n   - Renders password field\n   - Renders confirm password field\n   - Shows 'Create Account' button text\n   - Validates password match (shows 'Passwords do not match')\n   - Calls onSubmit with email, password, name when valid\n\n3. Test loading state:\n   - Form fields disabled when isLoading true\n   - Button shows loading indicator when isLoading true\n\n🧪 **VERIFICATION:**\n- Run: flutter test test/features/auth/\n- Check: All AuthForm tests pass for login and register modes",
+        "epicId": "epic-frontend-widget-tests",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-widget-tests-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/auth/presentation/widgets/auth_form.dart",
+          "lib/features/auth/presentation/widgets/password_field.dart",
+          "lib/core/utils/validators.dart",
+          "test/helpers/widget_test_helpers.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "test/features/auth/presentation/widgets/auth_form_test.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given AuthForm with formType login, When rendered, Then email and password fields visible but NOT name field",
+          "Given AuthForm with formType register, When rendered, Then name, email, password, and confirm password fields visible",
+          "Given AuthForm login mode with invalid email, When Login tapped, Then 'Please enter a valid email address' error shown",
+          "Given AuthForm with valid credentials, When submitted, Then onSubmit callback receives correct email and password",
+          "Given AuthForm with isLoading true, When rendered, Then form fields are disabled and button shows loading"
+        ]
+      },
+      {
+        "id": "epic-frontend-widget-tests-story-5",
+        "title": "Create step_counter_card_test.dart and goal_card_test.dart feature tests",
+        "description": "Write comprehensive tests for StepCounterCard and GoalCard dashboard/goals feature widgets.\n\n🔒 **SCOPE BOUNDARY:**\n- You can ONLY create/modify files listed below\n- Creating ANY other file is a scope violation\n\n📁 **FILES:**\n- Read: lib/features/dashboard/presentation/widgets/step_counter_card.dart, lib/features/goals/presentation/widgets/goal_card.dart, lib/features/goals/domain/entities/group_goal.dart, lib/features/goals/domain/entities/goal_progress.dart, test/helpers/widget_test_helpers.dart\n- Modify: [none]\n- Create: test/features/dashboard/presentation/widgets/step_counter_card_test.dart, test/features/goals/presentation/widgets/goal_card_test.dart\n\n🔧 **PATTERNS TO USE:**\n- Use `pumpApp()` from test/helpers/widget_test_helpers.dart\n- Use `createTestGroupGoal()` and `createTestGoalProgress()` from helpers\n- Use `find.text()` for finding formatted step counts\n- Use `tester.tap()` for card interaction testing\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT create GroupGoal or GoalProgress manually - use helper factories\n- DO NOT use raw pumpWidget without pumpApp helper\n- DO NOT skip testing edge cases (0 steps, goal reached)\n\n🎯 **FUNCTIONAL REQUIREMENTS FOR step_counter_card_test.dart:**\n1. Test: displays current step count formatted with commas (e.g., '7,500')\n2. Test: displays goal text 'of X steps'\n3. Test: displays percentage completed badge\n4. Test: shows 'Goal reached!' when currentSteps >= goal\n5. Test: calculates progress correctly (75% for 7500/10000)\n6. Test: handles 0 steps case without division error\n7. Test: handles 0 goal case without division error\n\n🎯 **FUNCTIONAL REQUIREMENTS FOR goal_card_test.dart:**\n1. Test: displays goal name from GroupGoal entity\n2. Test: displays goal description when hasDescription is true\n3. Test: hides description when null\n4. Test: displays step progress 'X / Y' format\n5. Test: displays status badge (Active, Done, Cancelled)\n6. Test: onTap callback invoked when card tapped\n7. Test: onLongPress callback invoked when card long-pressed\n8. Test: shows GoalProgressIndicator with correct percentage\n\n🧪 **VERIFICATION:**\n- Run: flutter test test/features/\n- Check: All StepCounterCard tests pass\n- Check: All GoalCard tests pass",
+        "epicId": "epic-frontend-widget-tests",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-frontend-widget-tests-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "lib/features/dashboard/presentation/widgets/step_counter_card.dart",
+          "lib/features/goals/presentation/widgets/goal_card.dart",
+          "lib/features/goals/domain/entities/group_goal.dart",
+          "lib/features/goals/domain/entities/goal_progress.dart",
+          "test/helpers/widget_test_helpers.dart"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "test/features/dashboard/presentation/widgets/step_counter_card_test.dart",
+          "test/features/goals/presentation/widgets/goal_card_test.dart"
+        ],
+        "acceptanceCriteria": [
+          "Given StepCounterCard with 7500 current steps, When rendered, Then '7,500' is displayed",
+          "Given StepCounterCard with 10000 goal and 7500 steps, When rendered, Then '75% completed' badge visible",
+          "Given StepCounterCard with steps >= goal, When rendered, Then 'Goal reached!' text visible",
+          "Given GoalCard with GroupGoal entity, When rendered, Then goal name is displayed",
+          "Given GoalCard with onTap callback, When card tapped, Then callback is invoked",
+          "Given GoalCard with active status, When rendered, Then 'Active' status badge visible"
+        ]
+      }
+    ]
+  }
+}
