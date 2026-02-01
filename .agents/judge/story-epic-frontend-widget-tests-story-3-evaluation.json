@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "1bb751c1ac1b94470511c071",
+    "timestamp": "2026-02-01T02:50:35.482Z",
+    "phase": "judge",
+    "storyId": "epic-frontend-widget-tests-story-3",
+    "savedAt": "2026-02-01T02:50:35.482Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-frontend-widget-tests-story-3",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
