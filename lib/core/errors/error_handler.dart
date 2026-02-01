@@ -2,10 +2,14 @@
 ///
 /// Provides a consistent way to convert [AppException]s and other errors
 /// into user-friendly messages that can be displayed in the UI.
+///
+/// Integrates with Sentry for remote error tracking when enabled.
 library;
 
+import 'package:app_pasos_frontend/core/config/sentry_config.dart';
 import 'package:app_pasos_frontend/core/errors/app_exceptions.dart';
 import 'package:app_pasos_frontend/core/utils/logger.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// Service for handling errors and converting them to user-friendly messages.
 ///
@@ -37,15 +41,29 @@ class ErrorHandler {
   ///
   /// This method:
   /// 1. Logs the error with full details for debugging
-  /// 2. Converts the error to a user-friendly message
-  /// 3. Returns the message for display in the UI
+  /// 2. Sends the error to Sentry for remote tracking (if enabled)
+  /// 3. Converts the error to a user-friendly message
+  /// 4. Returns the message for display in the UI
   ///
   /// [error] - The error that occurred.
   /// [stackTrace] - Optional stack trace for debugging.
   ///
   /// Returns a user-friendly error message string.
   String handleError(Object error, [StackTrace? stackTrace]) {
+    // Local logging first
     _logger.error('Error occurred', error, stackTrace);
+
+    // Send to Sentry for remote tracking
+    if (SentryConfig.isEnabled) {
+      Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+        hint: Hint.withMap({
+          'error_type': error.runtimeType.toString(),
+          if (error is AppException) 'error_code': error.code,
+        }),
+      );
+    }
 
     return switch (error) {
       NetworkException(:final isNoConnection, :final isTimeout) =>
@@ -109,8 +127,26 @@ class ErrorHandler {
   ///
   /// [error] - The error that occurred.
   /// [stackTrace] - Optional stack trace for debugging.
-  void handleSilently(Object error, [StackTrace? stackTrace]) {
+  /// [captureToSentry] - Whether to send this error to Sentry. Defaults to
+  ///   `false` since silent errors are typically non-critical.
+  void handleSilently(
+    Object error, {
+    StackTrace? stackTrace,
+    bool captureToSentry = false,
+  }) {
     _logger.warning('Silent error handled', error, stackTrace);
+
+    if (captureToSentry && SentryConfig.isEnabled) {
+      Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+        hint: Hint.withMap({
+          'error_type': error.runtimeType.toString(),
+          'silent': true,
+          if (error is AppException) 'error_code': error.code,
+        }),
+      );
+    }
   }
 
   /// Checks if an error is recoverable.
@@ -143,5 +179,73 @@ class ErrorHandler {
             code == 'UNAUTHENTICATED',
       _ => false,
     };
+  }
+
+  /// Sets user context for Sentry error tracking.
+  ///
+  /// Call this when a user logs in to associate errors with the user.
+  /// Call with null values when the user logs out to clear the context.
+  ///
+  /// [userId] - The unique identifier for the user.
+  /// [email] - The user's email address.
+  ///
+  /// Example:
+  /// ```dart
+  /// // On login
+  /// errorHandler.setUserContext(userId: user.id, email: user.email);
+  ///
+  /// // On logout
+  /// errorHandler.setUserContext();
+  /// ```
+  void setUserContext({String? userId, String? email}) {
+    if (SentryConfig.isEnabled) {
+      Sentry.configureScope((scope) {
+        if (userId != null || email != null) {
+          scope.setUser(SentryUser(id: userId, email: email));
+        } else {
+          scope.setUser(null);
+        }
+      });
+    }
+  }
+
+  /// Adds a breadcrumb for Sentry error tracking.
+  ///
+  /// Breadcrumbs provide context for errors by recording a trail of events
+  /// that happened before the error occurred.
+  ///
+  /// [message] - Description of the event.
+  /// [category] - Category for grouping breadcrumbs (e.g., 'navigation', 'ui').
+  /// [data] - Additional key-value data to attach to the breadcrumb.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Navigation event
+  /// errorHandler.addBreadcrumb(
+  ///   message: 'Navigated to profile screen',
+  ///   category: 'navigation',
+  /// );
+  ///
+  /// // User action with data
+  /// errorHandler.addBreadcrumb(
+  ///   message: 'User submitted form',
+  ///   category: 'ui',
+  ///   data: {'form_type': 'registration'},
+  /// );
+  /// ```
+  void addBreadcrumb({
+    required String message,
+    String? category,
+    Map<String, dynamic>? data,
+  }) {
+    if (SentryConfig.isEnabled) {
+      Sentry.addBreadcrumb(
+        Breadcrumb(
+          message: message,
+          category: category,
+          data: data,
+        ),
+      );
+    }
   }
 }

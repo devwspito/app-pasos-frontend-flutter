@@ -46,6 +46,7 @@ import 'package:app_pasos_frontend/features/splash/presentation/pages/splash_pag
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// Notifier that triggers GoRouter to re-evaluate redirect logic.
 ///
@@ -187,6 +188,9 @@ abstract final class AppRouter {
     errorBuilder: _errorBuilder,
     redirect: null, // _redirect,
     refreshListenable: _authNotifier,
+    observers: [
+      SentryNavigatorObserver(),
+    ],
   );
 
   /// List of all application routes.
