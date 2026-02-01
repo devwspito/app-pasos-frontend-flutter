@@ -209,7 +209,7 @@ void main() {
           await tester.enterText(textFormFields.at(0), 'test@example.com');
           await tester.pump();
 
-          // Enter valid password (must meet requirements: 8+ chars, upper, lower, digit)
+          // Enter valid password (8+ chars, upper, lower, digit)
           await tester.enterText(textFormFields.at(1), 'Password123');
           await tester.pump();
 
@@ -447,22 +447,30 @@ void main() {
     });
 
     group('Loading State', () {
+      // NOTE: Loading state tests use tester.pumpWidget + tester.pump
+      // instead of pumpApp() because pumpApp uses pumpAndSettle(),
+      // which times out when CircularProgressIndicator is animating forever.
+
       testWidgets('form fields disabled when isLoading true', (tester) async {
-        await pumpApp(
-          tester,
-          Scaffold(
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: AuthForm(
-                  formType: AuthFormType.login,
-                  isLoading: true,
-                  onSubmit: (_, __, ___) {},
+        // Don't use pumpApp - it uses pumpAndSettle which times out
+        // with spinning indicator
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: AuthForm(
+                    formType: AuthFormType.login,
+                    isLoading: true,
+                    onSubmit: (_, __, ___) {},
+                  ),
                 ),
               ),
             ),
           ),
         );
+        await tester.pump();
 
         // Find all TextFormFields and verify they are disabled
         final textFormFields = tester.widgetList<TextFormField>(
@@ -477,23 +485,27 @@ void main() {
       testWidgets(
         'button shows loading indicator when isLoading true',
         (tester) async {
-          await pumpApp(
-            tester,
-            Scaffold(
-              body: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: AuthForm(
-                    formType: AuthFormType.login,
-                    isLoading: true,
-                    onSubmit: (_, __, ___) {},
+          // Don't use pumpApp - it uses pumpAndSettle which times out
+          // with spinning indicator
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: AuthForm(
+                      formType: AuthFormType.login,
+                      isLoading: true,
+                      onSubmit: (_, __, ___) {},
+                    ),
                   ),
                 ),
               ),
             ),
           );
+          await tester.pump();
 
-          // The AppButton shows a CircularProgressIndicator when isLoading is true
+          // AppButton shows CircularProgressIndicator when isLoading is true
           expect(find.byType(CircularProgressIndicator), findsOneWidget);
         },
       );
@@ -503,23 +515,27 @@ void main() {
         (tester) async {
           var onSubmitCalled = false;
 
-          await pumpApp(
-            tester,
-            Scaffold(
-              body: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: AuthForm(
-                    formType: AuthFormType.login,
-                    isLoading: true,
-                    onSubmit: (_, __, ___) {
-                      onSubmitCalled = true;
-                    },
+          // Don't use pumpApp - it uses pumpAndSettle which times out
+          // with spinning indicator
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: AuthForm(
+                      formType: AuthFormType.login,
+                      isLoading: true,
+                      onSubmit: (_, __, ___) {
+                        onSubmitCalled = true;
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
           );
+          await tester.pump();
 
           // Enter valid data
           final textFormFields = find.byType(TextFormField);
@@ -528,8 +544,8 @@ void main() {
           await tester.enterText(textFormFields.at(1), 'Password123');
           await tester.pump();
 
-          // Try to find and tap the button - it should be disabled
-          // The Login text might not be visible during loading, so find by widget
+          // Try to find and tap the button - it should be disabled.
+          // Login text might not be visible during loading.
           final button = find.byType(ElevatedButton);
           if (button.evaluate().isNotEmpty) {
             await tester.tap(button);
@@ -543,21 +559,25 @@ void main() {
       testWidgets(
         'register form fields disabled when isLoading true',
         (tester) async {
-          await pumpApp(
-            tester,
-            Scaffold(
-              body: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: AuthForm(
-                    formType: AuthFormType.register,
-                    isLoading: true,
-                    onSubmit: (_, __, ___) {},
+          // Don't use pumpApp - it uses pumpAndSettle which times out
+          // with spinning indicator
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: AuthForm(
+                      formType: AuthFormType.register,
+                      isLoading: true,
+                      onSubmit: (_, __, ___) {},
+                    ),
                   ),
                 ),
               ),
             ),
           );
+          await tester.pump();
 
           // Find all TextFormFields and verify they are disabled
           final textFormFields = tester.widgetList<TextFormField>(
