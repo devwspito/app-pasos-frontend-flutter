@@ -4,9 +4,8 @@
 /// 1. Ensuring Flutter bindings are ready
 /// 2. Loading environment variables from .env file
 /// 3. Initializing dependency injection
-/// 4. Initializing Hive storage service
-/// 5. Initializing Sentry for error tracking (if enabled)
-/// 6. Running the main App widget
+/// 4. Initializing Sentry for error tracking (if enabled)
+/// 5. Running the main App widget
 ///
 /// ## Shared Widgets Exports
 ///
@@ -31,7 +30,6 @@ import 'package:app_pasos_frontend/core/di/injection_container.dart';
 import 'package:app_pasos_frontend/core/services/background_sync_service.dart';
 import 'package:app_pasos_frontend/core/services/notification_handler.dart';
 import 'package:app_pasos_frontend/core/services/notification_service.dart';
-import 'package:app_pasos_frontend/core/storage/hive_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -51,10 +49,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 /// 3. [initializeDependencies] - Registers all services in the DI container.
 ///    This must complete before the app runs to ensure services are available.
 ///
-/// 4. `HiveService.initialize` - Initializes Hive offline storage.
-///    This opens all required boxes for storing data locally.
-///
-/// 5. [runApp] - Starts the Flutter application with the [App] widget.
+/// 4. [runApp] - Starts the Flutter application with the [App] widget.
 ///
 /// Example .env file:
 /// ```
@@ -79,19 +74,6 @@ Future<void> main() async {
   // This registers services like ApiClient, SecureStorage, etc.
   // Services are registered as lazy singletons for efficiency.
   await initializeDependencies();
-
-  // Initialize Hive storage service.
-  // This MUST be called before any Hive boxes are accessed.
-  // Failure to initialize will result in "StepsBox is not open" errors.
-  try {
-    await sl<HiveService>().initialize();
-    debugPrint('Hive storage initialized successfully');
-  } catch (e) {
-    // Log error but don't crash the app
-    debugPrint('Failed to initialize Hive storage: $e');
-    // Re-throw to prevent app from running with broken storage
-    rethrow;
-  }
 
   // Initialize platform-specific services (skip on web)
   // Background sync and notifications require native platform support
